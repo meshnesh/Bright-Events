@@ -47,6 +47,27 @@ EVENTS = {
     }
 }
 
+
+USERS = {
+    'user1': {
+        'name': u'John Doe',
+        'email': u'john.D@gmail.com',
+        'password': u'qwerty1234'
+    },
+    'user2': {
+        'user_id': 2,
+        'name': u'Mary Jane',
+        'email': u'jane.mary@yahoo.com',
+        'password': u'qwerty1234'
+    },
+    'user3': {
+        'user_id': 3,
+        'name': u'Antony Ng\'ang\'a',
+        'email': u'tonny.nesh@gmail.com',
+        'password': u'qwerty1234'
+    }
+}
+
 def abort_if_event_doesnt_exist(event_id):
     """
     Handle Error when Event not found.
@@ -131,9 +152,40 @@ class EventList(Resource):
         return EVENTS[event_id], 201
 
 
-# Eventlist
-# shows a list of all events, and lets you POST to add new tasks
+# User
+class User(Resource):
+    """
+    User Registration and login.
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('email', type=str, required=True, help='Password is required')
+        self.reqparse.add_argument('password', type=str, required=True, help='Please include an email')
+        super(User, self).__init__()
 
+    def get(self):
+        """
+        List all Users
+        """
+        return USERS
 
+    def post(self):
+        """
+        User Registration.
+        """
+        args = self.reqparse.parse_args()
+        user_id = int(max(USERS.keys()).lstrip('user')) + 1
+        user_id = 'user%i' % user_id
+        USERS[user_id] = {
+            'email': args['email'],
+            'password': args['password'],
+            'name':args.get('name', "")
+        }
+        return USERS[user_id], 201
+
+# events url
 api.add_resource(EventList, '/events')
 api.add_resource(Event, '/events/<event_id>')
+
+# users url
+api.add_resource(User, '/users')
