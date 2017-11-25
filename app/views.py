@@ -53,8 +53,11 @@ def abort_if_event_doesnt_exist(event_id):
     if event_id not in EVENTS:
         abort(404, message="Events {} doesn't exist".format(event_id))
 
-parser = reqparse.RequestParser()
-parser.add_argument('title')
+# parser = reqparse.RequestParser()
+# # parser.add_argument('title','loaction')
+# parser.add_argument('title', default='title')
+# parser.add_argument('loaction')
+
 
 
 class Event(Resource):
@@ -80,42 +83,32 @@ class EventList(Resource):
     """
     Creates a Eventlist object.
     """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('title', type=str, required=True,
+                                   help='No task title provided')
+        self.reqparse.add_argument('location', type=str,)
+        super(EventList, self).__init__()
+
+
     def get(self):
         return EVENTS
 
     def post(self):
-        args = parser.parse_args()
+        args = self.reqparse.parse_args()
+        # args = self.parser.parse_args()
         event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
         event_id = 'event%i' % event_id
         EVENTS[event_id] = {
             'title': args['title'],
-            'location':args.get('location'),
+            'location': args['location'], 
             'time':args.get('time', ""),
             'date':args.get('date', ""),
             'description': args.get('description', ""),
             'done': False,
             'rsvp': []
-
         }
         return EVENTS[event_id], 201
-
-    # def create_event(self):
-    #     """Create new event."""
-    #     data = request.get_json()
-    #     if not data or not 'title' in data:
-    #         abort(400)
-    #         event = {
-    #             'id': events[-1]['id'] + 1,
-    #             'title': data['title'],
-    #             'location':data.get('location', ""),
-    #             'time':data.get('time', ""),
-    #             'date':data.get('date', ""),
-    #             'description': data.get('description', ""),
-    #             'done': False
-    #         }
-    #     events.append(event)
-    #     return jsonify({'event': event}), 201
-
 
 
 
