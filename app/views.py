@@ -1,12 +1,18 @@
-#!/bin/env python
+
+    #!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
-from flask import Flask, jsonify, abort, make_response, request, url_for
+from flask import Flask, jsonify, abort, make_response, request
+from flask_restful import reqparse, abort, Api, Resource
 from app import app
+# import json
 
-events = [
-    {
-        'id': 1,
+from app import data
+
+api = Api(app)
+
+EVENTS = {
+    'event1': {
         'title': u'Mango Harvest',
         'location': u'Kitui, Kenya',
         'time': u'11:00AM',
@@ -26,8 +32,7 @@ events = [
             }
         ]
     },
-    {
-        'id': 2,
+    'event2':{
         'title': u'Python Meetup',
         'location':u'Nairobi, Kenya',
         'time':u'07:00PM',
@@ -36,68 +41,83 @@ events = [
         'done': False,
         'rsvp': [
             {
-            'user_id': 2,
-            'name': u'Mary Jane',
-            'email': u'jane.mary@yahoo.com'
+                'user_id': 2,
+                'name': u'Mary Jane',
+                'email': u'jane.mary@yahoo.com'
             }
         ]
     }
-]
+}
 
-@app.route('/api/events', methods=['GET'])
-def get_events():
-    return jsonify({'events': events})
+def abort_if_event_doesnt_exist(event_id):
+    if event_id not in EVENTS:
+        abort(404, message="Events {} doesn't exist".format(event_id))
 
-@app.route('/api/events/<int:event_id>', methods=['GET'])
-def get_event(event_id):
-    """Fetch single Event."""
-    for event in events:
-      	if event['id'] == event_id:
-    	    return jsonify({'event': event})
-    abort(404)
+parser = reqparse.RequestParser()
+parser.add_argument('title')
 
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/api/events', methods=['POST'])
-def create_event():
-    """Create new event."""
-    data = request.get_json()
-    if not data or not 'title' in data:
-        abort(400)
-    event = {
-        'id': events[-1]['id'] + 1,
-        'title': data['title'],
-        'location':data.get('location', ""),
-        'time':data.get('time', ""),
-        'date':data.get('date', ""),
-        'description': data.get('description', ""),
-        'done': False
-    }
-    events.append(event)
-    return jsonify({'event': event}), 201
+class Event(Resource):
+    def get(self, event_id):
+        abort_if_event_doesnt_exist(event_id)
+        return EVENTS[event_id]
 
-@app.route('/api/events/<int:event_id>', methods=['PUT'])
-def update_event(event_id):
-    """Update an event."""
-    for event in events:
-        if event['id'] == event_id and request.json:
-            event[0]['title'] = request.json.get('title', event[0]['title'])
-            event[0]['location'] = request.json.get('location', event[0]['location'])
-            event[0]['time'] = request.json.get('time', event[0]['time'])
-            event[0]['date'] = request.json.get('date', event[0]['date'])
-            event[0]['description'] = request.json.get('description', event[0]['description'])
-            event[0]['done'] = request.json.get('done', event[0]['done'])
-            return jsonify({'event': event[0]})
-      
-        abort(404)
+    def delete(self, event_id):
+        """
+        Deletes a single event
+        """
+        abort_if_event_doesnt_exist(event_id)
+        del EVENTS[event_id]
+        return '', 204
 
-@app.route('/api/events/<int:event_id>', methods=['DELETE'])
-def delete_event(event_id):
-    """Build the cookiecutter."""
-    for event in events:
-        if event['id'] == event_id:
-            events.remove(event[0])
-        return jsonify({'result': True})
-    abort(404)
+
+
+
+# Eventlist
+# shows a list of all events, and lets you POST to add new tasks
+
+class EventList(Resource):
+    """
+    Creates a Eventlist object.
+    """
+    def get(self):
+        return EVENTS
+
+    def post(self):
+        args = parser.parse_args()
+        event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
+        event_id = 'event%i' % event_id
+        EVENTS[event_id] = {
+            'title': args['title'],
+            'location':args.get('location'),
+            'time':args.get('time', ""),
+            'date':args.get('date', ""),
+            'description': args.get('description', ""),
+            'done': False,
+            'rsvp': []
+
+        }
+        return EVENTS[event_id], 201
+
+    # def create_event(self):
+    #     """Create new event."""
+    #     data = request.get_json()
+    #     if not data or not 'title' in data:
+    #         abort(400)
+    #         event = {
+    #             'id': events[-1]['id'] + 1,
+    #             'title': data['title'],
+    #             'location':data.get('location', ""),
+    #             'time':data.get('time', ""),
+    #             'date':data.get('date', ""),
+    #             'description': data.get('description', ""),
+    #             'done': False
+    #         }
+    #     events.append(event)
+    #     return jsonify({'event': event}), 201
+
+
+
+
+api.add_resource(EventList, '/events')
+api.add_resource(Event, '/events/<event_id>')
