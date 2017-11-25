@@ -1,11 +1,9 @@
-
-    #!/bin/env python
+#!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
 from flask import Flask, jsonify, abort, make_response, request
 from flask_restful import reqparse, abort, Api, Resource
 from app import app
-# import json
 
 from app import data
 
@@ -37,7 +35,7 @@ EVENTS = {
         'location':u'Nairobi, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
-        'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,', 
+        'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,',
         'done': False,
         'rsvp': [
             {
@@ -50,17 +48,16 @@ EVENTS = {
 }
 
 def abort_if_event_doesnt_exist(event_id):
+    """
+    Handle Error when Event not found.
+    """
     if event_id not in EVENTS:
         abort(404, message="Events {} doesn't exist".format(event_id))
 
-# parser = reqparse.RequestParser()
-# # parser.add_argument('title','loaction')
-# parser.add_argument('title', default='title')
-# parser.add_argument('loaction')
-
-
 class Event(Resource):
-    
+    """
+    Handle Event crud operation.
+    """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, required=True,
@@ -133,6 +130,9 @@ class EventList(Resource):
         }
         return EVENTS[event_id], 201
 
+
+# Eventlist
+# shows a list of all events, and lets you POST to add new tasks
 
 
 api.add_resource(EventList, '/events')
