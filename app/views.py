@@ -59,21 +59,38 @@ def abort_if_event_doesnt_exist(event_id):
 # parser.add_argument('loaction')
 
 
-
 class Event(Resource):
+    
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('title', type=str, required=True,
+                                   help='No task title provided')
+        # self.reqparse.add_argument('location', type=str,)
+        super(Event, self).__init__()
+
     def get(self, event_id):
+        """
+        Retrieve Event
+        """
         abort_if_event_doesnt_exist(event_id)
         return EVENTS[event_id]
 
     def delete(self, event_id):
         """
-        Deletes a single event
+        Delete a single event
         """
         abort_if_event_doesnt_exist(event_id)
         del EVENTS[event_id]
         return '', 204
 
-
+    def put(self, event_id):
+        """
+        Edit a single event
+        """
+        args = self.reqparse.parse_args()
+        title = {'title': args['title']}
+        EVENTS[event_id] = title
+        return title, 201
 
 
 # Eventlist
@@ -92,16 +109,22 @@ class EventList(Resource):
 
 
     def get(self):
+        """
+        List all Events
+        """
         return EVENTS
 
     def post(self):
+        """
+        Creates a new Event.
+        """
         args = self.reqparse.parse_args()
         # args = self.parser.parse_args()
         event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
         event_id = 'event%i' % event_id
         EVENTS[event_id] = {
             'title': args['title'],
-            'location': args['location'], 
+            'location': args['location'],
             'time':args.get('time', ""),
             'date':args.get('date', ""),
             'description': args.get('description', ""),
