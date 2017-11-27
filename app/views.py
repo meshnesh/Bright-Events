@@ -83,7 +83,10 @@ class Event(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, required=True,
                                    help='No task title provided')
-        # self.reqparse.add_argument('location', type=str,)
+        self.reqparse.add_argument('location', type=str,)
+        self.reqparse.add_argument('time', type=str, required=True)
+        self.reqparse.add_argument('date', type=str, required=True)
+        self.reqparse.add_argument('description', type=str,)
         super(Event, self).__init__()
 
     def get(self, event_id):
@@ -101,14 +104,21 @@ class Event(Resource):
         del EVENTS[event_id]
         return '', 204
 
-    # def put(self, event_id):
-    #     """
-    #     Edit a single event
-    #     """
-    #     args = self.reqparse.parse_args()
-    #     title = {'title': args['title']}
-    #     EVENTS[event_id] = title
-    #     return title, 201
+    def put(self, event_id):
+        """
+        Edit a single event
+        """
+        args = self.reqparse.parse_args()
+        EVENTS[event_id] = {
+            'title': args['title'],
+            'location': args['location'],
+            'time': args['time'],
+            'date': args['date'],
+            'description': args['description'],
+            'done': False,
+            'rsvp': []
+        }
+        return EVENTS[event_id], 201
 
 
 # Eventlist
@@ -123,6 +133,9 @@ class EventList(Resource):
         self.reqparse.add_argument('title', type=str, required=True,
                                    help='No task title provided')
         self.reqparse.add_argument('location', type=str,)
+        self.reqparse.add_argument('time', type=str, required=True)
+        self.reqparse.add_argument('date', type=str, required=True)
+        self.reqparse.add_argument('description', type=str,)
         super(EventList, self).__init__()
 
 
@@ -137,30 +150,30 @@ class EventList(Resource):
         Creates a new Event.
         """
         args = self.reqparse.parse_args()
-        # args = self.parser.parse_args()
         event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
         event_id = 'event%i' % event_id
         EVENTS[event_id] = {
             'title': args['title'],
             'location': args['location'],
-            'time':args.get('time', ""),
-            'date':args.get('date', ""),
-            'description': args.get('description', ""),
+            'time': args['time'],
+            'date': args['date'],
+            'description': args['description'],
             'done': False,
             'rsvp': []
         }
         return EVENTS[event_id], 201
 
 
-# User
+# User registration
 class User(Resource):
     """
     User Registration and login.
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', type=str, required=True, help='Password is required')
-        self.reqparse.add_argument('password', type=str, required=True, help='Please include an email')
+        self.reqparse.add_argument('email', type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('password', type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('name', type=str, required=True, help='Name is Required!')
         super(User, self).__init__()
 
     def get(self):
@@ -179,14 +192,17 @@ class User(Resource):
         USERS[user_id] = {
             'email': args['email'],
             'password': args['password'],
-            'name':args.get('name', "")
+            'name': args['name'],
         }
         return USERS[user_id], 201
 # RSVP
 class RSVP(Resource):
+    """
+    Lists all RSVP per event
+    """
     def get(self, event_id):
         """
-        Retrieve Event
+        Retrieve rsvp
         """
         abort_if_event_doesnt_exist(event_id)
         event = EVENTS[event_id]
@@ -195,11 +211,11 @@ class RSVP(Resource):
 
 
 # events url
-api.add_resource(EventList, '/events')
-api.add_resource(Event, '/events/<event_id>')
+api.add_resource(EventList, '/api/events')
+api.add_resource(Event, '/api/events/<event_id>')
 
 # users url
-api.add_resource(User, '/users')
+api.add_resource(User, '/api/auth/register')
 
 # RSVP url
-api.add_resource(RSVP, '/events/<event_id>/rsvp')
+api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
