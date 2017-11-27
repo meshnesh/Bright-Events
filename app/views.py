@@ -101,14 +101,14 @@ class Event(Resource):
         del EVENTS[event_id]
         return '', 204
 
-    def put(self, event_id):
-        """
-        Edit a single event
-        """
-        args = self.reqparse.parse_args()
-        title = {'title': args['title']}
-        EVENTS[event_id] = title
-        return title, 201
+    # def put(self, event_id):
+    #     """
+    #     Edit a single event
+    #     """
+    #     args = self.reqparse.parse_args()
+    #     title = {'title': args['title']}
+    #     EVENTS[event_id] = title
+    #     return title, 201
 
 
 # Eventlist
@@ -182,6 +182,17 @@ class User(Resource):
             'name':args.get('name', "")
         }
         return USERS[user_id], 201
+# RSVP
+class RSVP(Resource):
+    def get(self, event_id):
+        """
+        Retrieve Event
+        """
+        abort_if_event_doesnt_exist(event_id)
+        event = EVENTS[event_id]
+        rsvpList = event['rsvp']
+        return rsvpList
+
 
 # events url
 api.add_resource(EventList, '/events')
@@ -189,3 +200,6 @@ api.add_resource(Event, '/events/<event_id>')
 
 # users url
 api.add_resource(User, '/users')
+
+# RSVP url
+api.add_resource(RSVP, '/events/<event_id>/rsvp')
