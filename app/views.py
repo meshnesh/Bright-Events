@@ -75,6 +75,13 @@ def abort_if_event_doesnt_exist(event_id):
     if event_id not in EVENTS:
         abort(404, message="Events {} doesn't exist".format(event_id))
 
+def abort_if_user_doesnt_exist(user_id):
+    """
+    Handle Error when User not found.
+    """
+    if user_id not in USERS:
+        abort(404, message="Invalid User {} doesn't exist".format(user_id))
+
 class Event(Resource):
     """
     Handle Event crud operation.
@@ -171,8 +178,8 @@ class User(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', type=str, required=True, help='Password is required!')
-        self.reqparse.add_argument('password', type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
         self.reqparse.add_argument('name', type=str, required=True, help='Name is Required!')
         super(User, self).__init__()
 
@@ -195,6 +202,46 @@ class User(Resource):
             'name': args['name'],
         }
         return USERS[user_id], 201
+
+
+# User login
+class UserLogin(Resource):
+    """
+    Check if user exists then login
+    """
+    def get(self, user_id):
+        """
+        Retrieve Event
+        """
+        abort_if_user_doesnt_exist(user_id)
+        return USERS[user_id]
+
+# User reset password
+class PasswordRest(Resource):
+    """
+    Check if user exists then login
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        super(PasswordRest, self).__init__()
+
+
+    def put(self):
+        """
+        User Registration.
+        """
+        args = self.reqparse.parse_args()
+        user_id = int(max(USERS.keys()).lstrip('user')) + 1
+        user_id = 'user%i' % user_id
+        USERS[user_id] = {
+            'email': args.get('email', ""),
+            'password': args['password'],
+            'name': args.get('name', ""),
+        }
+        return USERS[user_id], 201
+
+
 # RSVP
 class RSVP(Resource):
     """
@@ -216,6 +263,10 @@ api.add_resource(Event, '/api/events/<event_id>')
 
 # users url
 api.add_resource(User, '/api/auth/register')
+api.add_resource(UserLogin, '/api/auth/login/<user_id>')
 
 # RSVP url
 api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
+
+# Reset Password
+api.add_resource(PasswordRest, '/api/auth/reset-password')
