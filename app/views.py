@@ -4,10 +4,12 @@
 from flask import Flask, jsonify, abort, make_response, request
 from flask_restful import reqparse, abort, Api, Resource
 from app import app
+from flask_cors import CORS
 
 from app import data
 
 api = Api(app)
+CORS = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 EVENTS = {
     'event1': {
