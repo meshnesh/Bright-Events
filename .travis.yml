@@ -1,14 +1,14 @@
 language: python
 sudo: enabled
 python:
-  - 3.6
+  - 3.6.1
 env:
   - FLASK=0.12  # recent Flask
 # command to install dependencies
 install:
   - pip3 install -r requirements.txt
 # command to run tests
-script: pytest --with-coverage --cover-package=tests.py && coverage report
-
-after_success: coveralls
+script:
+    python3 -m pytest tests.py
+    
 
