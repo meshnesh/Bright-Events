@@ -8,5 +8,7 @@ env:
 install:
   - pip3 install -r requirements.txt
 # command to run tests
-script:
-    python3 -m pytest tests.py
+script: pytest --with-coverage --cover-package=tests && coverage report
+
+after_success: coveralls
+
