@@ -1,5 +1,5 @@
 # Bright Events 
-![Alt travis_badge](https://travis-ci.org/meshnesh/Bright-Events.svg?branch=develop)
+![Alt travis_badge](https://travis-ci.org/meshnesh/Bright-Events.svg?branch=api_development)
 
 [![Coverage Status](https://coveralls.io/repos/github/meshnesh/Bright-Events/badge.svg?branch=master)](https://coveralls.io/github/meshnesh/Bright-Events?branch=api_development)
 
