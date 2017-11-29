@@ -55,13 +55,11 @@ USERS = {
         'password': u'qwerty1234'
     },
     'user2': {
-        'user_id': 2,
         'name': u'Mary Jane',
         'email': u'jane.mary@yahoo.com',
         'password': u'qwerty1234'
     },
     'user3': {
-        'user_id': 3,
         'name': u'Antony Ng\'ang\'a',
         'email': u'tonny.nesh@gmail.com',
         'password': u'qwerty1234'
@@ -119,14 +117,13 @@ class Event(Resource):
         EVENTS[event_id] = {
             'title': args['title'],
             'location': args['location'],
-            'time': args['time'],
+            'time': args.get('time',""),
             'date': args['date'],
             'description': args['description'],
             'done': False,
             'rsvp': []
         }
         return EVENTS[event_id], 201
-
 
 # Eventlist
 # shows a list of all events, and lets you POST to add new tasks
@@ -170,7 +167,6 @@ class EventList(Resource):
         }
         return EVENTS[event_id], 201
 
-
 # User registration
 class User(Resource):
     """
@@ -202,7 +198,6 @@ class User(Resource):
             'name': args['name'],
         }
         return USERS[user_id], 201
-
 
 # User login
 class UserLogin(Resource):

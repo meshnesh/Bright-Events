@@ -5,6 +5,7 @@ from app import app
 from app.views import EVENTS, Event, EventList, User, UserLogin, PasswordRest, RSVP, abort_if_event_doesnt_exist
 
 class TestEvents(unittest.TestCase):
+    """Test event crud functions"""
     def setUp(self):
         self.app = app
         self.event = EventList()
@@ -45,65 +46,70 @@ class TestEvents(unittest.TestCase):
         """Test that event get put"""
         resp = self.test_client().put('/api/events/event1', data=self.eventCreate)
         self.assertEqual(resp.status_code, 201)
-     
+
+class TestUsers(unittest.TestCase):
+    """Test user registration and login"""
+    def setUp(self):
+        self.app = app
+        self.user = User()
+        self.test_client = self.app.test_client
+        self.createUser = {
+            'name': u'Mary Jane',
+            'email': u'jane.mary@yahoo.com',
+            'password': u'1234qwerty'
+        }
+
+    def tearDown(self):
+        del self.user
+        del self.test_client
+
+    def test_user_registration(self):
+        """Test user Registration"""
+        resp = self.test_client().post('/api/auth/register', data=self.createUser)
+        self.assertEqual(resp.status_code, 201)
+
+    def test_user_login(self):
+        """Test user login"""
+        resp = self.test_client().get('/api/auth/login/user1')
+        self.assertEqual(resp.status_code, 200)
+
+class TestResetPassword(unittest.TestCase):
+    """Test password reset"""
+    def setUp(self):
+        self.app = app
+        self.passwordRest = PasswordRest()
+        self.test_client = self.app.test_client
+        self.resetPassword = {
+            'name': u'Mary Jane',
+            'email': u'jane.mary@yahoo.com',
+            'password': u'qwerty1234'
+        }
+
+    def tearDown(self):
+        del self.passwordRest
+        del self.test_client
+
+    def test_password_reset(self):
+        """Test password rest"""
+        resp = self.test_client().put('/api/auth/reset-password', data=self.resetPassword)
+        self.assertEqual(resp.status_code, 201)
 
 
+class TestRSVP(unittest.TestCase):
+    """Test password reset"""
+    def setUp(self):
+        self.app = app
+        self.rsvp = RSVP()
+        self.test_client = self.app.test_client
 
+    def tearDown(self):
+        del self.rsvp
+        del self.test_client
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class TestEvents(unittest.TestCase):
-#     def setUp(self):
-#         self.req = app.test_client()
-#         self.events = EVENTS
-
-#     def tearDown(self):
-#         self.events.clear()
-#         self.events = None
-
-#     def get_events(self):
-#       return self.req.get('/api/events')
-
-#     def add_event(self, data={}):
-#       return self.req.post('/api/events', 
-#         data=json.dumps(data), 
-#         content_type='application/json'
-#         )
-
-#     def test_initial_events(self):
-#         r = self.get_events()
-#         self.assertEqual(r.status_code, 200, 'Status Code not 200')
-#         body = json.loads(r.data)
-#         print(("imported events", self.events))
-#         print(("response events", body.get('events', [])))
-#         self.assertEqual(self.events, body.get('events', []), 'Events array not equal')
-
-#     def test_add_event(self):
-#         event = {
-#             "title": "YO",
-#             "location": 'NRB'
-#         }
-#         r = self.add_event(event)
-#         self.assertEqual(r.status_code, 201, 'Status Code not 201')
-#         body = json.loads(r.data)
-#         self.assertTrue(set(event.items()).issubset(set(body['event'].items())))
-
-
+    def test_user_login(self):
+        """Test user login"""
+        resp = self.test_client().get('/api/events/event1/rsvp')
+        self.assertEqual(resp.status_code, 200)
 
 
 if __name__ == "__main__":
