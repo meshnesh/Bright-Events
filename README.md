@@ -1,7 +1,7 @@
 # Bright Events 
 [![Build Status](https://travis-ci.org/meshnesh/Bright-Events.svg?branch=api_development)](https://travis-ci.org/meshnesh/Bright-Events)
 
-[![Coverage Status](https://coveralls.io/repos/github/meshnesh/Bright-Events/badge.svg?branch=master)](https://coveralls.io/github/meshnesh/Bright-Events?branch=api_development)
+[![Coverage Status](https://coveralls.io/repos/github/meshnesh/Bright-Events/badge.svg?branch=api_development)](https://coveralls.io/github/meshnesh/Bright-Events?branch=api_development)
 
 An events platform where people create new events and share with others. One can see how many people are reserved to there event.
 
