@@ -6,7 +6,7 @@ env:
   - FLASK=0.12  # recent Flask
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip3 install -r requirements.txt
 # command to run tests
 script:
     python3 -m pytest tests.py
