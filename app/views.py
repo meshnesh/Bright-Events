@@ -12,7 +12,7 @@ api = Api(app)
 EVENTS = {
     'event1': {
         'title': u'Drink Smoothie',
-        'imageUrl': u'https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/ui/imgs/img-3.jpg',
+        'imageUrl': u'http://freedesignfile.com/upload/2016/11/Fresh-fruit-with-smoothies-HD-picture.jpg',
         'location': u'Machakos, Kenya',
         'time': u'11:00AM',
         'date': u'25 NOV 2017',
@@ -33,7 +33,7 @@ EVENTS = {
     },
     'event2':{
         'title': u'Enviroment Awarnes',
-        'imageUrl': u'https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/ui/imgs/img-2.jpg',
+        'imageUrl': u'https://www.novograf.co.uk/Uploads/1383838151_KRimcWTD_novograf.enviroment.main1.jpg',
         'location':u'Karura Forest, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
@@ -49,7 +49,7 @@ EVENTS = {
     },
     'event3':{
         'title': u'Tattoo Fest',
-        'imageUrl': u'https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/ui/imgs/img-1.jpg',
+        'imageUrl': u'https://farm4.staticflickr.com/3722/13405416373_d3bdf9312e_b.jpg',
         'location':u'Nairobi, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
