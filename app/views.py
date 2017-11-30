@@ -29,7 +29,8 @@ EVENTS = {
                 'name': u'Antony Ng\'ang\'a',
                 'email': u'tonny.nesh@gmail.com'
             }
-        ]
+        ],
+        'url':u'https://bright-events.herokuapp.com/api/events/event1'
     },
     'event2':{
         'title': u'Enviroment Awarnes',
@@ -45,14 +46,15 @@ EVENTS = {
                 'name': u'Mary Jane',
                 'email': u'jane.mary@yahoo.com'
             }
-        ]
+        ],
+        'url':u'https://bright-events.herokuapp.com/api/events/event1'
     },
     'event3':{
         'title': u'Tattoo Fest',
         'imageUrl': u'http://ww1.prweb.com/prfiles/2017/09/29/14755349/Ray-Price-Capital-City-Bikefest_TattooFest_7574.jpg',
         'location':u'Nairobi, Kenya',
-        'time':u'07:00PM',
-        'date':u'30 NOV 2017',
+        'time':u'03:00PM',
+        'date':u'20 NOV 2017',
         'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,',
         'done': False,
         'rsvp': [
@@ -71,7 +73,8 @@ EVENTS = {
                 'name': u'Francis Gwada',
                 'email': u'gwada.frank@mango.com'
             }
-        ]
+        ],
+        'url':u'https://bright-events.herokuapp.com/api/events/event1'
     }
 }
 
