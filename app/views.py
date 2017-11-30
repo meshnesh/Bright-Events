@@ -1,11 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
-from datetime import timedelta
 from flask import Flask, jsonify, abort, make_response, request, current_app
 from flask_restful import reqparse, abort, Api, Resource
 from app import app
-from functools import update_wrapper
 
 from app import data
 
@@ -13,8 +11,9 @@ api = Api(app)
 
 EVENTS = {
     'event1': {
-        'title': u'Mango Harvest',
-        'location': u'Kitui, Kenya',
+        'title': u'Drink Smoothie',
+        'imageUrl': u'https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/ui/imgs/img-3.jpg',
+        'location': u'Machakos, Kenya',
         'time': u'11:00AM',
         'date': u'25 NOV 2017',
         'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,',
@@ -33,7 +32,24 @@ EVENTS = {
         ]
     },
     'event2':{
-        'title': u'Python Meetup',
+        'title': u'Enviroment Awarnes',
+        'imageUrl': u'https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/ui/imgs/img-2.jpg',
+        'location':u'Karura Forest, Kenya',
+        'time':u'07:00PM',
+        'date':u'30 NOV 2017',
+        'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,',
+        'done': False,
+        'rsvp': [
+            {
+                'user_id': 2,
+                'name': u'Mary Jane',
+                'email': u'jane.mary@yahoo.com'
+            }
+        ]
+    },
+    'event3':{
+        'title': u'Tattoo Fest',
+        'imageUrl': u'https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/ui/imgs/img-1.jpg',
         'location':u'Nairobi, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
@@ -67,50 +83,6 @@ USERS = {
         'password': u'qwerty1234'
     }
 }
-
-
-def crossdomain(origin=None, methods=None, headers=None,
-                max_age=21600, attach_to_all=True,
-                automatic_options=True):
-    if methods is not None:
-        methods = ', '.join(sorted(x.upper() for x in methods))
-    if headers is not None and not isinstance(headers, basestring):
-        headers = ', '.join(x.upper() for x in headers)
-    if not isinstance(origin, basestring):
-        origin = ', '.join(origin)
-    if isinstance(max_age, timedelta):
-        max_age = max_age.total_seconds()
-
-    def get_methods():
-        if methods is not None:
-            return methods
-
-        options_resp = current_app.make_default_options_response()
-        return options_resp.headers['allow']
-
-    def decorator(f):
-        def wrapped_function(*args, **kwargs):
-            if automatic_options and request.method == 'OPTIONS':
-                resp = current_app.make_default_options_response()
-            else:
-                resp = make_response(f(*args, **kwargs))
-            if not attach_to_all and request.method != 'OPTIONS':
-                return resp
-
-            h = resp.headers
-
-            h['Access-Control-Allow-Origin'] = origin
-            h['Access-Control-Allow-Methods'] = get_methods()
-            h['Access-Control-Max-Age'] = str(max_age)
-            if headers is not None:
-                h['Access-Control-Allow-Headers'] = headers
-            return resp
-
-        f.provide_automatic_options = False
-        return update_wrapper(wrapped_function, f)
-    return decorator
-
-
 
 def abort_if_event_doesnt_exist(event_id):
     """
