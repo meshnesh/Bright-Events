@@ -33,7 +33,7 @@ EVENTS = {
     },
     'event2':{
         'title': u'Enviroment Awarnes',
-        'imageUrl': u'https://s3-us-west-1.amazonaws.com/stanford.ucomm.newsms.media/wp-content/uploads/2016/11/10165436/environment_GettyImages-501231894.jpg'
+        'imageUrl': u'https://s3-us-west-1.amazonaws.com/stanford.ucomm.newsms.media/wp-content/uploads/2016/11/10165436/environment_GettyImages-501231894.jpg',
         'location':u'Karura Forest, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
