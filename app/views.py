@@ -47,7 +47,7 @@ EVENTS = {
                 'email': u'jane.mary@yahoo.com'
             }
         ],
-        'url':u'https://bright-events.herokuapp.com/api/events/event1'
+        'url':u'https://bright-events.herokuapp.com/api/events/event2'
     },
     'event3':{
         'title': u'Tattoo Fest',
@@ -74,7 +74,7 @@ EVENTS = {
                 'email': u'gwada.frank@mango.com'
             }
         ],
-        'url':u'https://bright-events.herokuapp.com/api/events/event1'
+        'url':u'https://bright-events.herokuapp.com/api/events/event3'
     }
 }
 
