@@ -33,7 +33,7 @@ EVENTS = {
     },
     'event2':{
         'title': u'Enviroment Awarnes',
-        'imageUrl': u'http://www-tc.pbs.org/wgbh/americanexperience/media/__sized__/canonical_images/collection/film-environment-collection-resize-1200x0-70.jpg',
+        'imageUrl': u'https://s3-us-west-1.amazonaws.com/stanford.ucomm.newsms.media/wp-content/uploads/2016/11/10165436/environment_GettyImages-501231894.jpg'
         'location':u'Karura Forest, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
@@ -49,7 +49,7 @@ EVENTS = {
     },
     'event3':{
         'title': u'Tattoo Fest',
-        'imageUrl': u'https://farm4.staticflickr.com/3722/13405416373_d3bdf9312e_b.jpg',
+        'imageUrl': u'http://ww1.prweb.com/prfiles/2017/09/29/14755349/Ray-Price-Capital-City-Bikefest_TattooFest_7574.jpg',
         'location':u'Nairobi, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
@@ -57,9 +57,19 @@ EVENTS = {
         'done': False,
         'rsvp': [
             {
-                'user_id': 2,
+                'user_id': 4,
                 'name': u'Mary Jane',
                 'email': u'jane.mary@yahoo.com'
+            },
+            {
+                'user_id': 1,
+                'name': u'James Micheal',
+                'email': u'micheal.j@gmail.com'
+            },
+            {
+                'user_id': 5,
+                'name': u'Francis Gwada',
+                'email': u'gwada.frank@mango.com'
             }
         ]
     }
