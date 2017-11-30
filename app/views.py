@@ -33,7 +33,7 @@ EVENTS = {
     },
     'event2':{
         'title': u'Enviroment Awarnes',
-        'imageUrl': u'https://www.novograf.co.uk/Uploads/1383838151_KRimcWTD_novograf.enviroment.main1.jpg',
+        'imageUrl': u'http://www-tc.pbs.org/wgbh/americanexperience/media/__sized__/canonical_images/collection/film-environment-collection-resize-1200x0-70.jpg',
         'location':u'Karura Forest, Kenya',
         'time':u'07:00PM',
         'date':u'30 NOV 2017',
