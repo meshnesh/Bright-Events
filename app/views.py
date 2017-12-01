@@ -33,7 +33,7 @@ EVENTS = {
         'url':u'https://bright-events.herokuapp.com/api/events/event1'
     },
     'event2':{
-        'title': u'Enviroment Awarnes',
+        'title': u'Enviroment Awareness',
         'imageUrl': u'https://s3-us-west-1.amazonaws.com/stanford.ucomm.newsms.media/wp-content/uploads/2016/11/10165436/environment_GettyImages-501231894.jpg',
         'location':u'Karura Forest, Kenya',
         'time':u'07:00PM',
