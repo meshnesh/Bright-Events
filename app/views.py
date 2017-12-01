@@ -43,7 +43,7 @@ class Event(Resource):
         Retrieve Event
         """
         abort_if_event_doesnt_exist(event_id)
-        return EVENTS[event_id]
+        return EVENTS[event_id], 200
 
     def delete(self, event_id):
         """
@@ -91,7 +91,7 @@ class EventList(Resource):
         """
         List all Events
         """
-        return EVENTS
+        return EVENTS, 200
 
     def post(self):
         """
@@ -127,7 +127,7 @@ class User(Resource):
         """
         List all Users
         """
-        return USERS
+        return USERS, 200
 
     def post(self):
         """
@@ -153,7 +153,7 @@ class UserLogin(Resource):
         Retrieve Event
         """
         abort_if_user_doesnt_exist(user_id)
-        return USERS[user_id]
+        return USERS[user_id], 200
 
 # User reset password
 class PasswordRest(Resource):
@@ -193,7 +193,7 @@ class RSVP(Resource):
         abort_if_event_doesnt_exist(event_id)
         event = EVENTS[event_id]
         rsvpList = event['rsvp']
-        return rsvpList
+        return rsvpList, 200
 
 
 # events url
