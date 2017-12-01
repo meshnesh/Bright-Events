@@ -24,6 +24,14 @@ def abort_if_user_doesnt_exist(user_id):
     if user_id not in USERS:
         abort(404, message="Invalid User {} doesn't exist".format(user_id))
 
+# def abort_user_email_doesnt_exist(email):
+#     """
+#     Handle Error when User not found.
+#     """
+#     for user,email in USERS.items():
+#         if email['email'] == email:
+#             abort(400, message="Email Exists")
+
 class Event(Resource):
     """
     Handle Event crud operation.
@@ -148,13 +156,22 @@ class UserLogin(Resource):
     """
     Check if user exists then login
     """
-    def get(self, user_id):
-        """
-        Retrieve Event
-        """
-        abort_if_user_doesnt_exist(user_id)
-        return USERS[user_id], 200
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        super(UserLogin, self).__init__()
 
+    def post(self):
+        """
+        User Registration.
+        """
+        args = self.reqparse.parse_args()
+        USERS = {
+            'email': args['email'],
+            'password': args['password']
+        }
+        return "Login Sccessful", 200
 # User reset password
 class PasswordRest(Resource):
     """
@@ -170,6 +187,8 @@ class PasswordRest(Resource):
         """
         User Registration.
         """
+        abort_if_user_doesnt_exist(user_id)
+
         args = self.reqparse.parse_args()
         user_id = int(max(USERS.keys()).lstrip('user')) + 1
         user_id = 'user%i' % user_id
@@ -202,7 +221,7 @@ api.add_resource(Event, '/api/events/<event_id>')
 
 # users url
 api.add_resource(User, '/api/auth/register')
-api.add_resource(UserLogin, '/api/auth/login/<user_id>')
+api.add_resource(UserLogin, '/api/auth/login')
 
 # RSVP url
 api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
