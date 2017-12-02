@@ -44,21 +44,59 @@ class Event(Resource):
     def get(self, event_id):
         """
         Retrieve Event
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: event_id
+            required: true
+            description: The ID of the event, try event1!
+            type: string
+        responses:
+          200:
+            description: The event
         """
         abort_if_event_doesnt_exist(event_id)
         return EVENTS[event_id]
 
     def delete(self, event_id):
         """
-        Delete a single event
+        Delete a single Event
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: events_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          204:
+            description: Event deleted
         """
         abort_if_event_doesnt_exist(event_id)
         del EVENTS[event_id]
-        return '', 204
+        return 'Event deleted', 204
 
     def put(self, event_id):
         """
-        Edit a single event
+        This is an example
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: event_id
+          - in: path
+            name: event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          201:
+            description: The Event has been updated
         """
         args = self.reqparse.parse_args()
         EVENTS[event_id] = {
@@ -92,13 +130,64 @@ class EventList(Resource):
 
     def get(self):
         """
-        List all Events
+        Retrieve event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
         """
         return EVENTS
 
     def post(self):
         """
-        Creates a new Event.
+        Creates a new event
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: title
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: location
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: date
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: time
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: description
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+        responses:
+          201:
+            description: The task has been created
+            schema:
+              $ref: '#/definitions/Task'
         """
         args = self.reqparse.parse_args()
         event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
@@ -127,7 +216,7 @@ class User(Resource):
 
     def get(self):
         """
-        This is an example
+        Gets Users
         ---
         tags:
           - restful
@@ -147,7 +236,7 @@ class User(Resource):
     # swag_from('colors.yml')
     def post(self):
         """
-        This is an example
+        Registers a new user
         ---
         tags:
           - restful
@@ -199,25 +288,28 @@ class UserLogin(Resource):
 
     def post(self):
         """
-        User Registration.
+        User Login
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: email
+            type: string
+            required: true
+          - in: formData
+            name: password
+            type: string
+            required: true
+        responses:
+          200:
+            description: User has logged in
         """
-        
         args = self.reqparse.parse_args()
-        # # if  is None:
-        # print(args.['email'])
-
         USERS = {
             'email': args['email'],
             'password': args['password']
         }
-        print(args["email"])
-        email = args['email']
-        if email.strip() == " ":
-            return "mango"
-        # if name.strip() == " ":
-        #     return "invalid name"
-        # for user,email in USERS.items():
-        #     return email['email']
         return USERS, 200
 
 # User reset password
@@ -233,15 +325,27 @@ class PasswordRest(Resource):
 
     def put(self):
         """
-        User Registration.
+        Paasword Reset
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: password
+            required: true
+            description: The ID of the task, try 42!
+            type: string
+        responses:
+          201:
+            description: The task has been updated
         """
         args = self.reqparse.parse_args()
         user_id = int(max(USERS.keys()).lstrip('user')) + 1
         user_id = 'user%i' % user_id
         USERS[user_id] = {
-            'email': args.get('email', ""),
+            'email': args.get('email', "tonny.nesh@gmail.com"),
             'password': args['password'],
-            'name': args.get('name', ""),
+            'name': args.get('name', "Antony Ng'ang'a"),
         }
         return USERS[user_id], 201
 
@@ -253,7 +357,19 @@ class RSVP(Resource):
     """
     def get(self, event_id):
         """
-        Retrieve rsvp
+        Retrieve event RSVP
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
         """
         abort_if_event_doesnt_exist(event_id)
         event = EVENTS[event_id]
