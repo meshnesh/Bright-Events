@@ -82,7 +82,7 @@ class Event(Resource):
 
     def put(self, event_id):
         """
-        This is an example
+        Update single event data
         ---
         tags:
           - restful
@@ -222,13 +222,6 @@ class User(Resource):
         responses:
           200:
             description: The task data
-            schema:
-              id: Tasks
-              properties:
-                task_id:
-                  type: object
-                  schema:
-                    $ref: '#/definitions/Task'
         """
         return USERS
 
