@@ -43,38 +43,38 @@ class Event(Resource):
 
     def get(self, event_id):
         """
-        Retrieve Event
+        Retrieve single event data
         ---
         tags:
           - restful
         parameters:
-          - in: formData
-            name: event_id
+          - in: path
+            name: Event_id
             required: true
-            description: The ID of the event, try event1!
+            description: The ID of the Event, try event1!
             type: string
         responses:
           200:
-            description: The event
+            description: The RSVP data
         """
         abort_if_event_doesnt_exist(event_id)
         return EVENTS[event_id]
 
     def delete(self, event_id):
         """
-        Delete a single Event
+        Delete single event data
         ---
         tags:
           - restful
         parameters:
-          - in: formData
-            name: events_id
+          - in: path
+            name: Event_id
             required: true
             description: The ID of the Event, try event1!
             type: string
         responses:
           204:
-            description: Event deleted
+            description: The RSVP data
         """
         abort_if_event_doesnt_exist(event_id)
         del EVENTS[event_id]
@@ -89,11 +89,28 @@ class Event(Resource):
         parameters:
           - in: formData
             name: event_id
-          - in: path
-            name: event_id
-            required: true
-            description: The ID of the Event, try event1!
             type: string
+            required: true
+          - in: formData
+            name: title
+            type: string
+            required: true
+          - in: formData
+            name: location
+            type: string
+            required: true
+          - in: formData
+            name: date
+            type: string
+            required: true
+          - in: formData
+            name: time
+            type: string
+            required: true
+          - in: formData
+            name: description
+            type: string
+            required: true
         responses:
           201:
             description: The Event has been updated
@@ -130,19 +147,13 @@ class EventList(Resource):
 
     def get(self):
         """
-        Retrieve event data
+        Gets Events
         ---
         tags:
           - restful
-        parameters:
-          - in: path
-            name: Event_id
-            required: true
-            description: The ID of the Event, try event1!
-            type: string
         responses:
           200:
-            description: The RSVP data
+            description: The event data
         """
         return EVENTS
 
@@ -157,37 +168,25 @@ class EventList(Resource):
             name: title
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: location
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: date
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: time
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: description
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
         responses:
           201:
-            description: The task has been created
-            schema:
-              $ref: '#/definitions/Task'
+            description: The Event has been created
         """
         args = self.reqparse.parse_args()
         event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
