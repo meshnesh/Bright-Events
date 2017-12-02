@@ -3,12 +3,15 @@
 """import depancies."""
 from flask import abort,request
 from flask_restful import reqparse, Api, Resource
+from flasgger import Swagger, swag_from
 from app import app
+
 
 from app.data import EVENTS
 from app.user_data import USERS
 
 api = Api(app)
+swagger = Swagger(app)
 
 def abort_if_event_doesnt_exist(event_id):
     """
@@ -113,9 +116,8 @@ class EventList(Resource):
 
 # User registration
 class User(Resource):
-    """
-    User Registration and login.
-    """
+    # @swag_from('colors.yml', methods=['POST','GET'])
+
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
@@ -125,13 +127,54 @@ class User(Resource):
 
     def get(self):
         """
-        List all Users
+        This is an example
+        ---
+        tags:
+          - restful
+        responses:
+          200:
+            description: The task data
+            schema:
+              id: Tasks
+              properties:
+                task_id:
+                  type: object
+                  schema:
+                    $ref: '#/definitions/Task'
         """
         return USERS
 
+    # swag_from('colors.yml')
     def post(self):
         """
-        User Registration.
+        This is an example
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: name
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: email
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: password
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+        responses:
+          201:
+            description: The task has been created
+            schema:
+              $ref: '#/definitions/Task'
         """
         args = self.reqparse.parse_args()
         user_id = int(max(USERS.keys()).lstrip('user')) + 1

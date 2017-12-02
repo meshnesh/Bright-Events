@@ -1,27 +1,27 @@
 Example endpoint returning a list of colors by palette
 In this example the specification is taken from external YAML file
 ---
+
 parameters:
-  - name: palette
-    in: path
+  - in: formData
+    name: email
     type: string
-    enum: ['all', 'rgb', 'cmyk']
     required: true
-    default: all
-definitions:
-  Palette:
-    type: object
-    properties:
-      palette_name:
-        type: array
-        items:
-          $ref: '#/definitions/Color'
-  Color:
+    description: Requires a valid email address
+  - in: formData
+    name: name
     type: string
+    required: true
+    description: Accepts an alphanumeric username
+  - in: formData
+    name: password
+    type: string
+    required: true
+    description: Contains lowercase, uppercase and digits, and at least 6 characters
 responses:
-  200:
-    description: A list of colors (may be filtered by palette)
-    schema:
-      $ref: '#/definitions/Palette'
-    examples:
-      rgb: ['red', 'green', 'blue']
+        201:
+          description: Registration of User
+          schema:
+            $ref: '#/user/registration'
+          examples:
+            userID: {'name':"Antony", 'email':"tonny.nesh@gmail.com", 'password':"qwerty123"}
