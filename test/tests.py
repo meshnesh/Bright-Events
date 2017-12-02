@@ -70,7 +70,7 @@ class TestUsers(unittest.TestCase):
 
     def test_user_login(self):
         """Test user login"""
-        resp = self.test_client().get('/api/auth/login/user1')
+        resp = self.test_client().post('/api/auth/login', data=self.createUser)
         self.assertEqual(resp.status_code, 200)
 
 class TestResetPassword(unittest.TestCase):

@@ -1,70 +1,17 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
-from flask import Flask, jsonify, abort, make_response, request
-from flask_restful import reqparse, abort, Api, Resource
+from flask import abort,request
+from flask_restful import reqparse, Api, Resource
+from flasgger import Swagger, swag_from
 from app import app
 
-from app import data
+
+from app.data import EVENTS
+from app.user_data import USERS
 
 api = Api(app)
-
-EVENTS = {
-    'event1': {
-        'title': u'Mango Harvest',
-        'location': u'Kitui, Kenya',
-        'time': u'11:00AM',
-        'date': u'25 NOV 2017',
-        'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,',
-        'done': False,
-        'rsvp': [
-            {
-                'user_id': 1,
-                'name': u'John Doe',
-                'email': u'john.D@gmail.com'
-            },
-            {
-                'user_id': 3,
-                'name': u'Antony Ng\'ang\'a',
-                'email': u'tonny.nesh@gmail.com'
-            }
-        ]
-    },
-    'event2':{
-        'title': u'Python Meetup',
-        'location':u'Nairobi, Kenya',
-        'time':u'07:00PM',
-        'date':u'30 NOV 2017',
-        'description': u'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,',
-        'done': False,
-        'rsvp': [
-            {
-                'user_id': 2,
-                'name': u'Mary Jane',
-                'email': u'jane.mary@yahoo.com'
-            }
-        ]
-    }
-}
-
-
-USERS = {
-    'user1': {
-        'name': u'John Doe',
-        'email': u'john.D@gmail.com',
-        'password': u'qwerty1234'
-    },
-    'user2': {
-        'name': u'Mary Jane',
-        'email': u'jane.mary@yahoo.com',
-        'password': u'qwerty1234'
-    },
-    'user3': {
-        'name': u'Antony Ng\'ang\'a',
-        'email': u'tonny.nesh@gmail.com',
-        'password': u'qwerty1234'
-    }
-}
+swagger = Swagger(app)
 
 def abort_if_event_doesnt_exist(event_id):
     """
@@ -96,22 +43,77 @@ class Event(Resource):
 
     def get(self, event_id):
         """
-        Retrieve Event
+        Retrieve single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
         """
         abort_if_event_doesnt_exist(event_id)
         return EVENTS[event_id]
 
     def delete(self, event_id):
         """
-        Delete a single event
+        Delete single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          204:
+            description: The RSVP data
         """
         abort_if_event_doesnt_exist(event_id)
         del EVENTS[event_id]
-        return '', 204
+        return 'Event deleted', 204
 
     def put(self, event_id):
         """
-        Edit a single event
+        Update single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: event_id
+            type: string
+            required: true
+          - in: formData
+            name: title
+            type: string
+            required: true
+          - in: formData
+            name: location
+            type: string
+            required: true
+          - in: formData
+            name: date
+            type: string
+            required: true
+          - in: formData
+            name: time
+            type: string
+            required: true
+          - in: formData
+            name: description
+            type: string
+            required: true
+        responses:
+          201:
+            description: The Event has been updated
         """
         args = self.reqparse.parse_args()
         EVENTS[event_id] = {
@@ -145,13 +147,46 @@ class EventList(Resource):
 
     def get(self):
         """
-        List all Events
+        Gets Events
+        ---
+        tags:
+          - restful
+        responses:
+          200:
+            description: The event data
         """
         return EVENTS
 
     def post(self):
         """
-        Creates a new Event.
+        Creates a new event
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: title
+            type: string
+            required: true
+          - in: formData
+            name: location
+            type: string
+            required: true
+          - in: formData
+            name: date
+            type: string
+            required: true
+          - in: formData
+            name: time
+            type: string
+            required: true
+          - in: formData
+            name: description
+            type: string
+            required: true
+        responses:
+          201:
+            description: The Event has been created
         """
         args = self.reqparse.parse_args()
         event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
@@ -169,9 +204,8 @@ class EventList(Resource):
 
 # User registration
 class User(Resource):
-    """
-    User Registration and login.
-    """
+    # @swag_from('colors.yml', methods=['POST','GET'])
+
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
@@ -181,13 +215,47 @@ class User(Resource):
 
     def get(self):
         """
-        List all Users
+        Gets Users
+        ---
+        tags:
+          - restful
+        responses:
+          200:
+            description: The task data
         """
         return USERS
 
+    # swag_from('colors.yml')
     def post(self):
         """
-        User Registration.
+        Registers a new user
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: name
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: email
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: password
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+        responses:
+          201:
+            description: The task has been created
+            schema:
+              $ref: '#/definitions/Task'
         """
         args = self.reqparse.parse_args()
         user_id = int(max(USERS.keys()).lstrip('user')) + 1
@@ -204,12 +272,37 @@ class UserLogin(Resource):
     """
     Check if user exists then login
     """
-    def get(self, user_id):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('email', type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        super(UserLogin, self).__init__()
+
+    def post(self):
         """
-        Retrieve Event
+        User Login
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: email
+            type: string
+            required: true
+          - in: formData
+            name: password
+            type: string
+            required: true
+        responses:
+          200:
+            description: User has logged in
         """
-        abort_if_user_doesnt_exist(user_id)
-        return USERS[user_id]
+        args = self.reqparse.parse_args()
+        USERS = {
+            'email': args['email'],
+            'password': args['password']
+        }
+        return USERS, 200
 
 # User reset password
 class PasswordRest(Resource):
@@ -224,15 +317,27 @@ class PasswordRest(Resource):
 
     def put(self):
         """
-        User Registration.
+        Paasword Reset
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: password
+            required: true
+            description: The ID of the task, try 42!
+            type: string
+        responses:
+          201:
+            description: The task has been updated
         """
         args = self.reqparse.parse_args()
         user_id = int(max(USERS.keys()).lstrip('user')) + 1
         user_id = 'user%i' % user_id
         USERS[user_id] = {
-            'email': args.get('email', ""),
+            'email': args.get('email', "tonny.nesh@gmail.com"),
             'password': args['password'],
-            'name': args.get('name', ""),
+            'name': args.get('name', "Antony Ng'ang'a"),
         }
         return USERS[user_id], 201
 
@@ -244,7 +349,19 @@ class RSVP(Resource):
     """
     def get(self, event_id):
         """
-        Retrieve rsvp
+        Retrieve event RSVP
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
         """
         abort_if_event_doesnt_exist(event_id)
         event = EVENTS[event_id]
@@ -258,7 +375,7 @@ api.add_resource(Event, '/api/events/<event_id>')
 
 # users url
 api.add_resource(User, '/api/auth/register')
-api.add_resource(UserLogin, '/api/auth/login/<user_id>')
+api.add_resource(UserLogin, '/api/auth/login')
 
 # RSVP url
 api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
