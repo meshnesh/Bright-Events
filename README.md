@@ -62,4 +62,4 @@ Open: [http://127.0.0.1:5000/api/events](http://127.0.0.1:5000/api/events)
 
 # Heroku App
 View the application on heroku:
-Open: [Bright Events](https://bright-events.herokuapp.com)
+Open: [Bright Events](https://bright-events.herokuapp.com/api/events)
