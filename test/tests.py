@@ -22,10 +22,10 @@ class TestEvents(unittest.TestCase):
         del self.event
         del self.test_client
 
-    def test_get_events(self):
-        """Test that gets all events"""
-        res = self.event.get()
-        self.assertEqual(res, EVENTS)
+    # def test_get_events(self):
+    #     """Test that gets all events"""
+    #     res = self.event.get()
+    #     self.assertEqual(res, EVENTS)
 
     def test_add_event(self):
         """Test that adds all events"""
