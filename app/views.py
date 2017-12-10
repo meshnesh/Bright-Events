@@ -116,11 +116,11 @@ class Event(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('title', type=str, required=True,
+        self.reqparse.add_argument('title', type=str,
                                    help='No task title provided')
         self.reqparse.add_argument('location', type=str,)
-        self.reqparse.add_argument('time', type=str, required=True)
-        self.reqparse.add_argument('date', type=str, required=True)
+        self.reqparse.add_argument('time', type=str)
+        self.reqparse.add_argument('date', type=str)
         self.reqparse.add_argument('description', type=str,)
         super(Event, self).__init__()
 
