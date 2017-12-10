@@ -167,52 +167,52 @@ class EventList(Resource):
           200:
             description: The event data
         """
-        return {'EVENTS': [marshal(event, event_fields) for event in EVENTS]}
+        return {'EVENTS': [marshal(event, event_fields) for event in EVENTS]}, 200
 
-    # def post(self):
-    #     """
-    #     Creates a new event
-    #     ---
-    #     tags:
-    #       - restful
-    #     parameters:
-    #       - in: formData
-    #         name: title
-    #         type: string
-    #         required: true
-    #       - in: formData
-    #         name: location
-    #         type: string
-    #         required: true
-    #       - in: formData
-    #         name: date
-    #         type: string
-    #         required: true
-    #       - in: formData
-    #         name: time
-    #         type: string
-    #         required: true
-    #       - in: formData
-    #         name: description
-    #         type: string
-    #         required: true
-    #     responses:
-    #       201:
-    #         description: The Event has been created
-    #     """
-    #     args = self.reqparse.parse_args()
-    #     event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
-    #     event_id = 'event%i' % event_id
-    #     EVENTS[event_id] = {
-    #         'title': args['title'],
-    #         'location': args['location'],
-    #         'time': args['time'],
-    #         'date': args['date'],
-    #         'description': args['description'],
-    #         'done': False,
-    #         'rsvp': []
-    #     }
-    #     return EVENTS[event_id], 201
+    def post(self):
+        """
+        Creates a new event
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: title
+            type: string
+            required: true
+          - in: formData
+            name: location
+            type: string
+            required: true
+          - in: formData
+            name: date
+            type: string
+            required: true
+          - in: formData
+            name: time
+            type: string
+            required: true
+          - in: formData
+            name: description
+            type: string
+            required: true
+        responses:
+          201:
+            description: The Event has been created
+        """
+        args = self.reqparse.parse_args()
+        event = {
+            'id': EVENTS[-1]['id'] + 1,
+            'title': args['title'],
+            'location': args['location'],
+            'time': args['time'],
+            'date': args['date'],
+            'description': args['description'],
+            'done': False,
+            'rsvp': []
+        }
+        EVENTS.append(event)
+        return {'EVENTS': marshal(event, event_fields)}, 201
 
 # User registration
 # class User(Resource):
