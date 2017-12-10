@@ -38,110 +38,6 @@ event_fields = {
     'uri': fields.Url('event')
 }
 
-# class Event(Resource):
-#     """
-#     Handle Event crud operation.
-#     """
-#     def __init__(self):
-#         self.reqparse = reqparse.RequestParser()
-#         self.reqparse.add_argument('title', type=str, required=True,
-#                                    help='No task title provided')
-#         self.reqparse.add_argument('location', type=str,)
-#         self.reqparse.add_argument('time', type=str, required=True)
-#         self.reqparse.add_argument('date', type=str, required=True)
-#         self.reqparse.add_argument('description', type=str,)
-#         super(Event, self).__init__()
-
-#     def get(self, event_id):
-#         """
-#         Retrieve single event data
-#         ---
-#         tags:
-#           - restful
-#         parameters:
-#           - in: path
-#             name: Event_id
-#             required: true
-#             description: The ID of the Event, try event1!
-#             type: string
-#         responses:
-#           200:
-#             description: The RSVP data
-#         """
-#         # abort_if_event_doesnt_exist(event_id)
-#         return EVENTS[event_id]
-      
-
-#     def delete(self, event_id):
-#         """
-#         Delete single event data
-#         ---
-#         tags:
-#           - restful
-#         parameters:
-#           - in: path
-#             name: Event_id
-#             required: true
-#             description: The ID of the Event, try event1!
-#             type: string
-#         responses:
-#           204:
-#             description: The RSVP data
-#         """
-#         # abort_if_event_doesnt_exist(event_id)
-#         del EVENTS[event_id]
-#         return 'Event deleted', 204
-
-#     def put(self, event_id):
-#         """
-#         Update single event data
-#         ---
-#         tags:
-#           - restful
-#         parameters:
-#           - in: formData
-#             name: event_id
-#             type: string
-#             required: true
-#           - in: formData
-#             name: title
-#             type: string
-#             required: true
-#           - in: formData
-#             name: location
-#             type: string
-#             required: true
-#           - in: formData
-#             name: date
-#             type: string
-#             required: true
-#           - in: formData
-#             name: time
-#             type: string
-#             required: true
-#           - in: formData
-#             name: description
-#             type: string
-#             required: true
-#         responses:
-#           201:
-#             description: The Event has been updated
-#         """
-#         args = self.reqparse.parse_args()
-#         EVENTS[event_id] = {
-#             'title': args['title'],
-#             'location': args['location'],
-#             'time': args.get('time',""),
-#             'date': args['date'],
-#             'description': args['description'],
-#             'done': False,
-#             'rsvp': []
-#         }
-#         return EVENTS[event_id], 201
-
-# Eventlist
-# shows a list of all events, and lets you POST to add new tasks
-
 class EventList(Resource):
     """
     Creates a Eventlist object.
@@ -167,7 +63,7 @@ class EventList(Resource):
           200:
             description: The event data
         """
-        return {'EVENTS': [marshal(event, event_fields) for event in EVENTS]}, 200
+        return {'event': [marshal(event, event_fields) for event in EVENTS]}, 200
 
     def post(self):
         """
@@ -212,7 +108,114 @@ class EventList(Resource):
             'rsvp': []
         }
         EVENTS.append(event)
-        return {'EVENTS': marshal(event, event_fields)}, 201
+        return {'event': marshal(event, event_fields)}, 201
+
+class Event(Resource):
+    """
+    Handle Event crud operation.
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('title', type=str, required=True,
+                                   help='No task title provided')
+        self.reqparse.add_argument('location', type=str,)
+        self.reqparse.add_argument('time', type=str, required=True)
+        self.reqparse.add_argument('date', type=str, required=True)
+        self.reqparse.add_argument('description', type=str,)
+        super(Event, self).__init__()
+
+    def get(self, id):
+        """
+        Retrieve single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
+        """
+        event = [event for event in EVENTS if event['id'] == id]
+        if len(event) == 0:
+            abort(404)
+        return {'events': marshal(event[0], event_fields)}, 200
+
+    def put(self, id):
+        """
+        Update single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: event_id
+            type: string
+            required: true
+          - in: formData
+            name: title
+            type: string
+            required: true
+          - in: formData
+            name: location
+            type: string
+            required: true
+          - in: formData
+            name: date
+            type: string
+            required: true
+          - in: formData
+            name: time
+            type: string
+            required: true
+          - in: formData
+            name: description
+            type: string
+            required: true
+        responses:
+          201:
+            description: The Event has been updated
+        """
+        event = [event for event in EVENTS if event['id'] == id]
+        if len(event) == 0:
+            abort(404)
+        event = event[0]
+        args = self.reqparse.parse_args()
+        for k, v in args.items():
+            if v is not None:
+                event[k] = v
+        return {'events': marshal(event, event_fields)}, 201
+
+    def delete(self, id):
+        """
+        Delete single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          204:
+            description: The RSVP data
+        """
+        # abort_if_event_doesnt_exist(event_id)
+        del EVENTS[event_id]
+        return 'Event deleted', 204
+
+    
+
+# End of Eventlist
+# shows a list of all events, and lets you POST to add new tasks
+
+
 
 # User registration
 # class User(Resource):
@@ -383,7 +386,7 @@ class EventList(Resource):
 
 # events url
 api.add_resource(EventList, '/api/events', endpoint='event')
-# api.add_resource(Event, '/api/events/<event_id>')
+api.add_resource(Event, '/api/events/<int:id>', endpoint='events')
 
 # users url
 # api.add_resource(User, '/api/auth/register')

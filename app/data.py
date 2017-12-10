@@ -39,7 +39,7 @@ EVENTS = [
         ]
     },
     {
-        'id':4,
+        'id':3,
         'title': u'Tattoo Fest',
         'imageUrl': u'http://ww1.prweb.com/prfiles/2017/09/29/14755349/Ray-Price-Capital-City-Bikefest_TattooFest_7574.jpg',
         'location':u'Nairobi, Kenya',
