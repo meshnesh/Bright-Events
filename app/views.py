@@ -206,9 +206,11 @@ class Event(Resource):
           204:
             description: The RSVP data
         """
-        # abort_if_event_doesnt_exist(event_id)
-        del EVENTS[event_id]
-        return 'Event deleted', 204
+        event = [event for event in EVENTS if event['id'] == id]
+        if len(event) == 0:
+            abort(404)
+        EVENTS.remove(event[0])
+        return {'result': True}, 204
 
     
 
