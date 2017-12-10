@@ -132,9 +132,9 @@ class Event(Resource):
           - restful
         parameters:
           - in: path
-            name: Event_id
+            name: id
             required: true
-            description: The ID of the Event, try event1!
+            description: The ID of the Event, try 1!
             type: string
         responses:
           200:
@@ -152,30 +152,26 @@ class Event(Resource):
         tags:
           - restful
         parameters:
-          - in: formData
-            name: event_id
+          - in: path
+            name: id
             type: string
             required: true
+            description: The ID of the Event must be an interger, try 1!
           - in: formData
             name: title
             type: string
-            required: true
           - in: formData
             name: location
             type: string
-            required: true
           - in: formData
             name: date
             type: string
-            required: true
           - in: formData
             name: time
             type: string
-            required: true
           - in: formData
             name: description
             type: string
-            required: true
         responses:
           201:
             description: The Event has been updated
@@ -198,9 +194,9 @@ class Event(Resource):
           - restful
         parameters:
           - in: path
-            name: Event_id
+            name: id
             required: true
-            description: The ID of the Event, try event1!
+            description: The ID of the Event, try 1!
             type: string
         responses:
           204:
@@ -210,7 +206,7 @@ class Event(Resource):
         if len(event) == 0:
             abort(404)
         EVENTS.remove(event[0])
-        return {'result': True}, 204
+        return {'result': True}
 
     
 
