@@ -38,6 +38,12 @@ event_fields = {
     'uri': fields.Url('event')
 }
 
+user_fields = {
+    'email': fields.String,
+    'name': fields.String,
+    'password': fields.String
+}
+
 class EventList(Resource):
     """
     Creates a Eventlist object.
@@ -216,69 +222,69 @@ class Event(Resource):
 
 
 # User registration
-# class User(Resource):
-#     # @swag_from('colors.yml', methods=['POST','GET'])
+class User(Resource):
+    # @swag_from('colors.yml', methods=['POST','GET'])
 
-#     def __init__(self):
-#         self.reqparse = reqparse.RequestParser()
-#         self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
-#         self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
-#         self.reqparse.add_argument('name', type=str, required=True, help='Name is Required!')
-#         super(User, self).__init__()
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('name', type=str, required=True, help='Name is Required!')
+        super(User, self).__init__()
 
-#     def get(self):
-#         """
-#         Gets Users
-#         ---
-#         tags:
-#           - restful
-#         responses:
-#           200:
-#             description: The task data
-#         """
-#         return USERS
+    def get(self):
+        """
+        Gets Users
+        ---
+        tags:
+          - restful
+        responses:
+          200:
+            description: The task data
+        """
+        return USERS
 
-#     # swag_from('colors.yml')
-#     def post(self):
-#         """
-#         Registers a new user
-#         ---
-#         tags:
-#           - restful
-#         parameters:
-#           - in: formData
-#             name: name
-#             type: string
-#             required: true
-#             schema:
-#               $ref: '#/definitions/Task'
-#           - in: formData
-#             name: email
-#             type: string
-#             required: true
-#             schema:
-#               $ref: '#/definitions/Task'
-#           - in: formData
-#             name: password
-#             type: string
-#             required: true
-#             schema:
-#               $ref: '#/definitions/Task'
-#         responses:
-#           201:
-#             description: The task has been created
-#             schema:
-#               $ref: '#/definitions/Task'
-#         """
-#         args = self.reqparse.parse_args()
-#         user_id = int(max(USERS.keys()).lstrip('user')) + 1
-#         user_id = 'user%i' % user_id
-#         USERS[user_id] = {
-#             'email': args['email'],
-#             'password': args['password'],
-#             'name': args['name'],
-#         }
-#         return USERS[user_id], 201
+    # swag_from('colors.yml')
+    def post(self):
+        """
+        Registers a new user
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: name
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: email
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+          - in: formData
+            name: password
+            type: string
+            required: true
+            schema:
+              $ref: '#/definitions/Task'
+        responses:
+          201:
+            description: The task has been created
+            schema:
+              $ref: '#/definitions/Task'
+        """
+        args = self.reqparse.parse_args()
+        user = {
+            'id': USERS[-1]['id'] + 1,
+            'name': args['name'],
+            'email': args['email'],
+            'password': args['password']
+        }
+        USERS.append(user)
+        return {'user': marshal(user, user_fields)}, 201
 
 # User login
 # class UserLogin(Resource):
@@ -387,7 +393,7 @@ api.add_resource(EventList, '/api/events', endpoint='event')
 api.add_resource(Event, '/api/events/<int:id>', endpoint='events')
 
 # users url
-# api.add_resource(User, '/api/auth/register')
+api.add_resource(User, '/api/auth/register', endpoint='user')
 # api.add_resource(UserLogin, '/api/auth/login')
 
 # RSVP url
