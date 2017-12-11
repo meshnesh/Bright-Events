@@ -49,6 +49,11 @@ user_login_fields = {
     'password': fields.String
 }
 
+rsvp_fields = {
+    'name': fields.String,
+    'email': fields.String
+}
+
 class EventList(Resource):
     """
     Creates a Eventlist object.
@@ -292,10 +297,10 @@ class UserLogin(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', 
-                                    type=str, required=True, help='Email is required!')
-        self.reqparse.add_argument('password', 
-                                    type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('email',
+                                   type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password',
+                                   type=str, required=True, help='Password is required!')
         super(UserLogin, self).__init__()
 
     def post(self):
@@ -387,30 +392,73 @@ class PasswordRest(Resource):
 
 
 # RSVP
-# class RSVP(Resource):
-#     """
-#     Lists all RSVP per event
-#     """
-#     def get(self, event_id):
-#         """
-#         Retrieve event RSVP
-#         ---
-#         tags:
-#           - restful
-#         parameters:
-#           - in: path
-#             name: Event_id
-#             required: true
-#             description: The ID of the Event, try event1!
-#             type: string
-#         responses:
-#           200:
-#             description: The RSVP data
-#         """
-#         abort_if_event_doesnt_exist(event_id)
-#         event = EVENTS[event_id]
-#         rsvpList = event['rsvp']
-#         return rsvpList
+class RSVP(Resource):
+    """
+    Lists all RSVP per event
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('name', type=str, required=True,
+                                   help='Name is required')
+        self.reqparse.add_argument('email', type=str, required=True,
+                                   help='Name is required')
+        super(RSVP, self).__init__()
+
+
+    def get(self, id):
+        """
+        Retrieve event RSVP
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: Event_id
+            required: true
+            description: The ID of the Event, try event1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
+        """
+        event = [event for event in EVENTS if event['id'] == id]
+        if len(event) == 0:
+            abort(404)
+        rsvpList = event[0]['rsvp']
+        # print(event[0]['rsvp'])
+        return {'rsvp': marshal(rsvpList, rsvp_fields)}, 200
+
+    def post(self, id):
+          """
+          Retrieve event RSVP
+          ---
+          tags:
+            - restful
+          parameters:
+            - in: path
+              name: Event_id
+              required: true
+              description: The ID of the Event, try event1!
+              type: string
+          responses:
+            200:
+              description: The RSVP data
+          """
+
+          event = [event for event in EVENTS if event['id'] == id]
+          if len(event) == 0:
+              abort(404)
+          rsvpList = event[0]['rsvp']
+
+          args = self.reqparse.parse_args()
+          rsvp = {
+              'user_id': rsvpList[-1]['user_id'] + 1,
+              'name': args['name'],
+              'email': args['email']
+          }
+          rsvpList.append(rsvp)
+          return {'rsvp': marshal(rsvpList, rsvp_fields)}, 201
+
 
 
 # events url
@@ -422,7 +470,7 @@ api.add_resource(User, '/api/auth/register', endpoint='user')
 api.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
 # RSVP url
-# api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
+api.add_resource(RSVP, '/api/events/<int:id>/rsvp', endpoint='rsvp')
 
 # Reset Password
 api.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
