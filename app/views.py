@@ -254,25 +254,17 @@ class User(Resource):
             name: name
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: email
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: password
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
         responses:
           201:
             description: The task has been created
-            schema:
-              $ref: '#/definitions/Task'
         """
         args = self.reqparse.parse_args()
         user = {
@@ -285,41 +277,41 @@ class User(Resource):
         return {'user': marshal(user, user_fields)}, 201
 
 # User login
-# class UserLogin(Resource):
-#     """
-#     Check if user exists then login
-#     """
-#     def __init__(self):
-#         self.reqparse = reqparse.RequestParser()
-#         self.reqparse.add_argument('email', type=str, required=True, help='Email is required!')
-#         self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
-#         super(UserLogin, self).__init__()
+class UserLogin(Resource):
+    """
+    Check if user exists then login
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('email', type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        super(UserLogin, self).__init__()
 
-#     def post(self):
-#         """
-#         User Login
-#         ---
-#         tags:
-#           - restful
-#         parameters:
-#           - in: formData
-#             name: email
-#             type: string
-#             required: true
-#           - in: formData
-#             name: password
-#             type: string
-#             required: true
-#         responses:
-#           200:
-#             description: User has logged in
-#         """
-#         args = self.reqparse.parse_args()
-#         USERS = {
-#             'email': args['email'],
-#             'password': args['password']
-#         }
-#         return USERS, 200
+    def post(self):
+        """
+        User Login
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: email
+            type: string
+            required: true
+          - in: formData
+            name: password
+            type: string
+            required: true
+        responses:
+          200:
+            description: User has logged in
+        """
+        args = self.reqparse.parse_args()
+        USERS = {
+            'email': args['email'],
+            'password': args['password']
+        }
+        return USERS, 200
 
 # User reset password
 # class PasswordRest(Resource):
