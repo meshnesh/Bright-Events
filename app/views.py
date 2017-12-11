@@ -214,8 +214,6 @@ class Event(Resource):
         EVENTS.remove(event[0])
         return {'result': True}
 
-    
-
 # End of Eventlist
 # shows a list of all events, and lets you POST to add new tasks
 
@@ -242,7 +240,7 @@ class User(Resource):
           200:
             description: The task data
         """
-        return USERS
+        return {'user': [marshal(user, user_fields) for user in USERS]}, 200
 
     # swag_from('colors.yml')
     def post(self):
