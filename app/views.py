@@ -398,12 +398,11 @@ class RSVP(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('name', type=str, required=True,
+        self.reqparse.add_argument('name', type=str,
                                    help='Name is required')
-        self.reqparse.add_argument('email', type=str, required=True,
+        self.reqparse.add_argument('email', type=str,
                                    help='Name is required')
         super(RSVP, self).__init__()
-
 
     def get(self, id):
         """
@@ -413,7 +412,7 @@ class RSVP(Resource):
           - restful
         parameters:
           - in: path
-            name: Event_id
+            name: id
             required: true
             description: The ID of the Event, try event1!
             type: string
@@ -436,30 +435,35 @@ class RSVP(Resource):
             - restful
           parameters:
             - in: path
-              name: Event_id
+              name: id
               required: true
-              description: The ID of the Event, try event1!
+              description: The ID of the Event, try 1!
+              type: string
+            - in: formData
+              name: name
+              required: true
+              description: The name of the user!
+              type: string
+            - in: formData
+              name: email
+              description: The email of the user!
               type: string
           responses:
             200:
               description: The RSVP data
           """
-
           event = [event for event in EVENTS if event['id'] == id]
           if len(event) == 0:
-              abort(404)
+                abort(404)
           rsvpList = event[0]['rsvp']
-
           args = self.reqparse.parse_args()
           rsvp = {
-              'user_id': rsvpList[-1]['user_id'] + 1,
-              'name': args['name'],
-              'email': args['email']
+            'user_id': rsvpList[-1]['user_id'] + 1,
+            'name': args['name'],
+            'email': args['email']
           }
           rsvpList.append(rsvp)
           return {'rsvp': marshal(rsvpList, rsvp_fields)}, 201
-
-
 
 # events url
 api.add_resource(EventList, '/api/events', endpoint='event')
@@ -469,8 +473,8 @@ api.add_resource(Event, '/api/events/<int:id>', endpoint='events')
 api.add_resource(User, '/api/auth/register', endpoint='user')
 api.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
-# RSVP url
-api.add_resource(RSVP, '/api/events/<int:id>/rsvp', endpoint='rsvp')
-
 # Reset Password
 api.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
+
+# RSVP url
+api.add_resource(RSVP, '/api/events/<int:id>/rsvp', endpoint='rsvp')
