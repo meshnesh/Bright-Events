@@ -44,6 +44,11 @@ user_fields = {
     'password': fields.String
 }
 
+user_login_fields = {
+    'email': fields.String,
+    'password': fields.String
+}
+
 class EventList(Resource):
     """
     Creates a Eventlist object.
@@ -306,12 +311,16 @@ class UserLogin(Resource):
           200:
             description: User has logged in
         """
+        user = [user for user in USERS]
         args = self.reqparse.parse_args()
-        USERS = {
+        users = {
             'email': args['email'],
             'password': args['password']
         }
-        return USERS, 200
+        if users['email'] != user[0]['email'] or users['password'] != user[0]['password']:
+            return 'Wrong email and password', 404
+        else:
+            return {'users': marshal(users, user_login_fields)}, 200
 
 # User reset password
 # class PasswordRest(Resource):
@@ -384,7 +393,7 @@ api.add_resource(Event, '/api/events/<int:id>', endpoint='events')
 
 # users url
 api.add_resource(User, '/api/auth/register', endpoint='user')
-# api.add_resource(UserLogin, '/api/auth/login')
+api.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
 # RSVP url
 # api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
