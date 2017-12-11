@@ -1,9 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
-from flask import abort,request
+from flask import abort
 from flask_restful import reqparse, Api, Resource, fields, marshal
-from flasgger import Swagger, swag_from
+from flasgger import Swagger
 from app import app
 
 
@@ -226,13 +226,18 @@ class Event(Resource):
 
 # User registration
 class User(Resource):
-    # @swag_from('colors.yml', methods=['POST','GET'])
+    """
+    Handle User Registration.
+    """
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
-        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
-        self.reqparse.add_argument('name', type=str, required=True, help='Name is Required!')
+        self.reqparse.add_argument('email',
+                                   type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('password',
+                                   type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('name',
+                                   type=str, required=True, help='Name is Required!')
         super(User, self).__init__()
 
     def get(self):
@@ -247,7 +252,6 @@ class User(Resource):
         """
         return {'user': [marshal(user, user_fields) for user in USERS]}, 200
 
-    # swag_from('colors.yml')
     def post(self):
         """
         Registers a new user
@@ -288,8 +292,10 @@ class UserLogin(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', type=str, required=True, help='Email is required!')
-        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('email', 
+                                    type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password', 
+                                    type=str, required=True, help='Password is required!')
         super(UserLogin, self).__init__()
 
     def post(self):
@@ -303,10 +309,12 @@ class UserLogin(Resource):
             name: email
             type: string
             required: true
+            description: The email of the user, try john.D@gmail.com!
           - in: formData
             name: password
             type: string
             required: true
+            description: The password of the user, try qwerty1234!
         responses:
           200:
             description: User has logged in
@@ -323,41 +331,59 @@ class UserLogin(Resource):
             return {'users': marshal(users, user_login_fields)}, 200
 
 # User reset password
-# class PasswordRest(Resource):
-#     """
-#     Check if user exists then login
-#     """
-#     def __init__(self):
-#         self.reqparse = reqparse.RequestParser()
-#         self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
-#         super(PasswordRest, self).__init__()
+class PasswordRest(Resource):
+    """
+    Check if user exists then login
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('email',
+                                   type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password',
+                                   type=str, required=True, help='Password is required!')
+        super(PasswordRest, self).__init__()
 
 
-    # def put(self):
-    #     """
-    #     Paasword Reset
-    #     ---
-    #     tags:
-    #       - restful
-    #     parameters:
-    #       - in: formData
-    #         name: password
-    #         required: true
-    #         description: The ID of the task, try 42!
-    #         type: string
-    #     responses:
-    #       201:
-    #         description: The task has been updated
-    #     """
-    #     args = self.reqparse.parse_args()
-    #     user_id = int(max(USERS.keys()).lstrip('user')) + 1
-    #     user_id = 'user%i' % user_id
-    #     USERS[user_id] = {
-    #         'email': args.get('email', "tonny.nesh@gmail.com"),
-    #         'password': args['password'],
-    #         'name': args.get('name', "Antony Ng'ang'a"),
-    #     }
-    #     return USERS[user_id], 201
+    def post(self):
+        """
+        Paasword Reset
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: formData
+            name: email
+            type: string
+            required: true
+            description: Enter the current email of the user, try john.D@gmail.com!
+          - in: formData
+            name: password
+            type: string
+            description: Enter the new password of the user!
+        responses:
+          201:
+            description: The Password has been rest
+        """
+        user = [user for user in USERS]
+        args = self.reqparse.parse_args()
+        users = {
+            'email': args['email'],
+            'password': args['password']
+        }
+        if users['email'] != user[0]['email']:
+            return 'Wrong email or Email doesn\'t exist', 404
+        else:
+            return {'reset': marshal(users, user_login_fields)}, 201
+
+        # args = self.reqparse.parse_args()
+        # user_id = int(max(USERS.keys()).lstrip('user')) + 1
+        # user_id = 'user%i' % user_id
+        # USERS[user_id] = {
+        #     'email': args.get('email', "tonny.nesh@gmail.com"),
+        #     'password': args['password'],
+        #     'name': args.get('name', "Antony Ng'ang'a"),
+        # }
+        # return USERS[user_id], 201
 
 
 # RSVP
@@ -399,4 +425,4 @@ api.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 # api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
 
 # Reset Password
-# api.add_resource(PasswordRest, '/api/auth/reset-password')
+api.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
