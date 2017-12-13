@@ -35,7 +35,7 @@ event_fields = {
     'date': fields.String,
     'description': fields.String,
     'done': fields.Boolean,
-    'uri': fields.Url('event')
+    # 'uri': fields.Url('event')
 }
 
 user_fields = {
@@ -222,7 +222,7 @@ class Event(Resource):
         if len(event) == 0:
             abort(404)
         EVENTS.remove(event[0])
-        return {'result': True}
+        return {'result': True}, 204
 
 # End of Eventlist
 # shows a list of all events, and lets you POST to add new tasks
@@ -456,6 +456,7 @@ class RSVP(Resource):
           if len(event) == 0:
                 abort(404)
           rsvpList = event[0]['rsvp']
+          print(rsvpList)
           args = self.reqparse.parse_args()
           rsvp = {
             'user_id': rsvpList[-1]['user_id'] + 1,

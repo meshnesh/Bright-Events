@@ -2,7 +2,30 @@
 import unittest, requests
 from flask import json
 from app import app
-from app.views import EVENTS, Event, EventList, User, UserLogin, PasswordRest, RSVP, abort_if_event_doesnt_exist
+from app.views import EVENTS, Event, EventList, User, UserLogin, PasswordRest, RSVP
+
+# class TestRSVP(unittest.TestCase):
+#     """Test event rsvp"""
+#     def setUp(self):
+#         self.app = app
+#         self.rsvp = RSVP()
+#         self.test_client = self.app.test_client
+#         self.testRsvp = {
+#             'name': u'John Doe',
+#             'email': u'john.D@gmail.com'
+#         }
+
+#     def tearDown(self):
+#         del self.rsvp
+#         del self.test_client
+#         del self.testRsvp
+
+#     def test_event_rsvp(self):
+#         """Test user event rsvp"""
+#         res = self.test_client().post('/api/events/2/rsvp', data=self.testRsvp)
+#         # self.assertEqual(res.status_code, 200)
+#         # res = self.test_client().get('/api/events')
+#         self.assertEqual(res.status_code, 201)
 
 class TestEvents(unittest.TestCase):
     """Test event crud functions"""
@@ -21,11 +44,12 @@ class TestEvents(unittest.TestCase):
     def tearDown(self):
         del self.event
         del self.test_client
+        del self.eventCreate
 
-    # def test_get_events(self):
-    #     """Test that gets all events"""
-    #     res = self.event.get()
-    #     self.assertEqual(res, EVENTS)
+    def test_get_events(self):
+        """Test that gets all events"""
+        res = self.test_client().get('/api/events')
+        self.assertEqual(res.status_code, 200)
 
     def test_add_event(self):
         """Test that adds all events"""
@@ -34,17 +58,17 @@ class TestEvents(unittest.TestCase):
 
     def test_get_single_event(self):
         """Test that gets single event"""
-        resp = self.test_client().get('/api/events/event1')
+        resp = self.test_client().get('/api/events/1')
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_event(self):
         """Test that event gets delete"""
-        resp = self.test_client().delete('/api/events/event2')
+        resp = self.test_client().delete('/api/events/2')
         self.assertEqual(resp.status_code, 204)
 
     def test_put_event(self):
         """Test that event get put"""
-        resp = self.test_client().put('/api/events/event1', data=self.eventCreate)
+        resp = self.test_client().put('/api/events/1', data=self.eventCreate)
         self.assertEqual(resp.status_code, 201)
 
 class TestUsers(unittest.TestCase):
@@ -55,13 +79,14 @@ class TestUsers(unittest.TestCase):
         self.test_client = self.app.test_client
         self.createUser = {
             'name': u'Mary Jane',
-            'email': u'jane.mary@yahoo.com',
-            'password': u'1234qwerty'
+            'email': u'john.D@gmail.com',
+            'password': u'qwerty1234'
         }
 
     def tearDown(self):
         del self.user
         del self.test_client
+        del self. createUser
 
     def test_user_registration(self):
         """Test user Registration"""
@@ -81,36 +106,19 @@ class TestResetPassword(unittest.TestCase):
         self.test_client = self.app.test_client
         self.resetPassword = {
             'name': u'Mary Jane',
-            'email': u'jane.mary@yahoo.com',
+            'email': u'john.D@gmail.com',
             'password': u'qwerty1234'
         }
 
     def tearDown(self):
         del self.passwordRest
         del self.test_client
+        del self.resetPassword
 
     def test_password_reset(self):
         """Test password rest"""
-        resp = self.test_client().put('/api/auth/reset-password', data=self.resetPassword)
+        resp = self.test_client().post('/api/auth/reset-password', data=self.resetPassword)
         self.assertEqual(resp.status_code, 201)
-
-
-class TestRSVP(unittest.TestCase):
-    """Test password reset"""
-    def setUp(self):
-        self.app = app
-        self.rsvp = RSVP()
-        self.test_client = self.app.test_client
-
-    def tearDown(self):
-        del self.rsvp
-        del self.test_client
-
-    def test_user_login(self):
-        """Test user login"""
-        resp = self.test_client().get('/api/events/event1/rsvp')
-        self.assertEqual(resp.status_code, 200)
-
 
 if __name__ == "__main__":
     unittest.main()
