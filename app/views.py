@@ -227,8 +227,6 @@ class Event(Resource):
 # End of Eventlist
 # shows a list of all events, and lets you POST to add new tasks
 
-
-
 # User registration
 class User(Resource):
     """
@@ -293,7 +291,6 @@ class User(Resource):
             return {'user': marshal(user, user_fields)}, 201
         else:
             return 'Email already exists. Try another Email adress', 404
-        
 
 # User login
 class UserLogin(Resource):

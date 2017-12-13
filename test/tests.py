@@ -78,6 +78,11 @@ class TestUsers(unittest.TestCase):
         self.user = User()
         self.test_client = self.app.test_client
         self.createUser = {
+            'name': u'Tonnie Nesh',
+            'email': u'tonnie.nesh@gmail.com',
+            'password': u'qwerty1'
+        }
+        self.checkUser = {
             'name': u'Mary Jane',
             'email': u'john.D@gmail.com',
             'password': u'qwerty1234'
@@ -87,15 +92,21 @@ class TestUsers(unittest.TestCase):
         del self.user
         del self.test_client
         del self. createUser
+        del self.checkUser
 
-    def test_user_registration(self):
+    def test_user_registration_email_exists(self):
+        """Test user Registration"""
+        resp = self.test_client().post('/api/auth/register', data=self.checkUser)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_registration_emailNot_exist(self):
         """Test user Registration"""
         resp = self.test_client().post('/api/auth/register', data=self.createUser)
         self.assertEqual(resp.status_code, 201)
 
     def test_user_login(self):
         """Test user login"""
-        resp = self.test_client().post('/api/auth/login', data=self.createUser)
+        resp = self.test_client().post('/api/auth/login', data=self.checkUser)
         self.assertEqual(resp.status_code, 200)
 
 class TestResetPassword(unittest.TestCase):
