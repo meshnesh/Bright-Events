@@ -280,6 +280,7 @@ class User(Resource):
           201:
             description: The task has been created
         """
+        userEmail = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
         user = {
             'id': USERS[-1]['id'] + 1,
@@ -287,8 +288,12 @@ class User(Resource):
             'email': args['email'],
             'password': args['password']
         }
-        USERS.append(user)
-        return {'user': marshal(user, user_fields)}, 201
+        if user['email'] not in userEmail:
+            USERS.append(user)
+            return {'user': marshal(user, user_fields)}, 201
+        else:
+            return 'Email already exists. Try another Email adress', 404
+        
 
 # User login
 class UserLogin(Resource):
@@ -324,14 +329,14 @@ class UserLogin(Resource):
           200:
             description: User has logged in
         """
-        user = [user for user in USERS]
+        userEmail = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
         users = {
             'email': args['email'],
             'password': args['password']
         }
-        if users['email'] != user[0]['email'] or users['password'] != user[0]['password']:
-            return 'Wrong email and password', 404
+        if users['email'] not in userEmail:
+            return 'Wrong email or email doesn\'t exist', 404
         else:
             return {'users': marshal(users, user_login_fields)}, 200
 
@@ -369,27 +374,16 @@ class PasswordRest(Resource):
           201:
             description: The Password has been rest
         """
-        user = [user for user in USERS]
+        userEmail = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
         users = {
             'email': args['email'],
             'password': args['password']
         }
-        if users['email'] != user[0]['email']:
+        if users['email'] not in userEmail:
             return 'Wrong email or Email doesn\'t exist', 404
         else:
             return {'reset': marshal(users, user_login_fields)}, 201
-
-        # args = self.reqparse.parse_args()
-        # user_id = int(max(USERS.keys()).lstrip('user')) + 1
-        # user_id = 'user%i' % user_id
-        # USERS[user_id] = {
-        #     'email': args.get('email', "tonny.nesh@gmail.com"),
-        #     'password': args['password'],
-        #     'name': args.get('name', "Antony Ng'ang'a"),
-        # }
-        # return USERS[user_id], 201
-
 
 # RSVP
 class RSVP(Resource):
