@@ -57,8 +57,8 @@ class EventList(Resource):
         super(EventList, self).__init__()
 
 
-    @classmethod
-    def get(cls):
+    @staticmethod
+    def get():
         """
         Gets Events
         ---
@@ -129,8 +129,8 @@ class Event(Resource):
         self.reqparse.add_argument('description', type=str,)
         super(Event, self).__init__()
 
-    @classmethod
-    def get(cls, id):
+    @staticmethod
+    def get(id):
         """
         Retrieve single event data
         ---
@@ -192,8 +192,8 @@ class Event(Resource):
                 event[k] = v
         return {'events': marshal(event, event_fields)}, 201
 
-    @classmethod
-    def delete(cls, id):
+    @staticmethod
+    def delete(id):
         """
         Delete single event data
         ---
@@ -234,7 +234,8 @@ class User(Resource):
                                    type=str, required=True, help='Name is Required!')
         super(User, self).__init__()
 
-    def get(self):
+    @staticmethod
+    def get():
         """
         Gets Users
         ---
