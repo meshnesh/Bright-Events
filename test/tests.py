@@ -1,7 +1,9 @@
-
+#!/bin/env python
+# -*- coding: utf-8 -*-
+"""import depancies."""
 import unittest
 from app import app
-from app.views import EventList, User, UserLogin, PasswordRest, RSVP
+from app.views import EventList, User, PasswordRest
 
 # class TestRSVP(unittest.TestCase):
 #     """Test event rsvp"""
