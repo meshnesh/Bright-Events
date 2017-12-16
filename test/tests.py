@@ -23,8 +23,6 @@ from app.views import EVENTS, Event, EventList, User, UserLogin, PasswordRest, R
 #     def test_event_rsvp(self):
 #         """Test user event rsvp"""
 #         res = self.test_client().post('/api/events/2/rsvp', data=self.testRsvp)
-#         # self.assertEqual(res.status_code, 200)
-#         # res = self.test_client().get('/api/events')
 #         self.assertEqual(res.status_code, 201)
 
 class TestEvents(unittest.TestCase):

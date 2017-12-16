@@ -5,28 +5,15 @@ from flask import abort
 from flask_restful import reqparse, Api, Resource, fields, marshal
 from flasgger import Swagger
 from app import app
+import re
 
 
 from app.data import EVENTS
 from app.user_data import USERS
 
+
 api = Api(app)
 swagger = Swagger(app)
-
-# def abort_if_event_doesnt_exist(event_id):
-#     """
-#     Handle Error when Event not found.
-#     """
-#     if event_id not in EVENTS:
-#         abort(404, message="Events {} doesn't exist".format(event_id))
-
-# def abort_if_user_doesnt_exist(user_id):
-#     """
-#     Handle Error when User not found.
-#     """
-#     if user_id not in USERS:
-#         abort(404, message="Invalid User {} doesn't exist".format(user_id))
-
 
 event_fields = {
     'title': fields.String,
@@ -53,6 +40,8 @@ rsvp_fields = {
     'name': fields.String,
     'email': fields.String
 }
+
+email_validator = re.compile(r'.+?@.+?\..+')
 
 class EventList(Resource):
     """
@@ -280,6 +269,26 @@ class User(Resource):
         """
         userEmail = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
+        email_match = re.match(email_validator, args['email'])
+        if not email_match:
+            return 'Wrong email format', 404
+        password = args['password']
+        if len(password) != 7:
+            return 'Password too short', 404
+        count = 1
+        prev = ''
+        for letter in password:
+            if letter == ' ':
+                return 'No spaces you fool', 404
+            elif prev == letter:
+                count += 1
+                if count == 2:
+                    return "Too many repetitions of {}".format(letter), 404
+            else:
+                prev = letter
+                count = 0
+        
+        
         user = {
             'id': USERS[-1]['id'] + 1,
             'name': args['name'],
@@ -326,16 +335,17 @@ class UserLogin(Resource):
           200:
             description: User has logged in
         """
-        userEmail = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
         users = {
             'email': args['email'],
             'password': args['password']
         }
-        if users['email'] not in userEmail:
-            return 'Wrong email or email doesn\'t exist', 404
-        else:
-            return {'users': marshal(users, user_login_fields)}, 200
+        for user in USERS:
+            if users['email'] == user['email']:
+                if user['password'] == users['password']:
+                    return {'users': marshal(users, user_login_fields)}, 200
+                return 'Wrong password', 405
+        return 'Wrong email or email doesn\'t exist', 404
 
 # User reset password
 class PasswordRest(Resource):
