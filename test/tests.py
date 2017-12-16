@@ -1,7 +1,7 @@
 
 import unittest
 from app import app
-from app.views import Event, EventList, User, UserLogin, PasswordRest, RSVP
+from app.views import EventList, User, UserLogin, PasswordRest, RSVP
 
 # class TestRSVP(unittest.TestCase):
 #     """Test event rsvp"""

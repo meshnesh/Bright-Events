@@ -57,7 +57,8 @@ class EventList(Resource):
         super(EventList, self).__init__()
 
 
-    def get(self):
+    @classmethod
+    def get(cls):
         """
         Gets Events
         ---
@@ -121,14 +122,15 @@ class Event(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str,
-                                   help='No task title provided')
+                                   help='No title title provided')
         self.reqparse.add_argument('location', type=str,)
         self.reqparse.add_argument('time', type=str)
         self.reqparse.add_argument('date', type=str)
         self.reqparse.add_argument('description', type=str,)
         super(Event, self).__init__()
 
-    def get(self, id):
+    @classmethod
+    def get(cls, id):
         """
         Retrieve single event data
         ---
@@ -190,7 +192,8 @@ class Event(Resource):
                 event[k] = v
         return {'events': marshal(event, event_fields)}, 201
 
-    def delete(self, id):
+    @classmethod
+    def delete(cls, id):
         """
         Delete single event data
         ---
@@ -403,7 +406,8 @@ class RSVP(Resource):
                                    help='Name is required')
         super(RSVP, self).__init__()
 
-    def get(self, id):
+    @classmethod
+    def get(cls, id):
         """
         Retrieve event RSVP
         ---
@@ -423,7 +427,6 @@ class RSVP(Resource):
         if len(event) == 0:
             abort(404)
         rsvpList = event[0]['rsvp']
-        # print(event[0]['rsvp'])
         return {'rsvp': marshal(rsvpList, rsvp_fields)}, 200
 
     def post(self, id):
