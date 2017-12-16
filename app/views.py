@@ -1,12 +1,11 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
+import re
 from flask import abort
 from flask_restful import reqparse, Api, Resource, fields, marshal
 from flasgger import Swagger
 from app import app
-import re
-
 
 from app.data import EVENTS
 from app.user_data import USERS
@@ -273,7 +272,7 @@ class User(Resource):
         if not email_match:
             return 'Wrong email format', 404
         password = args['password']
-        if len(password) != 7:
+        if len(password) < 5:
             return 'Password too short', 404
         count = 1
         prev = ''
@@ -287,8 +286,7 @@ class User(Resource):
             else:
                 prev = letter
                 count = 0
-        
-        
+
         user = {
             'id': USERS[-1]['id'] + 1,
             'name': args['name'],

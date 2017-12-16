@@ -1,8 +1,7 @@
 
-import unittest, requests
-from flask import json
+import unittest
 from app import app
-from app.views import EVENTS, Event, EventList, User, UserLogin, PasswordRest, RSVP
+from app.views import Event, EventList, User, UserLogin, PasswordRest, RSVP
 
 # class TestRSVP(unittest.TestCase):
 #     """Test event rsvp"""
