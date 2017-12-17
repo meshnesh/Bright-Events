@@ -11,10 +11,10 @@ from app.data import EVENTS
 from app.user_data import USERS
 
 
-api = Api(app)
-swagger = Swagger(app)
+API = Api(app)
+SWAGGER = Swagger(app)
 
-event_fields = {
+EVENT_FIELDS = {
     'title': fields.String,
     'location': fields.String,
     'time': fields.String,
@@ -24,23 +24,23 @@ event_fields = {
     # 'uri': fields.Url('event')
 }
 
-user_fields = {
+USER_FIELDS = {
     'email': fields.String,
     'name': fields.String,
     'password': fields.String
 }
 
-user_login_fields = {
+USER_LOGIN_FIELDS = {
     'email': fields.String,
     'password': fields.String
 }
 
-rsvp_fields = {
+RSVP_FIELDS = {
     'name': fields.String,
     'email': fields.String
 }
 
-email_validator = re.compile(r'.+?@.+?\..+')
+EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
 
 class EventList(Resource):
     """
@@ -68,7 +68,7 @@ class EventList(Resource):
           200:
             description: The event data
         """
-        return {'event': [marshal(event, event_fields) for event in EVENTS]}, 200
+        return {'event': [marshal(event, EVENT_FIELDS) for event in EVENTS]}, 200
 
     def post(self):
         """
@@ -113,7 +113,7 @@ class EventList(Resource):
             'rsvp': []
         }
         EVENTS.append(event)
-        return {'event': marshal(event, event_fields)}, 201
+        return {'event': marshal(event, EVENT_FIELDS)}, 201
 
 class Event(Resource):
     """
@@ -130,7 +130,7 @@ class Event(Resource):
         super(Event, self).__init__()
 
     @staticmethod
-    def get(id):
+    def get(eventid):
         """
         Retrieve single event data
         ---
@@ -146,12 +146,12 @@ class Event(Resource):
           200:
             description: The RSVP data
         """
-        event = [event for event in EVENTS if event['id'] == id]
+        event = [event for event in EVENTS if event['id'] == eventid]
         if len(event) == 0:
             abort(404)
-        return {'events': marshal(event[0], event_fields)}, 200
+        return {'events': marshal(event[0], EVENT_FIELDS)}, 200
 
-    def put(self, id):
+    def put(self, eventid):
         """
         Update single event data
         ---
@@ -182,7 +182,7 @@ class Event(Resource):
           201:
             description: The Event has been updated
         """
-        event = [event for event in EVENTS if event['id'] == id]
+        event = [event for event in EVENTS if event['id'] == eventid]
         if len(event) == 0:
             abort(404)
         event = event[0]
@@ -190,10 +190,10 @@ class Event(Resource):
         for k, v in args.items():
             if v is not None:
                 event[k] = v
-        return {'events': marshal(event, event_fields)}, 201
+        return {'events': marshal(event, EVENT_FIELDS)}, 201
 
     @staticmethod
-    def delete(id):
+    def delete(eventid):
         """
         Delete single event data
         ---
@@ -209,7 +209,7 @@ class Event(Resource):
           204:
             description: The RSVP data
         """
-        event = [event for event in EVENTS if event['id'] == id]
+        event = [event for event in EVENTS if event['id'] == eventid]
         if len(event) == 0:
             abort(404)
         EVENTS.remove(event[0])
@@ -245,7 +245,7 @@ class User(Resource):
           200:
             description: The task data
         """
-        return {'user': [marshal(user, user_fields) for user in USERS]}, 200
+        return {'user': [marshal(user, USER_FIELDS) for user in USERS]}, 200
 
     def post(self):
         """
@@ -270,9 +270,9 @@ class User(Resource):
           201:
             description: The task has been created
         """
-        userEmail = [user['email'] for user in USERS]
+        user_email = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
-        email_match = re.match(email_validator, args['email'])
+        email_match = re.match(EMAIL_VALIDATOR, args['email'])
         if not email_match:
             return 'Wrong email format', 404
         password = args['password']
@@ -297,9 +297,9 @@ class User(Resource):
             'email': args['email'],
             'password': args['password']
         }
-        if user['email'] not in userEmail:
+        if user['email'] not in user_email:
             USERS.append(user)
-            return {'user': marshal(user, user_fields)}, 201
+            return {'user': marshal(user, USER_FIELDS)}, 201
         else:
             return 'Email already exists. Try another Email adress', 404
 
@@ -345,7 +345,7 @@ class UserLogin(Resource):
         for user in USERS:
             if users['email'] == user['email']:
                 if user['password'] == users['password']:
-                    return {'users': marshal(users, user_login_fields)}, 200
+                    return {'users': marshal(users, USER_LOGIN_FIELDS)}, 200
                 return 'Wrong password', 405
         return 'Wrong email or email doesn\'t exist', 404
 
@@ -383,16 +383,16 @@ class PasswordRest(Resource):
           201:
             description: The Password has been rest
         """
-        userEmail = [user['email'] for user in USERS]
+        user_email = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
         users = {
             'email': args['email'],
             'password': args['password']
         }
-        if users['email'] not in userEmail:
+        if users['email'] not in user_email:
             return 'Wrong email or Email doesn\'t exist', 404
         else:
-            return {'reset': marshal(users, user_login_fields)}, 201
+            return {'reset': marshal(users, USER_LOGIN_FIELDS)}, 201
 
 # RSVP
 class RSVP(Resource):
@@ -407,8 +407,8 @@ class RSVP(Resource):
                                    help='Name is required')
         super(RSVP, self).__init__()
 
-    @classmethod
-    def get(cls, id):
+    @staticmethod
+    def get(eventid):
         """
         Retrieve event RSVP
         ---
@@ -424,13 +424,13 @@ class RSVP(Resource):
           200:
             description: The RSVP data
         """
-        event = [event for event in EVENTS if event['id'] == id]
+        event = [event for event in EVENTS if event['id'] == eventid]
         if len(event) == 0:
             abort(404)
-        rsvpList = event[0]['rsvp']
-        return {'rsvp': marshal(rsvpList, rsvp_fields)}, 200
+        rsvp_list = event[0]['rsvp']
+        return {'rsvp': marshal(rsvp_list, RSVP_FIELDS)}, 200
 
-    def post(self, id):
+    def post(self, eventid):
           """
           Retrieve event RSVP
           ---
@@ -455,30 +455,29 @@ class RSVP(Resource):
             200:
               description: The RSVP data
           """
-          event = [event for event in EVENTS if event['id'] == id]
+          event = [event for event in EVENTS if event['id'] == eventid]
           if len(event) == 0:
                 abort(404)
-          rsvpList = event[0]['rsvp']
-          print(rsvpList)
+          rsvp_list = event[0]['rsvp']
           args = self.reqparse.parse_args()
           rsvp = {
-            'user_id': rsvpList[-1]['user_id'] + 1,
+            'user_id': rsvp_list[-1]['user_id'] + 1,
             'name': args['name'],
             'email': args['email']
           }
-          rsvpList.append(rsvp)
-          return {'rsvp': marshal(rsvpList, rsvp_fields)}, 201
+          rsvp_list.append(rsvp)
+          return {'rsvp': marshal(rsvp_list, RSVP_FIELDS)}, 201
 
 # events url
-api.add_resource(EventList, '/api/events', endpoint='event')
-api.add_resource(Event, '/api/events/<int:id>', endpoint='events')
+API.add_resource(EventList, '/api/events', endpoint='event')
+API.add_resource(Event, '/api/events/<int:eventid>', endpoint='events')
 
 # users url
-api.add_resource(User, '/api/auth/register', endpoint='user')
-api.add_resource(UserLogin, '/api/auth/login', endpoint='users')
+API.add_resource(User, '/api/auth/register', endpoint='user')
+API.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
 # Reset Password
-api.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
+API.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
 
 # RSVP url
-api.add_resource(RSVP, '/api/events/<int:id>/rsvp', endpoint='rsvp')
+API.add_resource(RSVP, '/api/events/<int:eventid>/rsvp', endpoint='rsvp')
