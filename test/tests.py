@@ -3,28 +3,7 @@
 """import depancies."""
 import unittest
 from app import app
-from app.views import EventList, User, PasswordRest
-
-# class TestRSVP(unittest.TestCase):
-#     """Test event rsvp"""
-#     def setUp(self):
-#         self.app = app
-#         self.rsvp = RSVP()
-#         self.test_client = self.app.test_client
-#         self.testRsvp = {
-#             'name': u'John Doe',
-#             'email': u'john.D@gmail.com'
-#         }
-
-#     def tearDown(self):
-#         del self.rsvp
-#         del self.test_client
-#         del self.testRsvp
-
-#     def test_event_rsvp(self):
-#         """Test user event rsvp"""
-#         res = self.test_client().post('/api/events/2/rsvp', data=self.testRsvp)
-#         self.assertEqual(res.status_code, 201)
+from app.views import EventList, User, PasswordRest, RSVP
 
 class TestEvents(unittest.TestCase):
     """Test event crud functions"""
@@ -70,18 +49,50 @@ class TestEvents(unittest.TestCase):
         resp = self.test_client().put('/api/events/1', data=self.eventCreate)
         self.assertEqual(resp.status_code, 201)
 
+class TestRSVP(unittest.TestCase):
+    """Test event rsvp"""
+    def setUp(self):
+        self.app = app
+        self.rsvp = RSVP()
+        self.test_client = self.app.test_client
+        self.testrsvp = {
+            'name': u'John Doe',
+            'email': u'atony.nesh@gmail.com'
+        }
+        self.testemailexist = {
+            'name': u'John Doe',
+            'email': u'john.D@gmail.com'
+        }
+
+    def tearDown(self):
+        del self.rsvp
+        del self.test_client
+        del self.testrsvp
+        del self.testemailexist
+
+    def test_event_rsvp(self):
+        """Test user event rsvp"""
+        res = self.test_client().post('/api/events/1/rsvp', data=self.testrsvp)
+        self.assertEqual(res.status_code, 201)
+
+    def test_email_exist(self):
+        """Test user event rsvp"""
+        res = self.test_client().post('/api/events/1/rsvp', data=self.testemailexist)
+        self.assertEqual(res.status_code, 403)
+
+
 class TestUsers(unittest.TestCase):
     """Test user registration and login"""
     def setUp(self):
         self.app = app
         self.user = User()
         self.test_client = self.app.test_client
-        self.createUser = {
+        self.createuser = {
             'name': u'Tonnie Nesh',
             'email': u'tonnie.nesh@gmail.com',
             'password': u'qwerty1'
         }
-        self.checkUser = {
+        self.checkuser = {
             'name': u'Mary Jane',
             'email': u'john.D@gmail.com',
             'password': u'qwerty1234'
@@ -90,44 +101,44 @@ class TestUsers(unittest.TestCase):
     def tearDown(self):
         del self.user
         del self.test_client
-        del self. createUser
-        del self.checkUser
+        del self. createuser
+        del self.checkuser
 
-    def test_user_registration_email_exists(self):
+    def test_user_reg_email_exist(self):
         """Test user Registration"""
-        resp = self.test_client().post('/api/auth/register', data=self.checkUser)
+        resp = self.test_client().post('/api/auth/register', data=self.checkuser)
         self.assertEqual(resp.status_code, 404)
 
-    def test_registration_emailNot_exist(self):
+    def test_reg_email_not_exist(self):
         """Test user Registration"""
-        resp = self.test_client().post('/api/auth/register', data=self.createUser)
+        resp = self.test_client().post('/api/auth/register', data=self.createuser)
         self.assertEqual(resp.status_code, 201)
 
     def test_user_login(self):
         """Test user login"""
-        resp = self.test_client().post('/api/auth/login', data=self.checkUser)
+        resp = self.test_client().post('/api/auth/login', data=self.checkuser)
         self.assertEqual(resp.status_code, 200)
 
 class TestResetPassword(unittest.TestCase):
     """Test password reset"""
     def setUp(self):
         self.app = app
-        self.passwordRest = PasswordRest()
+        self.passwordrest = PasswordRest()
         self.test_client = self.app.test_client
-        self.resetPassword = {
+        self.resetpassword = {
             'name': u'Mary Jane',
             'email': u'john.D@gmail.com',
             'password': u'qwerty1234'
         }
 
     def tearDown(self):
-        del self.passwordRest
+        del self.passwordrest
         del self.test_client
-        del self.resetPassword
+        del self.resetpassword
 
     def test_password_reset(self):
         """Test password rest"""
-        resp = self.test_client().post('/api/auth/reset-password', data=self.resetPassword)
+        resp = self.test_client().post('/api/auth/reset-password', data=self.resetpassword)
         self.assertEqual(resp.status_code, 201)
 
 if __name__ == "__main__":
