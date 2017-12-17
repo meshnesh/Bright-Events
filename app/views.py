@@ -216,7 +216,6 @@ class Event(Resource):
         return {'result': True}, 204
 
 # End of Eventlist
-# shows a list of all events, and lets you POST to add new tasks
 
 # User registration
 class User(Resource):
@@ -274,19 +273,19 @@ class User(Resource):
         args = self.reqparse.parse_args()
         email_match = re.match(EMAIL_VALIDATOR, args['email'])
         if not email_match:
-            return 'Wrong email format', 404
+            return 'Wrong email format', 403
         password = args['password']
         if len(password) < 5:
-            return 'Password too short', 404
+            return 'Password too short, minimum 5 characters', 403
         count = 1
         prev = ''
         for letter in password:
             if letter == ' ':
-                return 'No spaces you fool', 404
+                return 'Password should not contain spaces', 404
             elif prev == letter:
                 count += 1
                 if count == 2:
-                    return "Too many repetitions of {}".format(letter), 404
+                    return "Too many repetitions of {}".format(letter), 403
             else:
                 prev = letter
                 count = 0
@@ -343,10 +342,11 @@ class UserLogin(Resource):
             'password': args['password']
         }
         for user in USERS:
+            print(user)
             if users['email'] == user['email']:
                 if user['password'] == users['password']:
                     return {'users': marshal(users, USER_LOGIN_FIELDS)}, 200
-                return 'Wrong password', 405
+                return 'Wrong password', 401
         return 'Wrong email or email doesn\'t exist', 404
 
 # User reset password
@@ -407,66 +407,49 @@ class RSVP(Resource):
                                    help='Name is required')
         super(RSVP, self).__init__()
 
-    @staticmethod
-    def get(eventid):
+    def post(self, eventid):
         """
         Retrieve event RSVP
         ---
         tags:
-          - restful
+        - restful
         parameters:
-          - in: path
+        - in: path
             name: id
             required: true
-            description: The ID of the Event, try event1!
+            description: The ID of the Event, try 1!
+            type: string
+        - in: formData
+            name: name
+            required: true
+            description: The name of the user!
+            type: string
+        - in: formData
+            name: email
+            description: The email of the user!
             type: string
         responses:
-          200:
+        200:
             description: The RSVP data
         """
         event = [event for event in EVENTS if event['id'] == eventid]
         if len(event) == 0:
             abort(404)
         rsvp_list = event[0]['rsvp']
-        return {'rsvp': marshal(rsvp_list, RSVP_FIELDS)}, 200
-
-    def post(self, eventid):
-          """
-          Retrieve event RSVP
-          ---
-          tags:
-            - restful
-          parameters:
-            - in: path
-              name: id
-              required: true
-              description: The ID of the Event, try 1!
-              type: string
-            - in: formData
-              name: name
-              required: true
-              description: The name of the user!
-              type: string
-            - in: formData
-              name: email
-              description: The email of the user!
-              type: string
-          responses:
-            200:
-              description: The RSVP data
-          """
-          event = [event for event in EVENTS if event['id'] == eventid]
-          if len(event) == 0:
-                abort(404)
-          rsvp_list = event[0]['rsvp']
-          args = self.reqparse.parse_args()
-          rsvp = {
+        args = self.reqparse.parse_args()
+        rsvp = {
             'user_id': rsvp_list[-1]['user_id'] + 1,
             'name': args['name'],
             'email': args['email']
-          }
-          rsvp_list.append(rsvp)
-          return {'rsvp': marshal(rsvp_list, RSVP_FIELDS)}, 201
+        }
+
+        for rsvplist in event:
+            for rsvpemail in rsvplist['rsvp']:
+                print(rsvpemail['email'])
+                if rsvp['email'] == rsvpemail['email']:
+                    return 'You have already RSVP to the event', 403
+        rsvp_list.append(rsvp)
+        return {'rsvp': marshal(rsvp_list, RSVP_FIELDS)}, 201
 
 # events url
 API.add_resource(EventList, '/api/events', endpoint='event')
