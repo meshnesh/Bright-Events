@@ -147,9 +147,10 @@ class Event(Resource):
             description: The RSVP data
         """
         event = [event for event in EVENTS if event['id'] == eventid]
-        if len(event) == 0:
+        # checks if the eventid passed is located in the dictionary
+        if not event:
             abort(404)
-        return {'events': marshal(event[0], EVENT_FIELDS)}, 200
+        return {'events': marshal(event[0], EVENT_FIELDS)}, 200 #returns the value of the event with the id
 
     def put(self, eventid):
         """
@@ -183,7 +184,7 @@ class Event(Resource):
             description: The Event has been updated
         """
         event = [event for event in EVENTS if event['id'] == eventid]
-        if len(event) == 0:
+        if not event:
             abort(404)
         event = event[0]
         args = self.reqparse.parse_args()
@@ -210,7 +211,7 @@ class Event(Resource):
             description: The RSVP data
         """
         event = [event for event in EVENTS if event['id'] == eventid]
-        if len(event) == 0:
+        if not event:
             abort(404)
         EVENTS.remove(event[0])
         return {'result': True}, 204
@@ -433,7 +434,7 @@ class RSVP(Resource):
             description: The RSVP data
         """
         event = [event for event in EVENTS if event['id'] == eventid]
-        if len(event) == 0:
+        if not event:
             abort(404)
         rsvp_list = event[0]['rsvp']
         args = self.reqparse.parse_args()
