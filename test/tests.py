@@ -11,7 +11,7 @@ class TestEvents(unittest.TestCase):
         self.app = app
         self.event = EventList()
         self.test_client = self.app.test_client
-        self.eventCreate = {
+        self.eventcreate = {
             'title':'Orange Harvest',
             'location':'Kitui, Kenya',
             'time':'11:00AM',
@@ -22,7 +22,7 @@ class TestEvents(unittest.TestCase):
     def tearDown(self):
         del self.event
         del self.test_client
-        del self.eventCreate
+        del self.eventcreate
 
     def test_get_events(self):
         """Test that gets all events"""
@@ -31,7 +31,7 @@ class TestEvents(unittest.TestCase):
 
     def test_add_event(self):
         """Test that adds all events"""
-        resp = self.test_client().post('/api/events', data=self.eventCreate)
+        resp = self.test_client().post('/api/events', data=self.eventcreate)
         self.assertEqual(resp.status_code, 201)
 
     def test_get_single_event(self):
@@ -46,7 +46,7 @@ class TestEvents(unittest.TestCase):
 
     def test_put_event(self):
         """Test that event get put"""
-        resp = self.test_client().put('/api/events/1', data=self.eventCreate)
+        resp = self.test_client().put('/api/events/1', data=self.eventcreate)
         self.assertEqual(resp.status_code, 201)
 
 class TestRSVP(unittest.TestCase):
