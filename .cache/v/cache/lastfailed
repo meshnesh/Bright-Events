@@ -1,4 +1,10 @@
 {
   "tests.py::EventConnectionTests::test_user_register": true,
-  "tests.py::PrimitiveTests::test_create_post": true
+  "tests.py::PrimitiveTests::test_create_post": true,
+  "tests.py::TestEvent::test_add_event": true,
+  "tests.py::TestEvent::test_get_event": true,
+  "tests.py::TestEvent::test_get_single_event": true,
+  "tests.py::TestEvents::test_initial_events": true,
+  "tests.py::TestGetEvent::test_add_event": true,
+  "tests.py::test_get_single_event": true
 }
