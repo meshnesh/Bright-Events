@@ -349,9 +349,9 @@ class UserLogin(Resource):
         return 'Wrong email or email doesn\'t exist', 404
 
 
-class PasswordRest(Resource):
+class ResetPassword(Resource):
     """
-    Check if user exists then login
+    Check if user exists then rest password
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -359,12 +359,12 @@ class PasswordRest(Resource):
                                    type=str, required=True, help='Email is required!')
         self.reqparse.add_argument('password',
                                    type=str, required=True, help='Password is required!')
-        super(PasswordRest, self).__init__()
+        super(ResetPassword, self).__init__()
 
 
     def post(self):
         """
-        Paasword Reset
+        Password Reset
         ---
         tags:
           - restful
@@ -458,7 +458,7 @@ API.add_resource(User, '/api/auth/register', endpoint='user')
 API.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
 # Reset Password
-API.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
+API.add_resource(ResetPassword, '/api/auth/reset-password', endpoint='reset')
 
 # RSVP url
 API.add_resource(RSVP, '/api/events/<int:eventid>/rsvp', endpoint='rsvp')
