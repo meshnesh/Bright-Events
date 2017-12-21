@@ -301,7 +301,7 @@ class User(Resource):
             USERS.append(user)
             return {'user': marshal(user, USER_FIELDS)}, 201
         else:
-            return 'Email already exists. Try another Email adress', 404
+            return 'Email already exists. Try another Email adress', 403
 
 # User login
 class UserLogin(Resource):
