@@ -42,6 +42,7 @@ RSVP_FIELDS = {
 
 EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
 
+
 class EventList(Resource):
     """
     Creates a Eventlist object.
@@ -115,6 +116,7 @@ class EventList(Resource):
         EVENTS.append(event)
         return {'event': marshal(event, EVENT_FIELDS)}, 201
 
+
 class Event(Resource):
     """
     Handle Event crud operation.
@@ -147,10 +149,9 @@ class Event(Resource):
             description: The RSVP data
         """
         event = [event for event in EVENTS if event['id'] == eventid]
-        # checks if the eventid passed is located in the dictionary
         if not event:
             abort(404)
-        return {'events': marshal(event[0], EVENT_FIELDS)}, 200 #returns the value of the event with the id
+        return {'events': marshal(event[0], EVENT_FIELDS)}, 200
 
     def put(self, eventid):
         """
@@ -216,9 +217,7 @@ class Event(Resource):
         EVENTS.remove(event[0])
         return {'result': True}, 204
 
-# End of Eventlist
 
-# User registration
 class User(Resource):
     """
     Handle User Registration.
@@ -301,9 +300,9 @@ class User(Resource):
             USERS.append(user)
             return {'user': marshal(user, USER_FIELDS)}, 201
         else:
-            return 'Email already exists. Try another Email adress', 404
+            return 'Email already exists. Try another Email adress', 403
 
-# User login
+
 class UserLogin(Resource):
     """
     Check if user exists then login
@@ -343,17 +342,16 @@ class UserLogin(Resource):
             'password': args['password']
         }
         for user in USERS:
-            print(user)
             if users['email'] == user['email']:
                 if user['password'] == users['password']:
                     return {'users': marshal(users, USER_LOGIN_FIELDS)}, 200
                 return 'Wrong password', 401
         return 'Wrong email or email doesn\'t exist', 404
 
-# User reset password
-class PasswordRest(Resource):
+
+class ResetPassword(Resource):
     """
-    Check if user exists then login
+    Check if user exists then rest password
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -361,12 +359,12 @@ class PasswordRest(Resource):
                                    type=str, required=True, help='Email is required!')
         self.reqparse.add_argument('password',
                                    type=str, required=True, help='Password is required!')
-        super(PasswordRest, self).__init__()
+        super(ResetPassword, self).__init__()
 
 
     def post(self):
         """
-        Paasword Reset
+        Password Reset
         ---
         tags:
           - restful
@@ -395,7 +393,7 @@ class PasswordRest(Resource):
         else:
             return {'reset': marshal(users, USER_LOGIN_FIELDS)}, 201
 
-# RSVP
+
 class RSVP(Resource):
     """
     Lists all RSVP per event
@@ -446,7 +444,6 @@ class RSVP(Resource):
 
         for rsvplist in event:
             for rsvpemail in rsvplist['rsvp']:
-                print(rsvpemail['email'])
                 if rsvp['email'] == rsvpemail['email']:
                     return 'You have already RSVP to the event', 403
         rsvp_list.append(rsvp)
@@ -461,7 +458,7 @@ API.add_resource(User, '/api/auth/register', endpoint='user')
 API.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
 # Reset Password
-API.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
+API.add_resource(ResetPassword, '/api/auth/reset-password', endpoint='reset')
 
 # RSVP url
 API.add_resource(RSVP, '/api/events/<int:eventid>/rsvp', endpoint='rsvp')
