@@ -22,6 +22,15 @@ class TestDevelopmentConfig(TestCase):
         self.assertFalse(current_app is None)
 
 
+class TestTestingConfig(TestCase):
+    def create_app(self):
+        app.config.from_object(APP_CONFIG['testing'])
+        return app
+
+    def test_app_is_testing(self):
+        self.assertTrue(app.config['DEBUG'] is True)
+
+
 class TestProductionConfig(TestCase):
     """Test App is in Development"""
     def create_app(self):
