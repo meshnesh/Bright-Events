@@ -1,134 +1,46 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 """import depancies."""
-from flask import abort,request
-from flask_restful import reqparse, Api, Resource
-from flasgger import Swagger, swag_from
+import re
+from flask import abort
+from flask_restful import reqparse, Api, Resource, fields, marshal
+from flasgger import Swagger
 from app import app
-
 
 from app.data import EVENTS
 from app.user_data import USERS
 
-api = Api(app)
-swagger = Swagger(app)
 
-def abort_if_event_doesnt_exist(event_id):
-    """
-    Handle Error when Event not found.
-    """
-    if event_id not in EVENTS:
-        abort(404, message="Events {} doesn't exist".format(event_id))
+API = Api(app)
+SWAGGER = Swagger(app)
 
-def abort_if_user_doesnt_exist(user_id):
-    """
-    Handle Error when User not found.
-    """
-    if user_id not in USERS:
-        abort(404, message="Invalid User {} doesn't exist".format(user_id))
+EVENT_FIELDS = {
+    'title': fields.String,
+    'location': fields.String,
+    'time': fields.String,
+    'date': fields.String,
+    'description': fields.String,
+    'done': fields.Boolean,
+    # 'uri': fields.Url('event')
+}
 
-class Event(Resource):
-    """
-    Handle Event crud operation.
-    """
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('title', type=str, required=True,
-                                   help='No task title provided')
-        self.reqparse.add_argument('location', type=str,)
-        self.reqparse.add_argument('time', type=str, required=True)
-        self.reqparse.add_argument('date', type=str, required=True)
-        self.reqparse.add_argument('description', type=str,)
-        super(Event, self).__init__()
+USER_FIELDS = {
+    'email': fields.String,
+    'name': fields.String,
+    'password': fields.String
+}
 
-    def get(self, event_id):
-        """
-        Retrieve single event data
-        ---
-        tags:
-          - restful
-        parameters:
-          - in: path
-            name: Event_id
-            required: true
-            description: The ID of the Event, try event1!
-            type: string
-        responses:
-          200:
-            description: The RSVP data
-        """
-        abort_if_event_doesnt_exist(event_id)
-        return EVENTS[event_id]
+USER_LOGIN_FIELDS = {
+    'email': fields.String,
+    'password': fields.String
+}
 
-    def delete(self, event_id):
-        """
-        Delete single event data
-        ---
-        tags:
-          - restful
-        parameters:
-          - in: path
-            name: Event_id
-            required: true
-            description: The ID of the Event, try event1!
-            type: string
-        responses:
-          204:
-            description: The RSVP data
-        """
-        abort_if_event_doesnt_exist(event_id)
-        del EVENTS[event_id]
-        return 'Event deleted', 204
+RSVP_FIELDS = {
+    'name': fields.String,
+    'email': fields.String
+}
 
-    def put(self, event_id):
-        """
-        Update single event data
-        ---
-        tags:
-          - restful
-        parameters:
-          - in: formData
-            name: event_id
-            type: string
-            required: true
-          - in: formData
-            name: title
-            type: string
-            required: true
-          - in: formData
-            name: location
-            type: string
-            required: true
-          - in: formData
-            name: date
-            type: string
-            required: true
-          - in: formData
-            name: time
-            type: string
-            required: true
-          - in: formData
-            name: description
-            type: string
-            required: true
-        responses:
-          201:
-            description: The Event has been updated
-        """
-        args = self.reqparse.parse_args()
-        EVENTS[event_id] = {
-            'title': args['title'],
-            'location': args['location'],
-            'time': args.get('time',""),
-            'date': args['date'],
-            'description': args['description'],
-            'done': False,
-            'rsvp': []
-        }
-        return EVENTS[event_id], 201
-
-# Eventlist
-# shows a list of all events, and lets you POST to add new tasks
+EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
 
 class EventList(Resource):
     """
@@ -145,7 +57,8 @@ class EventList(Resource):
         super(EventList, self).__init__()
 
 
-    def get(self):
+    @staticmethod
+    def get():
         """
         Gets Events
         ---
@@ -155,7 +68,7 @@ class EventList(Resource):
           200:
             description: The event data
         """
-        return EVENTS
+        return {'event': [marshal(event, EVENT_FIELDS) for event in EVENTS]}, 200
 
     def post(self):
         """
@@ -189,9 +102,8 @@ class EventList(Resource):
             description: The Event has been created
         """
         args = self.reqparse.parse_args()
-        event_id = int(max(EVENTS.keys()).lstrip('event')) + 1
-        event_id = 'event%i' % event_id
-        EVENTS[event_id] = {
+        event = {
+            'id': EVENTS[-1]['id'] + 1,
             'title': args['title'],
             'location': args['location'],
             'time': args['time'],
@@ -200,20 +112,130 @@ class EventList(Resource):
             'done': False,
             'rsvp': []
         }
-        return EVENTS[event_id], 201
+        EVENTS.append(event)
+        return {'event': marshal(event, EVENT_FIELDS)}, 201
+
+class Event(Resource):
+    """
+    Handle Event crud operation.
+    """
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('title', type=str,
+                                   help='No title title provided')
+        self.reqparse.add_argument('location', type=str,)
+        self.reqparse.add_argument('time', type=str)
+        self.reqparse.add_argument('date', type=str)
+        self.reqparse.add_argument('description', type=str,)
+        super(Event, self).__init__()
+
+    @staticmethod
+    def get(eventid):
+        """
+        Retrieve single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: id
+            required: true
+            description: The ID of the Event, try 1!
+            type: string
+        responses:
+          200:
+            description: The RSVP data
+        """
+        event = [event for event in EVENTS if event['id'] == eventid]
+        # checks if the eventid passed is located in the dictionary
+        if not event:
+            abort(404)
+        return {'events': marshal(event[0], EVENT_FIELDS)}, 200 #returns the value of the event with the id
+
+    def put(self, eventid):
+        """
+        Update single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: id
+            type: string
+            required: true
+            description: The ID of the Event must be an interger, try 1!
+          - in: formData
+            name: title
+            type: string
+          - in: formData
+            name: location
+            type: string
+          - in: formData
+            name: date
+            type: string
+          - in: formData
+            name: time
+            type: string
+          - in: formData
+            name: description
+            type: string
+        responses:
+          201:
+            description: The Event has been updated
+        """
+        event = [event for event in EVENTS if event['id'] == eventid]
+        if not event:
+            abort(404)
+        event = event[0]
+        args = self.reqparse.parse_args()
+        for k, v in args.items():
+            if v is not None:
+                event[k] = v
+        return {'events': marshal(event, EVENT_FIELDS)}, 201
+
+    @staticmethod
+    def delete(eventid):
+        """
+        Delete single event data
+        ---
+        tags:
+          - restful
+        parameters:
+          - in: path
+            name: id
+            required: true
+            description: The ID of the Event, try 1!
+            type: string
+        responses:
+          204:
+            description: The RSVP data
+        """
+        event = [event for event in EVENTS if event['id'] == eventid]
+        if not event:
+            abort(404)
+        EVENTS.remove(event[0])
+        return {'result': True}, 204
+
+# End of Eventlist
 
 # User registration
 class User(Resource):
-    # @swag_from('colors.yml', methods=['POST','GET'])
+    """
+    Handle User Registration.
+    """
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', type=str, required=True, help='Please include an email!')
-        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
-        self.reqparse.add_argument('name', type=str, required=True, help='Name is Required!')
+        self.reqparse.add_argument('email',
+                                   type=str, required=True, help='Please include an email!')
+        self.reqparse.add_argument('password',
+                                   type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('name',
+                                   type=str, required=True, help='Name is Required!')
         super(User, self).__init__()
 
-    def get(self):
+    @staticmethod
+    def get():
         """
         Gets Users
         ---
@@ -223,9 +245,8 @@ class User(Resource):
           200:
             description: The task data
         """
-        return USERS
+        return {'user': [marshal(user, USER_FIELDS) for user in USERS]}, 200
 
-    # swag_from('colors.yml')
     def post(self):
         """
         Registers a new user
@@ -237,35 +258,50 @@ class User(Resource):
             name: name
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: email
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
           - in: formData
             name: password
             type: string
             required: true
-            schema:
-              $ref: '#/definitions/Task'
         responses:
           201:
             description: The task has been created
-            schema:
-              $ref: '#/definitions/Task'
         """
+        user_email = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
-        user_id = int(max(USERS.keys()).lstrip('user')) + 1
-        user_id = 'user%i' % user_id
-        USERS[user_id] = {
-            'email': args['email'],
-            'password': args['password'],
+        email_match = re.match(EMAIL_VALIDATOR, args['email'])
+        if not email_match:
+            return 'Wrong email format', 403
+        password = args['password']
+        if len(password) < 5:
+            return 'Password too short, minimum 5 characters', 403
+        count = 1
+        prev = ''
+        for letter in password:
+            if letter == ' ':
+                return 'Password should not contain spaces', 404
+            elif prev == letter:
+                count += 1
+                if count == 2:
+                    return "Too many repetitions of {}".format(letter), 403
+            else:
+                prev = letter
+                count = 0
+
+        user = {
+            'id': USERS[-1]['id'] + 1,
             'name': args['name'],
+            'email': args['email'],
+            'password': args['password']
         }
-        return USERS[user_id], 201
+        if user['email'] not in user_email:
+            USERS.append(user)
+            return {'user': marshal(user, USER_FIELDS)}, 201
+        else:
+            return 'Email already exists. Try another Email adress', 404
 
 # User login
 class UserLogin(Resource):
@@ -274,8 +310,10 @@ class UserLogin(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('email', type=str, required=True, help='Email is required!')
-        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('email',
+                                   type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password',
+                                   type=str, required=True, help='Password is required!')
         super(UserLogin, self).__init__()
 
     def post(self):
@@ -289,20 +327,28 @@ class UserLogin(Resource):
             name: email
             type: string
             required: true
+            description: The email of the user, try john.D@gmail.com!
           - in: formData
             name: password
             type: string
             required: true
+            description: The password of the user, try qwerty1234!
         responses:
           200:
             description: User has logged in
         """
         args = self.reqparse.parse_args()
-        USERS = {
+        users = {
             'email': args['email'],
             'password': args['password']
         }
-        return USERS, 200
+        for user in USERS:
+            print(user)
+            if users['email'] == user['email']:
+                if user['password'] == users['password']:
+                    return {'users': marshal(users, USER_LOGIN_FIELDS)}, 200
+                return 'Wrong password', 401
+        return 'Wrong email or email doesn\'t exist', 404
 
 # User reset password
 class PasswordRest(Resource):
@@ -311,11 +357,14 @@ class PasswordRest(Resource):
     """
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('password', type=str, required=True, help='Password is required!')
+        self.reqparse.add_argument('email',
+                                   type=str, required=True, help='Email is required!')
+        self.reqparse.add_argument('password',
+                                   type=str, required=True, help='Password is required!')
         super(PasswordRest, self).__init__()
 
 
-    def put(self):
+    def post(self):
         """
         Paasword Reset
         ---
@@ -323,62 +372,96 @@ class PasswordRest(Resource):
           - restful
         parameters:
           - in: formData
-            name: password
-            required: true
-            description: The ID of the task, try 42!
+            name: email
             type: string
+            required: true
+            description: Enter the current email of the user, try john.D@gmail.com!
+          - in: formData
+            name: password
+            type: string
+            description: Enter the new password of the user!
         responses:
           201:
-            description: The task has been updated
+            description: The Password has been rest
         """
+        user_email = [user['email'] for user in USERS]
         args = self.reqparse.parse_args()
-        user_id = int(max(USERS.keys()).lstrip('user')) + 1
-        user_id = 'user%i' % user_id
-        USERS[user_id] = {
-            'email': args.get('email', "tonny.nesh@gmail.com"),
-            'password': args['password'],
-            'name': args.get('name', "Antony Ng'ang'a"),
+        users = {
+            'email': args['email'],
+            'password': args['password']
         }
-        return USERS[user_id], 201
-
+        if users['email'] not in user_email:
+            return 'Wrong email or Email doesn\'t exist', 404
+        else:
+            return {'reset': marshal(users, USER_LOGIN_FIELDS)}, 201
 
 # RSVP
 class RSVP(Resource):
     """
     Lists all RSVP per event
     """
-    def get(self, event_id):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('name', type=str,
+                                   help='Name is required')
+        self.reqparse.add_argument('email', type=str,
+                                   help='Name is required')
+        super(RSVP, self).__init__()
+
+    def post(self, eventid):
         """
         Retrieve event RSVP
         ---
         tags:
-          - restful
+        - restful
         parameters:
-          - in: path
-            name: Event_id
+        - in: path
+            name: id
             required: true
-            description: The ID of the Event, try event1!
+            description: The ID of the Event, try 1!
+            type: string
+        - in: formData
+            name: name
+            required: true
+            description: The name of the user!
+            type: string
+        - in: formData
+            name: email
+            description: The email of the user!
             type: string
         responses:
-          200:
+        200:
             description: The RSVP data
         """
-        abort_if_event_doesnt_exist(event_id)
-        event = EVENTS[event_id]
-        rsvpList = event['rsvp']
-        return rsvpList
+        event = [event for event in EVENTS if event['id'] == eventid]
+        if not event:
+            abort(404)
+        rsvp_list = event[0]['rsvp']
+        args = self.reqparse.parse_args()
+        rsvp = {
+            'user_id': rsvp_list[-1]['user_id'] + 1,
+            'name': args['name'],
+            'email': args['email']
+        }
 
+        for rsvplist in event:
+            for rsvpemail in rsvplist['rsvp']:
+                print(rsvpemail['email'])
+                if rsvp['email'] == rsvpemail['email']:
+                    return 'You have already RSVP to the event', 403
+        rsvp_list.append(rsvp)
+        return {'rsvp': marshal(rsvp_list, RSVP_FIELDS)}, 201
 
 # events url
-api.add_resource(EventList, '/api/events')
-api.add_resource(Event, '/api/events/<event_id>')
+API.add_resource(EventList, '/api/events', endpoint='event')
+API.add_resource(Event, '/api/events/<int:eventid>', endpoint='events')
 
 # users url
-api.add_resource(User, '/api/auth/register')
-api.add_resource(UserLogin, '/api/auth/login')
-
-# RSVP url
-api.add_resource(RSVP, '/api/events/<event_id>/rsvp')
+API.add_resource(User, '/api/auth/register', endpoint='user')
+API.add_resource(UserLogin, '/api/auth/login', endpoint='users')
 
 # Reset Password
-api.add_resource(PasswordRest, '/api/auth/reset-password')
+API.add_resource(PasswordRest, '/api/auth/reset-password', endpoint='reset')
+
+# RSVP url
+API.add_resource(RSVP, '/api/events/<int:eventid>/rsvp', endpoint='rsvp')

@@ -1,5 +1,6 @@
-EVENTS = {
-    'event1': {
+EVENTS = [
+    {
+        'id':1,
         'title': u'Drink Smoothie',
         'imageUrl': u'http://freedesignfile.com/upload/2016/11/Fresh-fruit-with-smoothies-HD-picture.jpg',
         'location': u'Machakos, Kenya',
@@ -18,10 +19,10 @@ EVENTS = {
                 'name': u'Antony Ng\'ang\'a',
                 'email': u'tonny.nesh@gmail.com'
             }
-        ],
-        'url':u'https://bright-events.herokuapp.com/api/events/event1'
+        ]
     },
-    'event2':{
+    {
+        'id':2,
         'title': u'Enviroment Awareness',
         'imageUrl': u'https://s3-us-west-1.amazonaws.com/stanford.ucomm.newsms.media/wp-content/uploads/2016/11/10165436/environment_GettyImages-501231894.jpg',
         'location':u'Karura Forest, Kenya',
@@ -35,10 +36,10 @@ EVENTS = {
                 'name': u'Mary Jane',
                 'email': u'jane.mary@yahoo.com'
             }
-        ],
-        'url':u'https://bright-events.herokuapp.com/api/events/event2'
+        ]
     },
-    'event3':{
+    {
+        'id':3,
         'title': u'Tattoo Fest',
         'imageUrl': u'http://ww1.prweb.com/prfiles/2017/09/29/14755349/Ray-Price-Capital-City-Bikefest_TattooFest_7574.jpg',
         'location':u'Nairobi, Kenya',
@@ -62,7 +63,6 @@ EVENTS = {
                 'name': u'Francis Gwada',
                 'email': u'gwada.frank@mango.com'
             }
-        ],
-        'url':u'https://bright-events.herokuapp.com/api/events/event3'
+        ]
     }
-}
+]
