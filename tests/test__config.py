@@ -11,6 +11,7 @@ from config import APP_CONFIG
 
 class TestDevelopmentConfig(TestCase):
     """Test App is in Development"""
+    @staticmethod
     def create_app(self):
         app.config.from_object(APP_CONFIG['development'])
         return app
@@ -24,6 +25,7 @@ class TestDevelopmentConfig(TestCase):
 
 class TestTestingConfig(TestCase):
     """Test App is in Testing"""
+    @staticmethod
     def create_app(self):
         app.config.from_object(APP_CONFIG['testing'])
         return app
