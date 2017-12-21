@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """import depancies."""
 import re
 from flask import abort
