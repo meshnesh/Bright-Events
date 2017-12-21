@@ -23,16 +23,19 @@ class TestDevelopmentConfig(TestCase):
 
 
 class TestTestingConfig(TestCase):
+    """Test App is in Testing"""
     def create_app(self):
         app.config.from_object(APP_CONFIG['testing'])
         return app
 
     def test_app_is_testing(self):
+        """Test App is running DEBUG in Test Enviroment"""
+
         self.assertTrue(app.config['DEBUG'] is True)
 
 
 class TestProductionConfig(TestCase):
-    """Test App is in Development"""
+    """Test App is in Production"""
     def create_app(self):
         app.config.from_object(APP_CONFIG['production'])
         return app
