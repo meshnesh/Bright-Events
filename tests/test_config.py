@@ -12,7 +12,7 @@ from config import APP_CONFIG
 class TestDevelopmentConfig(TestCase):
     """Test App is in Development"""
     @staticmethod
-    def create_app(self):
+    def create_app():
         app.config.from_object(APP_CONFIG['development'])
         return app
 
@@ -26,7 +26,7 @@ class TestDevelopmentConfig(TestCase):
 class TestTestingConfig(TestCase):
     """Test App is in Testing"""
     @staticmethod
-    def create_app(self):
+    def create_app():
         app.config.from_object(APP_CONFIG['testing'])
         return app
 
@@ -38,7 +38,8 @@ class TestTestingConfig(TestCase):
 
 class TestProductionConfig(TestCase):
     """Test App is in Production"""
-    def create_app(self):
+    @staticmethod
+    def create_app():
         app.config.from_object(APP_CONFIG['production'])
         return app
 
