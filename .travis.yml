@@ -8,7 +8,7 @@ env:
 install:
   - pip install -r requirements.txt
 # command to run tests
-script: nosetests test/*.py --with-coverage --cover-package=test && coverage report
+script: nosetests tests/ --with-coverage --cover-package=app && coverage report
 
 after_success: coveralls
     
