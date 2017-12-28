@@ -8,10 +8,10 @@ Events contain locations, time and day when it will happen, user can logging in 
 ### Wireframes Designs ###
 The platform is being developed from this designs
 
-![Alt homepage](https://github.com/meshnesh/Bright-Events/blob/develop/designs/wireframes/bright_events_homepage.png)
-![Alt sign-in](https://github.com/meshnesh/Bright-Events/blob/develop/designs/wireframes/SIGN%20IN.png)
-![Alt login](https://github.com/meshnesh/Bright-Events/blob/develop/designs/wireframes/Login.png)
-![Alt event details](https://github.com/meshnesh/Bright-Events/blob/develop/designs/wireframes/desktop_card_page.png)
+![Alt homepage](https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/wireframes/bright_events_homepage.png)
+![Alt sign-in](https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/wireframes/SIGN%20IN.png)
+![Alt login](https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/wireframes/Login.png)
+![Alt event details](https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/wireframes/desktop_card_page.png)
 
 ## UI Designs ##
 * All the front-end development files are located with in the designs folder, so are the wireframes and the uml-class and wireframes of the respective pages
