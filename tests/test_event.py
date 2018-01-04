@@ -1,88 +1,97 @@
-# -*- coding: utf-8 -*-
-"""import depancies."""
+# test_bucketlist.py
 import unittest
-from app import app
+import os
+import json
+from app import create_app, db
 
+class EventTestCase(unittest.TestCase):
+    """This class represents the bucketlist test case"""
 
-class TestEvents(unittest.TestCase):
-    """Test event crud functions"""
     def setUp(self):
-        self.app = app
-        self.test_client = self.app.test_client
-        self.eventcreate = {
-            'title':'Orange Harvest',
-            'location':'Kitui, Kenya',
-            'time':'11:00AM',
-            'date': '25 NOV 2017',
-            'description':'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,'
+        """Define test variables and initialize app."""
+        self.app = create_app(config_name="testing")
+        self.client = self.app.test_client
+        self.event = {
+            'title': 'Vacation',
+            'location':'JKIA',
+            'time':'12:00PM',
+            'date':'20th DEC 2017',
+            'description':'Going to Borabora for vacation and chill',
+            'imageUrl':'https://www.google.com',
+            'cartegory':'Lifestyle'
         }
 
-    def tearDown(self):
-        del self.test_client
-        del self.eventcreate
+        # binds the app to the current context
+        with self.app.app_context():
+            # create all tables
+            db.create_all()
 
-    def test_retrieve_events(self):
-        """Test API can retrieve events (GET request)."""
-        resp = self.test_client().post('/api/events', data=self.eventcreate)
-        self.assertEqual(resp.status_code, 201)
-        resp = self.test_client().get('/api/events')
-        self.assertIn('Orange Harvest', str(resp.data))
-
-    def test_add_event(self):
-        """Test API can create an event"""
-        resp = self.test_client().post('/api/events', data=self.eventcreate)
-        self.assertEqual(resp.status_code, 201)
-
-    def test_get_single_event(self):
-        """Test API can get single event"""
-        resp = self.test_client().get('/api/events/1')
-        self.assertEqual(resp.status_code, 200)
-
-    def test_put_event(self):
-        """Test API can edit single event"""
-        resp = self.test_client().put('/api/events/1', data=self.eventcreate)
-        self.assertEqual(resp.status_code, 201)
-
-    def test_delete_event(self):
-        """Test API can delete single event"""
-        resp = self.test_client().delete('/api/events/2')
-        resp = self.test_client().get('/api/events/2')
-        self.assertEqual(resp.status_code, 404)
-
-    def test_event_not_exists(self):
-        """Test API if single event does not exist"""
-        resp = self.test_client().get('/api/events/5')
-        self.assertEqual(resp.status_code, 404)
-
-
-class TestRSVP(unittest.TestCase):
-    """Test event rsvp"""
-    def setUp(self):
-        self.app = app
-        self.test_client = self.app.test_client
-        self.testrsvp = {
-            'name': u'John Doe',
-            'email': u'atony.nesh@gmail.com'
-        }
-        self.testemailexist = {
-            'name': u'John Doe',
-            'email': u'john.D@gmail.com'
-        }
-
-    def tearDown(self):
-        del self.test_client
-        del self.testrsvp
-        del self.testemailexist
-
-    def test_event_rsvp(self):
-        """Test user can rsvp to an event"""
-        res = self.test_client().post('/api/events/1/rsvp', data=self.testrsvp)
+    def test_event_creation(self):
+        """Test API can create an event (POST request)"""
+        res = self.client().post('/api/events/', data=self.event)
         self.assertEqual(res.status_code, 201)
+        self.assertIn('Vacation', str(res.data))
 
-    def test_email_exist(self):
-        """Test user email already exist in event rsvp"""
-        res = self.test_client().post('/api/events/1/rsvp', data=self.testemailexist)
-        self.assertEqual(res.status_code, 403)
+    def test_api_can_get_all_events(self):
+        """Test API can get events (GET request)."""
+        res = self.client().post('/api/events/', data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get('/api/events/')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Vacation', str(res.data))
+
+    def test_api_can_get_event_by_id(self):
+        """Test API can get a single event by using it's id."""
+        res = self.client().post('/api/events/', data=self.event)
+        self.assertEqual(res.status_code, 201)
+        result_in_json = json.loads(res.data.decode('utf-8').replace("'", "\""))
+        result = self.client().get(
+            '/api/events/{}'.format(result_in_json['id']))
+        self.assertEqual(result.status_code, 200)
+        self.assertIn('Vacation', str(result.data))
+
+    def test_event_can_be_edited(self):
+        """Test API can edit an existing event. (PUT request)"""
+        res = self.client().post(
+            '/api/events/',
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().put(
+            '/api/events/1',
+            data={
+                'title': 'Climbing Mt Kenya',
+                'location':'Nyeri',
+                'time':'12:00PM',
+                'date':'20th DEC 2017',
+                'description':'Climb the Mountain',
+                'imageUrl':'https://www.google.com',
+                'cartegory':'Lifestyle'
+
+            })
+        self.assertEqual(res.status_code, 200)
+        results = self.client().get('/api/events/1')
+        self.assertIn('Climbing Mt Kenya', str(results.data))
+
+    def test_event_deletion(self):
+        """Test API can delete an existing event. (DELETE request)."""
+        res = self.client().post(
+            '/api/events/',
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().delete('/api/events/1')
+        self.assertEqual(res.status_code, 200)
+        # Test to see if it exists, should return a 404
+        result = self.client().get('/api/events/1')
+        self.assertEqual(result.status_code, 404)
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
+
+# Make the tests conveniently executable
 
 if __name__ == "__main__":
     unittest.main()
