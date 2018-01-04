@@ -77,7 +77,7 @@ class BucketlistTestCase(unittest.TestCase):
         res = self.client().post(
             '/api/events/',
             data=self.event)
-        self.assertEqual(rv.status_code, 201)
+        self.assertEqual(res.status_code, 201)
         res = self.client().delete('/api/events/1')
         self.assertEqual(res.status_code, 200)
         # Test to see if it exists, should return a 404
