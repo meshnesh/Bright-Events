@@ -58,8 +58,9 @@ class Events(db.Model):
     description = db.Column(db.String(255), nullable=False)
     cartegory = db.Column(db.String(255), nullable=False)
     imageUrl = db.Column(db.String(255))
+    created_by = db.Column(db.Integer, db.ForeignKey(User.id))
 
-    def __init__(self, title, location, time, date, description, cartegory, imageUrl):
+    def __init__(self, title, location, time, date, description, cartegory, imageUrl, created_by):
         """initialize an event with its creator."""
         self.title = title
         self.location = location
@@ -68,6 +69,7 @@ class Events(db.Model):
         self.description = description
         self.cartegory = cartegory
         self.imageUrl = imageUrl
+        self.created_by = created_by
 
     def save(self):
         db.session.add(self)
@@ -86,7 +88,6 @@ class Events(db.Model):
 
     def get__all_rsvp(self, user):
         """This method gets all the events for a given user."""
-        # return Events.query.filter_by(created_by=user_id)
         for user in self.rsvpList:
             # print(user)
             return user
@@ -99,7 +100,6 @@ class Events(db.Model):
     @staticmethod
     def get__all_events():
         """This method gets all the events for a given user."""
-        # return Events.query.filter_by(created_by=user_id)
         return Events.query.all()
 
     def delete(self):
