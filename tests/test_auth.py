@@ -25,7 +25,7 @@ class AuthTestCase(unittest.TestCase):
 
     def test_registration(self):
         """Test user registration works correcty."""
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/auth/register', data=self.user_data)
         # get the results returned in json format
         result = json.loads(res.data.decode())
         # assert that the request contains a success message and a 201 status code
@@ -34,9 +34,9 @@ class AuthTestCase(unittest.TestCase):
 
     def test_already_registered_user(self):
         """Test that a user cannot be registered twice."""
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/auth/register', data=self.user_data)
         self.assertEqual(res.status_code, 201)
-        second_res = self.client().post('/auth/register', data=self.user_data)
+        second_res = self.client().post('/api/auth/register', data=self.user_data)
         self.assertEqual(second_res.status_code, 202)
         # get the results returned in json format
         result = json.loads(second_res.data.decode())
