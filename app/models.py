@@ -39,6 +39,42 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def generate_token(self, user_id):
+        """ Generates the access token"""
+
+        try:
+            # set up a payload with an expiration time
+            payload = {
+                'exp': datetime.utcnow() + timedelta(minutes=1440),
+                'iat': datetime.utcnow(),
+                'sub': user_id
+            }
+            # create the byte string token using the payload and the SECRET key
+            jwt_string = jwt.encode(
+                payload,
+                current_app.config.get('SECRET'),
+                algorithm='HS256'
+            )
+            return jwt_string
+
+        except Exception as error:
+            # return an error in string format if an exception occurs
+            return str(error)
+
+    @staticmethod
+    def decode_token(token):
+        """Decodes the access token from the Authorization header."""
+        try:
+            # try to decode the token using our SECRET variable
+            payload = jwt.decode(token, current_app.config.get('SECRET'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            # the token is expired, return an error string
+            return "Expired token. Please login to get a new token"
+        except jwt.InvalidTokenError:
+            # the token is invalid, return an error string
+            return "Invalid token. Please register or login"
+
     def __str__(self):
         return """User(id={}, name={}, email={}, events={})""".format(self.id, self.name, self.email)
 
@@ -72,11 +108,13 @@ class Events(db.Model):
         self.created_by = created_by
 
     def save(self):
+        """Save an event to the database.
+        This includes creating a new event and editing one.
+        """
         db.session.add(self)
         db.session.commit()
 
     def add_rsvp(self, user):
-        # print(user)
         """ This method adds a user to the list of rsvps"""
         evt = user.myrsvps.filter_by(id=self.id).first()
         if evt:
@@ -89,7 +127,6 @@ class Events(db.Model):
     def get__all_rsvp(self, user):
         """This method gets all the events for a given user."""
         for user in self.rsvpList:
-            # print(user)
             return user
 
     @staticmethod
@@ -103,6 +140,7 @@ class Events(db.Model):
         return Events.query.all()
 
     def delete(self):
+        """This method deletes a given event."""
         db.session.delete(self)
         db.session.commit()
 
