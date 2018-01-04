@@ -17,8 +17,9 @@ class Events(db.Model):
     date = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     cartegory = db.Column(db.String(255), nullable=False)
+    imageUrl = db.Column(db.String(255))
 
-    def __init__(self, title, location, time, date, description, cartegory):
+    def __init__(self, title, location, time, date, description, cartegory, imageUrl):
         """initialize an event with its creator."""
         self.title = title
         self.location = location
@@ -26,6 +27,7 @@ class Events(db.Model):
         self.date = date
         self.description = description
         self.cartegory = cartegory
+        self.imageUrl = imageUrl
 
     def save(self):
         db.session.add(self)
