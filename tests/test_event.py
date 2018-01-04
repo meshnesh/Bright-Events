@@ -26,6 +26,23 @@ class EventTestCase(unittest.TestCase):
             # create all tables
             db.create_all()
 
+    def register_user(self, name="test user", email="user@test.com", password="test1234"):
+        """This helper method helps register a test user."""
+        user_data = {
+            'name':name,
+            'email': email,
+            'password': password
+        }
+        return self.client().post('/auth/register', data=user_data)
+
+    def login_user(self, email="user@test.com", password="test1234"):
+        """This helper method helps log in a test user."""
+        user_data = {
+            'email': email,
+            'password': password
+        }
+        return self.client().post('/auth/login', data=user_data)
+
     def test_event_creation(self):
         """Test API can create an event (POST request)"""
         res = self.client().post('/api/events/', data=self.event)
