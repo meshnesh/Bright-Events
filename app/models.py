@@ -1,5 +1,5 @@
 from app import db
-from flask_bcrypt import Bcrypt
+# from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 import jwt
 from datetime import datetime, timedelta
