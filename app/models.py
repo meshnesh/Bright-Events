@@ -1,9 +1,49 @@
 from app import db
-# from flask_bcrypt import Bcrypt
+from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 import jwt
 from datetime import datetime, timedelta
 from flask import current_app, Flask
+
+
+class User(db.Model):
+    """This class defines the users table """
+
+    __tablename__ = 'users'
+
+    # Define the columns of the users table, starting with the primary key
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(256), nullable=False)
+    email = db.Column(db.String(256), nullable=False, unique=True)
+    password = db.Column(db.String(256))
+    eventlists = db.relationship(
+        'Events', order_by='Events.id', cascade="all, delete-orphan")
+
+    def __init__(self, name, email, password):
+        """Initialize the user with a name, an email and a password."""
+        self.name = name
+        self.email = email
+        self.password = Bcrypt().generate_password_hash(password).decode()
+
+    def password_is_valid(self, password):
+        """
+        Checks the password against it's hash to validates the user's password
+        """
+        return Bcrypt().check_password_hash(self.password, password)
+
+
+    def save(self):
+        """Save a user to the database.
+        This includes creating a new user and editing one.
+        """
+        db.session.add(self)
+        db.session.commit()
+
+    def __str__(self):
+        return """User(id={}, name={}, email={}, events={})""".format(self.id, self.name, self.email)
+
+    __repr__ = __str__
+
 
 class Events(db.Model):
     """This class represents the eventlist table."""
