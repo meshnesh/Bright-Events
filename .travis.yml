@@ -7,6 +7,13 @@ env:
 # command to install dependencies
 install:
   - pip install -r requirements.txt
+
+services:
+  - postgresql
+
+before_script:
+  - createdb test_bright_events
+
 # command to run tests
 script: nosetests tests/test_event.py --with-coverage --cover-package=app && coverage report
 
