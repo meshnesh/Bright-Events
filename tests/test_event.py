@@ -45,36 +45,79 @@ class EventTestCase(unittest.TestCase):
 
     def test_event_creation(self):
         """Test API can create an event (POST request)"""
-        res = self.client().post('/api/events/', data=self.event)
+        # register a test user, then log them in
+        self.register_user()
+        result = self.login_user()
+        # obtain the access token
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
         self.assertEqual(res.status_code, 201)
         self.assertIn('Vacation', str(res.data))
 
     def test_api_can_get_all_events(self):
         """Test API can get events (GET request)."""
-        res = self.client().post('/api/events/', data=self.event)
+        # register a test user, then log them in
+        self.register_user()
+        result = self.login_user()
+        # obtain the access token
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
         self.assertEqual(res.status_code, 201)
-        res = self.client().get('/api/events/')
+
+        res = self.client().get(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
         self.assertEqual(res.status_code, 200)
         self.assertIn('Vacation', str(res.data))
 
     def test_api_can_get_event_by_id(self):
         """Test API can get a single event by using it's id."""
-        res = self.client().post('/api/events/', data=self.event)
+         # register a test user, then log them in
+        self.register_user()
+        result = self.login_user()
+        # obtain the access token
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
         self.assertEqual(res.status_code, 201)
-        result_in_json = json.loads(res.data.decode('utf-8').replace("'", "\""))
+
+        results = json.loads(res.data.decode())
         result = self.client().get(
-            '/api/events/{}'.format(result_in_json['id']))
+            '/api/eventlist/{}'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 200)
         self.assertIn('Vacation', str(result.data))
 
     def test_event_can_be_edited(self):
         """Test API can edit an existing event. (PUT request)"""
+        # register a test user, then log them in
+        self.register_user()
+        result = self.login_user()
+        # obtain the access token
+        access_token = json.loads(result.data.decode())['access_token']
+
         res = self.client().post(
             '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
             data=self.event)
         self.assertEqual(res.status_code, 201)
+        # get the json with the event
+        results = json.loads(res.data.decode())
+
         res = self.client().put(
-            '/api/events/1',
+            '/api/events/{}'.format(results['id']),
             data={
                 'title': 'Climbing Mt Kenya',
                 'location':'Nyeri',
@@ -83,22 +126,41 @@ class EventTestCase(unittest.TestCase):
                 'description':'Climb the Mountain',
                 'imageUrl':'https://www.google.com',
                 'cartegory':'Lifestyle'
-
             })
         self.assertEqual(res.status_code, 200)
-        results = self.client().get('/api/events/1')
+
+        results = self.client().get(
+            '/api/events/{}'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token))
         self.assertIn('Climbing Mt Kenya', str(results.data))
 
     def test_event_deletion(self):
         """Test API can delete an existing event. (DELETE request)."""
+        # register a test user, then log them in
+        self.register_user()
+        result = self.login_user()
+        # obtain the access token
+        access_token = json.loads(result.data.decode())['access_token']
+
         res = self.client().post(
             '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
             data=self.event)
         self.assertEqual(res.status_code, 201)
-        res = self.client().delete('/api/events/1')
+        # get the json with the event
+        results = json.loads(res.data.decode())
+
+        res = self.client().delete(
+            '/api/events/{}'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token)
+            )
         self.assertEqual(res.status_code, 200)
+
         # Test to see if it exists, should return a 404
-        result = self.client().get('/api/events/1')
+        result = self.client().get(
+            '/api/events/{}'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token)
+            )
         self.assertEqual(result.status_code, 404)
 
     def tearDown(self):
