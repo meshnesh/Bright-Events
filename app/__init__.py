@@ -219,7 +219,7 @@ def create_app(config_name):
 
     @app.route('/api/events/<int:id>/rsvp/', methods=['POST'])
     def create_rsvp(id, **kwargs):
-
+        """Adds a user to rsvp to a specific event."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
@@ -254,5 +254,5 @@ def create_app(config_name):
     # import the authentication blueprint and register it on the app
     from .auth import auth_blueprint
     app.register_blueprint(auth_blueprint)
-    
+
     return app

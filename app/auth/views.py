@@ -9,7 +9,8 @@ from flask_bcrypt import Bcrypt
 class RegistrationView(MethodView):
     """This class registers a new user."""
 
-    def post(self):
+    @staticmethod
+    def post():
         """Handle POST request for this view. Url ---> /api/auth/register"""
 
         # Query to see if the user already exists
@@ -50,7 +51,8 @@ class RegistrationView(MethodView):
 class LoginView(MethodView):
     """This class-based view handles user login and access token generation."""
 
-    def post(self):
+    @staticmethod
+    def post():
         """Handle POST request for this view. Url ---> /api/auth/login"""
         try:
             # Get the user object using their email (unique to every user)
@@ -84,7 +86,8 @@ class LoginView(MethodView):
 class RestEmailView(MethodView):
     """This class validates a user email then generates a token to reset a users password."""
 
-    def post(self):
+    @staticmethod
+    def post():
         """Handle POST request for this view. Url ---> /api/auth/reset"""
 
         # Query to see if the user email exists
@@ -107,7 +110,8 @@ class RestEmailView(MethodView):
 class RestPasswordView(MethodView):
     """This class resets a users password."""
 
-    def put(self):
+    @staticmethod
+    def put():
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/reset-password
         """
