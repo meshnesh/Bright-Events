@@ -169,6 +169,41 @@ def create_app(config_name):
                 }
                 return make_response(jsonify(response)), 401
 
+
+    @app.route('/api/events/<int:id>/rsvp/', methods=['POST'])
+    def create_rsvp(id, **kwargs):
+
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                event = Events.query.filter_by(id=id).first_or_404()
+
+                # POST User to the RSVP
+                user = User.query.filter_by(id=user_id).first_or_404()
+                has_prev_rsvpd = event.add_rsvp(user)
+                if has_prev_rsvpd:
+                    response = {
+                        'message': 'You have already reserved a seat'
+                    }
+                    return make_response(jsonify(response)), 202
+
+                response = {
+                    'message': 'You have Reserved a seat'
+                }
+                return make_response(jsonify(response)), 200
+
+            else:
+                # user is not legit, so the payload is an error message
+                message = user_id
+                response = {
+                    'message': message
+                }
+                return make_response(jsonify(response)), 401
+
+
     # import the authentication blueprint and register it on the app
     from .auth import auth_blueprint
     app.register_blueprint(auth_blueprint)

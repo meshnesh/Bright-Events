@@ -168,7 +168,7 @@ class EventTestCase(unittest.TestCase):
 
         #let's create an event
         rv = self.client().post(
-            '/api/events',
+            '/api/events/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.event)
         self.assertEqual(rv.status_code, 201)
@@ -177,7 +177,7 @@ class EventTestCase(unittest.TestCase):
 
         # lets rsvp to the event now
         rv = self.client().post(
-            '/api/events/{}/rsvp'.format(results['id']),
+            '/api/events/{}/rsvp/'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 200)
 
