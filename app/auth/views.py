@@ -1,9 +1,11 @@
-from . import auth_blueprint
+"""import depancies and methods."""
 
 from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User
 from flask_bcrypt import Bcrypt
+
+from . import auth_blueprint
 
 
 class RegistrationView(MethodView):
