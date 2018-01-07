@@ -80,6 +80,28 @@ class LoginView(MethodView):
             # Return a server error using the HTTP Error Code 500 (Internal Server Error)
             return make_response(jsonify(response)), 500
 
+class RestEmailView(MethodView):
+    """This class resets a users password."""
+
+    def post(self):
+        """Handle PUT request for this view. Url ---> /auth/register"""
+
+        # Query to see if the user email exists
+        user = User.query.filter_by(email=request.data['email']).first()
+        if user:
+            access_token = user.generate_token(user.id)
+            if access_token:
+                response = {
+                    'message': 'Email confirmed you can reset your password.',
+                    'access_token': access_token.decode()
+                }
+                return make_response(jsonify(response)), 200
+
+        response = {
+            'message': 'Wrong Email or user email does not exist.'
+        }
+        return make_response(jsonify(response)), 401
+
 
 
 # Define the API resource
