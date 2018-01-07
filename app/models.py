@@ -39,6 +39,12 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def resetPassword(self):
+        """Save a user to the database.
+        This includes creating a new user and editing one.
+        """
+        db.session.commit()
+
     def generate_token(self, user_id):
         """ Generates the access token"""
 
