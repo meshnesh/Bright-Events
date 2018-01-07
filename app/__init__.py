@@ -98,6 +98,53 @@ def create_app(config_name):
                 }
                 return make_response(jsonify(response)), 401
 
+    @app.route('/api/events/all', methods=['GET'])
+    def get_event():
+        """Function to handle GET requests and filter for events."""
+        # GET all the events for this user
+        events = Events.query
+        title = request.args.get('title')
+        page = request.args.get('page', default=1, type=int)
+        limit = request.args.get('limit', default=10, type=int)
+        location = request.args.get('location')
+        cartegory = request.args.get('cartegory')
+
+        args = {}
+        potential_search = ['title', 'location', 'cartegory']
+
+        for search_res in potential_search:
+            var = request.args.get(search_res)
+            if var:
+                args.update({search_res:var})
+
+        if args:
+            events = Events.query.filter_by(**args)
+
+        eventPage = events.paginate(page, limit, False).items
+
+        results = []
+
+        for event in eventPage:
+            obj = {
+                'id': event.id,
+                'title': event.title,
+                'location': event.location,
+                'time': event.time,
+                'date': event.date,
+                'description': event.description,
+                'cartegory':event.cartegory,
+                'imageUrl':event.imageUrl
+            }
+            results.append(obj)
+
+        if not results:
+            response = {
+                'message': "No events found"
+            }
+            return make_response(jsonify(response)), 404
+
+        return make_response(jsonify(results)), 200
+
     @app.route('/api/events/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     def event_manipulation(id, **kwargs):
         """Handles the manupilation of event data, with GET, PUT and DELETE by event id."""
