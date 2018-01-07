@@ -1,6 +1,5 @@
 # test_event.py
 import unittest
-import os
 import json
 from app import create_app, db
 
@@ -62,8 +61,8 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 201)
         self.assertIn('Swimming In Lake Turkana', str(res.data))
 
-    def test_api_can_get_all_user_events(self):
-        """Test API can get an event (GET request)."""
+    def test_api_get_all_user_events(self):
+        """Test API can get all events with token passed (GET request)."""
         self.register_user()
         result = self.login_user()
         access_token = json.loads(result.data.decode())['access_token']
@@ -80,7 +79,7 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('Swimming In Lake Turkana', str(res.data))
 
-    def test_api_can_get_user__single_event(self):
+    def test_api_get_user_single_event(self):
         """Test API can get a single event by using it's id."""
         self.register_user()
         result = self.login_user()
@@ -300,8 +299,8 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('Lifestyle', str(res.data))
 
-    def test_filter_event_all_not_title_search(self):
-        """Test API can filter an event by cartegory, location, title 
+    def test_event_filter_no_title(self):
+        """Test API can filter an event by cartegory, location, title
         with wrong title (GET request).
         """
         self.register_user()
@@ -319,8 +318,8 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
-    def test_filter_event_wrong_location(self):
-        """Test API can filter an event by cartegory, location, title 
+    def test_event_wrong_location(self):
+        """Test API can filter an event by cartegory, location, title
         with wrong location (GET request).
         """
         self.register_user()
@@ -338,8 +337,8 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
-    def test_filter_event_wrong_category(self):
-        """Test API can filter an event by cartegory, location, title 
+    def test_event_wrong_category(self):
+        """Test API can filter an event by cartegory, location, title
         with wrong category (GET request).
         """
         self.register_user()
