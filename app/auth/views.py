@@ -3,6 +3,7 @@ from . import auth_blueprint
 from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User
+from flask_bcrypt import Bcrypt
 
 
 class RegistrationView(MethodView):
@@ -81,10 +82,10 @@ class LoginView(MethodView):
             return make_response(jsonify(response)), 500
 
 class RestEmailView(MethodView):
-    """This class resets a users password."""
+    """This class validates a user email the generates a token for resets a users password."""
 
     def post(self):
-        """Handle PUT request for this view. Url ---> /auth/register"""
+        """Handle POST request for this view. Url ---> /api/auth/reset"""
 
         # Query to see if the user email exists
         user = User.query.filter_by(email=request.data['email']).first()
@@ -103,11 +104,57 @@ class RestEmailView(MethodView):
         return make_response(jsonify(response)), 401
 
 
+class RestPasswordView(MethodView):
+    """This class resets a users password."""
+
+    def put(self):
+        """This Handles PUT request for handling the reset password for the user
+        ---> /api/auth/reset-password
+        """
+
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # get_user = User.get_all_users()
+                # print(get_user)
+                try:
+                    reset_password = User.query.filter_by(id=user_id).first_or_404()
+
+                    post_data = request.data
+                    name = reset_password.name
+                    email = reset_password.email
+                    reset_password.password = Bcrypt().generate_password_hash(
+                        post_data['password']).decode()
+                    user = User(name=name, email=email, password=reset_password.password)
+                    user.resetPassword()
+
+                    response = {
+                        'message': 'Password rest successfully. Please log in.'
+                    }
+                    # return a response notifying the user that password was reset successfully
+                    return make_response(jsonify(response)), 201
+                except Exception as error:
+                    # An error occured, therefore return a string message containing the error
+                    response = {
+                        'message': str(error)
+                    }
+                    return make_response(jsonify(response)), 401
+        message = user_id
+        response = {
+            'message': message
+        }
+        return make_response(jsonify(response)), 401
+
+
 
 # Define the API resource
 registration_view = RegistrationView.as_view('registration_view')
 login_view = LoginView.as_view('login_view')
 reset_view = RestEmailView.as_view('rest_view')
+reset_password_view = RestPasswordView.as_view('rest_password_view')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -125,10 +172,18 @@ auth_blueprint.add_url_rule(
     methods=['POST']
 )
 
-# Define the rule for the rest(to validate the email) url --->  /auth/rest
+# Define the rule for the rest(to validate the email) url --->  /api/auth/rest
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
     '/api/auth/reset',
     view_func=reset_view,
     methods=['POST']
+)
+
+# Define the rule for the rest_password url --->  /api/auth/rest-password
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/api/auth/reset-password',
+    view_func=reset_password_view,
+    methods=['PUT']
 )
