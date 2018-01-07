@@ -1,9 +1,10 @@
+"""File contains the db models for application and tables"""
+
+from datetime import datetime, timedelta
 from app import db
 from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
 import jwt
-from datetime import datetime, timedelta
-from flask import current_app, Flask
+from flask import current_app
 
 
 rsvps = db.Table('rsvps',
@@ -48,7 +49,7 @@ class User(db.Model):
         db.session.commit()
 
     @staticmethod
-    def resetPassword():
+    def reset_password():
         """Save a new user user password to the database."""
         db.session.commit()
 
