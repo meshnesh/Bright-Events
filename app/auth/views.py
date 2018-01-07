@@ -82,7 +82,7 @@ class LoginView(MethodView):
             return make_response(jsonify(response)), 500
 
 class RestEmailView(MethodView):
-    """This class validates a user email the generates a token for resets a users password."""
+    """This class validates a user email then generates a token to reset a users password."""
 
     def post(self):
         """Handle POST request for this view. Url ---> /api/auth/reset"""
@@ -118,8 +118,6 @@ class RestPasswordView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
-                # get_user = User.get_all_users()
-                # print(get_user)
                 try:
                     reset_password = User.query.filter_by(id=user_id).first_or_404()
 
