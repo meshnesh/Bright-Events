@@ -107,6 +107,7 @@ class RestEmailView(MethodView):
 # Define the API resource
 registration_view = RegistrationView.as_view('registration_view')
 login_view = LoginView.as_view('login_view')
+reset_view = RestEmailView.as_view('rest_view')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -121,5 +122,13 @@ auth_blueprint.add_url_rule(
 auth_blueprint.add_url_rule(
     '/api/auth/login',
     view_func=login_view,
+    methods=['POST']
+)
+
+# Define the rule for the rest(to validate the email) url --->  /auth/rest
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/api/auth/reset',
+    view_func=reset_view,
     methods=['POST']
 )
