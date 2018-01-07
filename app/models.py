@@ -47,11 +47,13 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def resetPassword(self):
+    @staticmethod
+    def resetPassword():
         """Save a new user user password to the database."""
         db.session.commit()
 
-    def generate_token(self, user_id):
+    @staticmethod
+    def generate_token(user_id):
         """ Generates the access token"""
 
         try:
