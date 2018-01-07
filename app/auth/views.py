@@ -131,7 +131,7 @@ class RestPasswordView(MethodView):
                     reset_password.password = Bcrypt().generate_password_hash(
                         post_data['password']).decode()
                     user = User(name=name, email=email, password=reset_password.password)
-                    user.resetPassword()
+                    user.reset_password()
 
                     response = {
                         'message': 'Password rest successfully. Please log in.'
