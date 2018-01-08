@@ -99,11 +99,8 @@ def create_app(config_name):
         """Function to handle GET requests and filter for events."""
         # GET all the events for this user
         events = Events.query
-        title = request.args.get('title')
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
-        location = request.args.get('location')
-        cartegory = request.args.get('cartegory')
 
         args = {}
         potential_search = ['title', 'location', 'cartegory']
@@ -141,8 +138,8 @@ def create_app(config_name):
 
         return make_response(jsonify(results)), 200
 
-    @app.route('/api/events/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-    def event_manipulation(id, **kwargs):
+    @app.route('/api/events/<int:event_id>', methods=['GET', 'PUT', 'DELETE'])
+    def event_manipulation(event_id):
         """Handles the manupilation of event data, with GET, PUT and DELETE by event id."""
 
         auth_header = request.headers.get('Authorization')
@@ -152,7 +149,7 @@ def create_app(config_name):
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
                 # retrieve an event using it's ID
-                event = Events.query.filter_by(id=id).first_or_404()
+                event = Events.query.filter_by(id=event_id).first_or_404()
 
                 if request.method == 'DELETE':
                     event.delete()
@@ -213,8 +210,8 @@ def create_app(config_name):
                 return make_response(jsonify(response)), 401
 
 
-    @app.route('/api/events/<int:id>/rsvp/', methods=['POST'])
-    def create_rsvp(id, **kwargs):
+    @app.route('/api/events/<int:event_id>/rsvp/', methods=['POST'])
+    def create_rsvp(event_id):
         """Adds a user to rsvp to a specific event."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
@@ -222,7 +219,7 @@ def create_app(config_name):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
-                event = Events.query.filter_by(id=id).first_or_404()
+                event = Events.query.filter_by(id=event_id).first_or_404()
 
                 # POST User to the RSVP
                 user = User.query.filter_by(id=user_id).first_or_404()
