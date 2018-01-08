@@ -87,10 +87,10 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(result['access_token'])
 
     def test_email_non_exist_for_reset(self):
+        """Test Email exists so that they can reset there password"""
         not_a_user = {
             'email': 'not_a_user@example.com'
         }
-        """Test Email exists so that they can reset there password"""
         # send a POST request to /auth/register
         res = self.client().post('/api/auth/register', data=self.user_data)
         # get the result in json
