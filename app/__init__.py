@@ -1,9 +1,12 @@
 # app/__init__.py
+import os
 import json
+import uuid
 from flask_api import FlaskAPI, status
 from flask_sqlalchemy import SQLAlchemy
 
 from flask import request, jsonify, abort, make_response
+from flask_migrate import Migrate
 
 # local import
 from instance.config import app_config
@@ -21,7 +24,11 @@ def create_app(config_name):
 
     app.config.from_object(app_config[config_name])
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SECRET_KEY"] = str(uuid.uuid4())
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ('DATABASE_URL')
+
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     @app.route('/api/events/', methods=['POST', 'GET'])
     def event():
