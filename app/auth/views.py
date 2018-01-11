@@ -14,7 +14,6 @@ class RegistrationView(MethodView):
     @staticmethod
     def post():
         """Handle POST request for this view. Url ---> /api/auth/register"""
-
         # Query to see if the user already exists
         user = User.query.filter_by(email=request.data['email']).first()
 

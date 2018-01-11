@@ -21,12 +21,13 @@ def create_app(config_name):
 
     app.config.from_object(app_config[config_name])
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     db.init_app(app)
+
 
     @app.route('/api/events/', methods=['POST', 'GET'])
     def event():
         """Function to handle POST and GET requests for events."""
-        # get the access token
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
