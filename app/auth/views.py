@@ -152,7 +152,6 @@ class RestPasswordView(MethodView):
         return make_response(jsonify(response)), 401
 
 
-
 # Define the API resource
 registration_view = RegistrationView.as_view('registration_view')
 login_view = LoginView.as_view('login_view')
