@@ -65,8 +65,67 @@ class AuthTestCase(unittest.TestCase):
         # get the result in json
         result = json.loads(res.data.decode())
 
-        # assert that this response must contain an error message 
+        # assert that this response must contain an error message
         # and an error status code 401(Unauthorized)
         self.assertEqual(res.status_code, 401)
         self.assertEqual(
             result['message'], "Invalid email or password, Please try again")
+
+    def test_email_exist_for_reset(self):
+        """Test Email exists so that they can reset there password"""
+        # send a POST request to /auth/register
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        # get the result in json
+        result = json.loads(res.data.decode())
+        # assert that the request contains a 201 status code
+        self.assertEqual(res.status_code, 201)
+
+        reset_res = self.client().post('/api/auth/reset', data=self.user_data)
+        result = json.loads(reset_res.data.decode())
+        self.assertEqual(result['message'], "Email confirmed you can reset your password.")
+        self.assertEqual(reset_res.status_code, 200)
+        self.assertTrue(result['access_token'])
+
+    def test_email_non_exist_for_reset(self):
+        """Test Email exists so that they can reset there password"""
+        not_a_user = {
+            'email': 'not_a_user@example.com'
+        }
+        # send a POST request to /auth/register
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        # get the result in json
+        result = json.loads(res.data.decode())
+        # assert that the request contains a 201 status code
+        self.assertEqual(res.status_code, 201)
+
+        reset_res = self.client().post('/api/auth/reset', data=not_a_user)
+        result = json.loads(reset_res.data.decode())
+        self.assertEqual(result['message'], "Wrong Email or user email does not exist.")
+        self.assertEqual(reset_res.status_code, 401)
+
+    def test_user_reset_password(self):
+        """Test Email exists so that they can reset there password"""
+        new_password = {
+            'password': 'nope'
+        }
+        # send a POST request to /auth/register
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        # get the result in json
+        result = json.loads(res.data.decode())
+        # assert that the request contains a 201 status code
+        self.assertEqual(res.status_code, 201)
+
+        reset_res = self.client().post('/api/auth/reset', data=self.user_data)
+        result = json.loads(reset_res.data.decode())
+        self.assertEqual(result['message'], "Email confirmed you can reset your password.")
+        self.assertEqual(reset_res.status_code, 200)
+        self.assertTrue(result['access_token'])
+
+        # obtain the access token
+        access_token = json.loads(reset_res.data.decode())['access_token']
+
+        password_res = self.client().put(
+            '/api/auth/reset-password',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=new_password)
+        self.assertEqual(password_res.status_code, 201)

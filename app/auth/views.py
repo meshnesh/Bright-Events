@@ -1,16 +1,19 @@
-from . import auth_blueprint
+"""import depancies and methods."""
 
 from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User
+from flask_bcrypt import Bcrypt
+
+from . import auth_blueprint
 
 
 class RegistrationView(MethodView):
     """This class registers a new user."""
 
-    def post(self):
+    @staticmethod
+    def post():
         """Handle POST request for this view. Url ---> /api/auth/register"""
-
         # Query to see if the user already exists
         user = User.query.filter_by(email=request.data['email']).first()
 
@@ -49,7 +52,8 @@ class RegistrationView(MethodView):
 class LoginView(MethodView):
     """This class-based view handles user login and access token generation."""
 
-    def post(self):
+    @staticmethod
+    def post():
         """Handle POST request for this view. Url ---> /api/auth/login"""
         try:
             # Get the user object using their email (unique to every user)
@@ -80,11 +84,79 @@ class LoginView(MethodView):
             # Return a server error using the HTTP Error Code 500 (Internal Server Error)
             return make_response(jsonify(response)), 500
 
+class RestEmailView(MethodView):
+    """This class validates a user email then generates a token to reset a users password."""
+
+    @staticmethod
+    def post():
+        """Handle POST request for this view. Url ---> /api/auth/reset"""
+
+        # Query to see if the user email exists
+        user = User.query.filter_by(email=request.data['email']).first()
+        if user:
+            access_token = user.generate_token(user.id)
+            if access_token:
+                response = {
+                    'message': 'Email confirmed you can reset your password.',
+                    'access_token': access_token.decode()
+                }
+                return make_response(jsonify(response)), 200
+
+        response = {
+            'message': 'Wrong Email or user email does not exist.'
+        }
+        return make_response(jsonify(response)), 401
+
+
+class RestPasswordView(MethodView):
+    """This class resets a users password."""
+
+    @staticmethod
+    def put():
+        """This Handles PUT request for handling the reset password for the user
+        ---> /api/auth/reset-password
+        """
+
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                try:
+                    reset_password = User.query.filter_by(id=user_id).first_or_404()
+
+                    post_data = request.data
+                    name = reset_password.name
+                    email = reset_password.email
+                    reset_password.password = Bcrypt().generate_password_hash(
+                        post_data['password']).decode()
+                    user = User(name=name, email=email, password=reset_password.password)
+                    user.reset_password()
+
+                    response = {
+                        'message': 'Password rest successfully. Please log in.'
+                    }
+                    # return a response notifying the user that password was reset successfully
+                    return make_response(jsonify(response)), 201
+                except Exception as error:
+                    # An error occured, therefore return a string message containing the error
+                    response = {
+                        'message': str(error)
+                    }
+                    return make_response(jsonify(response)), 401
+        message = user_id
+        response = {
+            'message': message
+        }
+        return make_response(jsonify(response)), 401
 
 
 # Define the API resource
 registration_view = RegistrationView.as_view('registration_view')
 login_view = LoginView.as_view('login_view')
+reset_view = RestEmailView.as_view('rest_view')
+reset_password_view = RestPasswordView.as_view('rest_password_view')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -100,4 +172,20 @@ auth_blueprint.add_url_rule(
     '/api/auth/login',
     view_func=login_view,
     methods=['POST']
+)
+
+# Define the rule for the rest(to validate the email) url --->  /api/auth/rest
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/api/auth/reset',
+    view_func=reset_view,
+    methods=['POST']
+)
+
+# Define the rule for the rest_password url --->  /api/auth/rest-password
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/api/auth/reset-password',
+    view_func=reset_password_view,
+    methods=['PUT']
 )

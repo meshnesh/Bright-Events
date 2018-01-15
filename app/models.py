@@ -1,9 +1,16 @@
+"""File contains the db models for application and tables"""
+
+from datetime import datetime, timedelta
 from app import db
 from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
 import jwt
-from datetime import datetime, timedelta
-from flask import current_app, Flask
+from flask import current_app
+
+
+rsvps = db.Table('rsvps',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('event_id', db.Integer, db.ForeignKey('eventlists.id'))
+)
 
 
 class User(db.Model):
@@ -18,6 +25,8 @@ class User(db.Model):
     password = db.Column(db.String(256))
     eventlists = db.relationship(
         'Events', order_by='Events.id', cascade="all, delete-orphan")
+    myrsvps = db.relationship('Events', secondary=rsvps,
+                              backref=db.backref('rsvpList', lazy='dynamic'), lazy='dynamic')
 
     def __init__(self, name, email, password):
         """Initialize the user with a name, an email and a password."""
@@ -39,7 +48,13 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def generate_token(self, user_id):
+    @staticmethod
+    def reset_password():
+        """Save a new user user password to the database."""
+        db.session.commit()
+
+    @staticmethod
+    def generate_token(user_id):
         """ Generates the access token"""
 
         try:
@@ -76,7 +91,8 @@ class User(db.Model):
             return "Invalid token. Please register or login"
 
     def __str__(self):
-        return """User(id={}, name={}, email={}, events={})""".format(self.id, self.name, self.email)
+        return """User(id={}, name={}, email={}, events={})""".format(
+            self.id, self.name, self.email, self.myrsvps.all())
 
     __repr__ = __str__
 
@@ -116,6 +132,7 @@ class Events(db.Model):
 
     def add_rsvp(self, user):
         """ This method adds a user to the list of rsvps"""
+        #check if the user is already in the list
         evt = user.myrsvps.filter_by(id=self.id).first()
         if evt:
             return True
@@ -124,11 +141,6 @@ class Events(db.Model):
         db.session.commit()
         return False
 
-    def get__all_rsvp(self, user):
-        """This method gets all the events for a given user."""
-        for user in self.rsvpList:
-            return user
-
     @staticmethod
     def get_all_user(user_id):
         """This method gets all the events for a given user."""
@@ -136,7 +148,7 @@ class Events(db.Model):
 
     @staticmethod
     def get__all_events():
-        """This method gets all the events for a given user."""
+        """This method gets all the events in the db"""
         return Events.query.all()
 
     def delete(self):
@@ -145,6 +157,6 @@ class Events(db.Model):
         db.session.commit()
 
     def __str__(self):
-        return "<Events: {}>".format(self.title) # check on this later
+        return "<Events: {}>".format(self.title)
 
     __repr__ = __str__

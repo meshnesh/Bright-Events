@@ -1,6 +1,5 @@
 # test_event.py
 import unittest
-import os
 import json
 from app import create_app, db
 
@@ -29,20 +28,20 @@ class EventTestCase(unittest.TestCase):
             db.drop_all()
             db.create_all()
 
-    def register_user(self, name="test user", email="user@test.com", password="test1234"):
+    def register_user(self):
         """This helper method helps register a test user."""
         user_data = {
-            'name':name,
-            'email': email,
-            'password': password
+            'name':'test user',
+            'email': 'user@test.com',
+            'password': 'test1234'
         }
         return self.client().post('/api/auth/register', data=user_data)
 
-    def login_user(self, email="user@test.com", password="test1234"):
+    def login_user(self):
         """This helper method helps log in a test user."""
         user_data = {
-            'email': email,
-            'password': password
+            'email': 'user@test.com',
+            'password': 'test1234'
         }
         return self.client().post('/api/auth/login', data=user_data)
 
@@ -62,8 +61,8 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 201)
         self.assertIn('Swimming In Lake Turkana', str(res.data))
 
-    def test_api_can_get_all_user_events(self):
-        """Test API can get an event (GET request)."""
+    def test_api_get_all_user_events(self):
+        """Test API can get all events with token passed (GET request)."""
         self.register_user()
         result = self.login_user()
         access_token = json.loads(result.data.decode())['access_token']
@@ -80,7 +79,7 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('Swimming In Lake Turkana', str(res.data))
 
-    def test_api_can_get_user__single_event(self):
+    def test_api_get_user_single_event(self):
         """Test API can get a single event by using it's id."""
         self.register_user()
         result = self.login_user()
@@ -159,6 +158,203 @@ class EventTestCase(unittest.TestCase):
             )
         self.assertEqual(result.status_code, 404)
 
+    def test_user_rsvp(self):
+        """Test API User can RSVP to an existing event. (POST request)."""
+        #register the user and login
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        #let's create an event
+        rv = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(rv.status_code, 201)
+        # get the json with the event
+        results = json.loads(rv.data.decode())
+
+        # lets rsvp to the event now
+        rv = self.client().post(
+            '/api/events/{}/rsvp/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token))
+        self.assertEqual(result.status_code, 200)
+
+    def test_api_can_filter_event_title(self):
+        """Test API can filter an event by title (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Swimming In Lake Turkana'
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Swimming In Lake Turkana', str(res.data))
+
+    def test_filter_not_event_title(self):
+        """Test API can filter an event by title non existence (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=vacation'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
+    def test_filter_event_location(self):
+        """Test API can filter an event by location (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?location=Naivasha'
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Naivasha', str(res.data))
+
+    def test_filter_none_event_location(self):
+        """Test API can filter an event by location which does not exist (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?location=Nairobi'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
+    def test_filter_event_cartegory(self):
+        """Test API can filter an event by cartegory (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?cartegory=Lifestyle'
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Lifestyle', str(res.data))
+
+    def test_filter_not_event_cartegory(self):
+        """Test API can filter an event by cartegory that does not exist (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?cartegory=Education'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
+    def test_filter_event_all_search(self):
+        """Test API can filter an event by cartegory, location, title (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&cartegory=Lifestyle'
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Lifestyle', str(res.data))
+
+    def test_event_filter_no_title(self):
+        """Test API can filter an event by cartegory, location, title
+        with wrong title (GET request).
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Hiking Mt Kenya&location=Naivasha&cartegory=Lifestyle'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
+    def test_event_wrong_location(self):
+        """Test API can filter an event by cartegory, location, title
+        with wrong location (GET request).
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Swimming In Lake Turkana&location=Turkana&cartegory=Lifestyle'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
+    def test_event_wrong_category(self):
+        """Test API can filter an event by cartegory, location, title
+        with wrong category (GET request).
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&cartegory=Education'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
 
     def tearDown(self):
         """teardown all initialized variables."""
