@@ -129,3 +129,22 @@ class AuthTestCase(unittest.TestCase):
             headers=dict(Authorization="Bearer " + access_token),
             data=new_password)
         self.assertEqual(password_res.status_code, 201)
+
+    def test_user_status(self):
+        """ Test for user status """
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        self.assertEqual(res.status_code, 201)
+        login_res = self.client().post('/api/auth/login', data=self.user_data)
+
+        # obtain the access token
+        access_token = json.loads(login_res.data.decode())['access_token']
+
+        response = self.client().get(
+            '/auth/status',
+            headers=dict(
+                Authorization='Bearer ' + access_token)
+        )
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['status'] == 'success')
+        self.assertTrue(data['data'] is not None)
+        self.assertEqual(response.status_code, 200)

@@ -151,12 +151,47 @@ class RestPasswordView(MethodView):
         }
         return make_response(jsonify(response)), 401
 
+class UserAPI(MethodView):
+    """
+    User Resource
+    """
+    def get(self):
+        # get the auth token
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            resp = User.decode_token(access_token)
+            if not isinstance(resp, str):
+                user = User.query.filter_by(id=resp).first()
+                responseObject = {
+                    'status': 'success',
+                    'data': {
+                        'user_id': user.id,
+                        'email': user.email
+                    }
+                }
+                return make_response(jsonify(responseObject)), 200
+            responseObject = {
+                'status': 'fail',
+                'message': resp
+            }
+            return make_response(jsonify(responseObject)), 401
+
+        responseObject = {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }
+        return make_response(jsonify(responseObject)), 401
+
+
 
 # Define the API resource
 registration_view = RegistrationView.as_view('registration_view')
 login_view = LoginView.as_view('login_view')
 reset_view = RestEmailView.as_view('rest_view')
 reset_password_view = RestPasswordView.as_view('rest_password_view')
+user_view = UserAPI.as_view('user_api')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -188,4 +223,10 @@ auth_blueprint.add_url_rule(
     '/api/auth/reset-password',
     view_func=reset_password_view,
     methods=['PUT']
+)
+
+auth_blueprint.add_url_rule(
+    '/auth/status',
+    view_func=user_view,
+    methods=['GET']
 )
