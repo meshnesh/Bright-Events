@@ -2,6 +2,7 @@ import unittest
 import json
 import time
 from app import create_app, db
+from app.models import User, BlacklistToken
 
 class AuthTestCase(unittest.TestCase):
     """Test case for the authentication blueprint."""
@@ -192,3 +193,27 @@ class AuthTestCase(unittest.TestCase):
     #     self.assertTrue(
     #         data['message'] == 'Signature expired. Please log in again.')
     #     self.assertEqual(response.status_code, 401)
+
+    def test_valid_blacklisted_token_logout(self):
+        """ Test for logout before token expires """
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        self.assertEqual(res.status_code, 201)
+        login_res = self.client().post('/api/auth/login', data=self.user_data)
+
+        # get the token
+        access_token = json.loads(login_res.data.decode())['access_token']
+
+        blacklist_token = BlacklistToken(access_token)
+        db.session.add(blacklist_token)
+        db.session.commit()
+
+       # blacklisted valid token logout
+        response = self.client().post(
+            '/auth/logout',
+            headers=dict(
+                Authorization='Bearer ' + access_token)
+        )
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['status'] == 'fail')
+        self.assertTrue(data['message'] == 'Token blacklisted. Please log in again.')
+        self.assertEqual(response.status_code, 401)
