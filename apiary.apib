@@ -1,80 +1,326 @@
 FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
+HOST: https://bright-events.herokuapp.com/api
 
-# Bright Events Docs
+# Bright Events
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+An Application that allow people to create events, allow other people to attend them and share the great moments.
 
-## Questions Collection [/questions]
 
-### List All Questions [GET]
+## Register User [/auth/register]
 
-+ Response 200 (application/json)
+Create a new user account by registering
 
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
-
-### Create a New Question [POST]
-
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+### user registration [POST]
 
 + Request (application/json)
 
         {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
+            "name": "test user",
+            "email": "test@gmail.com",
+            "password": "qwerty1234"
+        }
+
++ Response 201 (application/json)
+    + Body
+
+            {
+                "message": "You registered successfully. Please log in."
+            }
+
++ Response 202 (application/json)
+
+    + Headers
+
+            Location: /api/events/
+
+    + Body
+
+            {
+                "message": "User already exists. Please login."
+            }
+
+
+## Login User [/auth/login]
+
+Create a new user account by registering
+
+### user login [POST]
+
++ Request (application/json)
+
+        {
+            "email": "test@gmail.com",
+            "password": "tushy123"
+        }
+
++ Response 200 (application/json)
+
+    + Headers
+
+            Location: /api/events/
+
+    + Body
+
+            {
+                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MTU4NTY2MTcsImlhdCI6MTUxNTc3MDIxNywic3ViIjoxfQ.RS1ebCtkiAw50LL1s2j0bKhUz_vLGXU1mIpSOuKPjkA",
+                "message": "You logged in successfully."
+            }
+
++ Response 401 (application/json)
+
+    + Headers
+
+            Location: /api/events/
+
+    + Body
+
+            {
+                "message": "Invalid email or password, Please try again"
+            }
+
++ Request (application/json)
+
+        {
+        }
+
++ Response 200 (application/json)
+
+    + Headers
+
+            Location: /api/events/
+
+    + Body
+
+            {
+                "message": "You logged out successfully."
+            }
+
+            
+## Events [/events/]
+
+Create and Fetch all created events
+
+### Get events [GET]
+
+Fetch all created events in the application
+
++ Response 200 (application/json)
+    
+    + Headers
+
+            Location: /api/events/
+
+    + Body
+
+            [
+                {
+                    "cartegory": "Family",
+                    "date": "26th OCT 2017",
+                    "description": "Celebrate all fathers in the world with this fathers day",
+                    "id": 1,
+                    "imageUrl": "https://www.google.com",
+                    "location": "Kasarani",
+                    "time": "10:00AM",
+                    "title": "Fathers Day"
+                },
+                {
+                    "cartegory": "event category",
+                    "date": "26th Jan 2018",
+                    "description": "evnet description, explaining the event in details",
+                    "id": 2,
+                    "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
+                    "location": "Kasarani Stadium",
+                    "time": "09:00 AM",
+                    "title": "Koroga Festival"
+                }
             ]
+
+
+### create an event [POST]
+
+Create a new event, must be logged in to do so.
+
++ Request (application/json)
+
+        {
+            "title": "Koroga Festival",
+            "description": "evnet description, explaining the event in details",
+            "cartegory": "event category",
+            "location": "Kasarani Stadium",
+            "date": "6th JAN 2017",
+            "time":"09:00AM",
+            "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
         }
 
 + Response 201 (application/json)
 
     + Headers
 
-            Location: /questions/2
+            Location: /api/events/
 
     + Body
 
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
+                "cartegory": "event category",
+                "created_by": 1,
+                "date": "26th Jan 2018",
+                "description": "evnet description, explaining the event in details",
+                "id": 2,
+                "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
+                "location": "Kasarani Stadium",
+                "time": "09:00 AM",
+                "title": "Koroga Festival"
             }
+
+## Updating and Deleting events [/events/1]
+
+Get, update and delete Events by using the event id
+
+### Get single Event [GET]
+
+Get a single event with details by sending a request with the event id
+
++ Request (application/json)
+
+        {}
+
++ Response 200 (application/json)
+
+        {
+            "cartegory": "Family",
+            "date": "26th OCT 2017",
+            "description": "Celebrate all fathers in the world with this fathers day",
+            "id": 1,
+            "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
+            "location": "Kasarani",
+            "time": "10:00AM",
+            "title": "Fathers Day"
+        }
+
+### Update Event [PUT]
+
+Update an event by sending a request with updated values and the event id
+
++ Request (application/json)
+
+        {
+            "cartegory": "event category",
+            "date": "26th Jan 2018",
+            "description": "evnet description, explaining the event in details",
+            "id": 1,
+            "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
+            "location": "Kasarani Stadium",
+            "time": "09:00 AM",
+            "title": "Koroga Festival"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "cartegory": "Family",
+            "date": "26th OCT 2017",
+            "description": "Celebrate all fathers in the world with this fathers day",
+            "id": 1,
+            "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
+            "location": "Kasarani",
+            "time": "10:00AM",
+            "title": "Fathers Day"
+        }
+
+### Delete an event [DELETE]
+
+Delete an event by sending a request with the event id
+
++ Request (application/json)
+
+        {}
+
++ Response 200 (application/json)
+
+    + Headers
+
+            Location: /api/events/<int:event_id>
+
+    + Body
+
+            {
+                "message": "event {int:event_id} deleted successfully"
+            }
+
++ Response 404 (application/json)
+
+    + Headers
+
+            Location: /api/events/<int:event_id>
+
+    + Body
+
+            {
+                "response": "event not found"
+            }
+
+## Event RSVP [/api/events/1/rsvp/]
+
+Get, update and delete Events by using the event id
+
+### RSVP to an Event [POST]
+
+Must have logged in and in order to reserve to an event
+
++ Request (application/json)
+
+        {}
+
++ Response 200 (application/json)
+
+        {
+            "message": "You have Reserved a seat"
+        }
+
+
++ Response 202 (application/json)
+
+        {
+            "message": "You have already reserved a seat"
+        }
+
+## Password Reset Email [/auth/reset]
+
+User can change, first must validate the email
+
+### validate email [POST]
+
+Must have logged in and in order to validate email for reset password
+
++ Request (application/json)
+
+        {
+            "email":"test@gmail.com"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MTU4NTczMjAsImlhdCI6MTUxNTc3MDkyMCwic3ViIjoxfQ.s-6lWX0J5s3yp9og2Ehf3Xp1zwKIX4uAAKa6PT3ckcc",
+            "message": "Email confirmed you can reset your password."
+        }
+
+## Password Reset [/auth/reset-password]
+
+User can change, first must validate the email
+
+### reset password [PUT]
+
+Send a request with the new password
+
++ Request (application/json)
+
+        {
+            "password":"tushy1234"
+        }
+
++ Response 201 (application/json)
+
+        {
+            "message": "Password rest successfully. Please log in."
+        }
