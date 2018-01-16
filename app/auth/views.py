@@ -151,6 +151,7 @@ class RestPasswordView(MethodView):
         }
         return make_response(jsonify(response)), 401
 
+
 class UserAPI(MethodView):
     """
     User Resource
