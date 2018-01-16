@@ -148,3 +148,23 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['status'] == 'success')
         self.assertTrue(data['data'] is not None)
         self.assertEqual(response.status_code, 200)
+
+    def test_valid_logout(self):
+        """ Test for logout before token expires """
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        self.assertEqual(res.status_code, 201)
+        login_res = self.client().post('/api/auth/login', data=self.user_data)
+
+        # get the token
+        access_token = json.loads(login_res.data.decode())['access_token']
+
+        # valid token logout
+        response = self.client().post(
+            '/auth/logout',
+            headers=dict(
+                Authorization='Bearer ' + access_token)
+        )
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['status'] == 'success')
+        self.assertTrue(data['message'] == 'Successfully logged out.')
+        self.assertEqual(response.status_code, 200)
