@@ -216,3 +216,10 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['status'] == 'fail')
         self.assertTrue(data['message'] == 'Token blacklisted. Please log in again.')
         self.assertEqual(response.status_code, 401)
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
