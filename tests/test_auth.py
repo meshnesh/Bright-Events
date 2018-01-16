@@ -208,9 +208,7 @@ class AuthTestCase(unittest.TestCase):
 
         # blacklist a valid token
         blacklist_token = BlacklistToken(access_token)
-        # blacklist_token.save()
-        db.session.add(blacklist_token)
-        db.session.commit()
+        blacklist_token.save()
 
         response = self.client().get(
             '/auth/status',
@@ -222,9 +220,9 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['message'] == 'Token blacklisted. Please log in again.')
         self.assertEqual(response.status_code, 401)
 
-    def tearDown(self):
-        """teardown all initialized variables."""
-        with self.app.app_context():
-            # drop all tables
-            db.session.remove()
-            db.drop_all()
+    # def tearDown(self):
+    #     """teardown all initialized variables."""
+    #     with self.app.app_context():
+    #         # drop all tables
+    #         db.session.remove()
+    #         db.drop_all()
