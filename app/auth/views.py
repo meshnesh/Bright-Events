@@ -2,7 +2,7 @@
 
 from flask.views import MethodView
 from flask import make_response, request, jsonify
-from app.models import User
+from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 
 from . import auth_blueprint
@@ -185,6 +185,46 @@ class UserAPI(MethodView):
         return make_response(jsonify(responseObject)), 401
 
 
+class LogoutAPI(MethodView):
+    """
+    Logout Resource
+    """
+    def post(self):
+        # get auth token
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            resp = User.decode_token(access_token)
+            if not isinstance(resp, str):
+                # mark the token as blacklisted
+                blacklist_token = BlacklistToken(token=access_token)
+                try:
+                    blacklist_token.save()
+                    responseObject = jsonify({
+                        'status': 'success',
+                        'message': 'Successfully logged out.'
+                    })
+                    return make_response(responseObject), 200
+                except Exception as error:
+                    responseObject = jsonify({
+                        'status': 'fail',
+                        'message': error
+                    })
+                    return make_response(responseObject), 200
+
+            responseObject = {
+                'status': 'fail',
+                'message': resp
+            }
+            return make_response(jsonify(responseObject)), 401
+
+        responseObject = {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }
+        return make_response(jsonify(responseObject)), 403
+
 
 # Define the API resource
 registration_view = RegistrationView.as_view('registration_view')
@@ -192,6 +232,7 @@ login_view = LoginView.as_view('login_view')
 reset_view = RestEmailView.as_view('rest_view')
 reset_password_view = RestPasswordView.as_view('rest_password_view')
 user_view = UserAPI.as_view('user_api')
+logout_view = LogoutAPI.as_view('logout_api')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -229,4 +270,10 @@ auth_blueprint.add_url_rule(
     '/auth/status',
     view_func=user_view,
     methods=['GET']
+)
+
+auth_blueprint.add_url_rule(
+    '/auth/logout',
+    view_func=logout_view,
+    methods=['POST']
 )
