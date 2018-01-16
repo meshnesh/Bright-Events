@@ -230,7 +230,7 @@ class AuthTestCase(unittest.TestCase):
         # blacklist a valid token
         blacklist_token = BlacklistToken(access_token)
         db.session.add(blacklist_token)
-        db.session.commit()
+        # db.session.commit()
 
         response = self.client().get(
             '/auth/status',
