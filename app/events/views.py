@@ -228,6 +228,29 @@ class EventsManupilationView(MethodView):
             }
             return make_response(jsonify(response)), 401
 
+    def delete(self, event_id):
+        """This Handles deleting of an event with it's id"""
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # retrieve an event using it's ID
+                event = Events.query.filter_by(id=event_id).first_or_404()
+
+                event.delete()
+                return {
+                    "message": "event {} deleted successfully".format(event.id)
+                }, 200
+
+        else:
+            # user is not legit, so the payload is an error message
+            message = user_id
+            response = {
+                'message': message
+            }
+            return make_response(jsonify(response)), 401
 
 
 
@@ -267,3 +290,8 @@ events_blueprint.add_url_rule(
     '/api/events/<int:event_id>',
     view_func=EVENT_MANUPILATION_VIEW,
     methods=['PUT'])
+
+events_blueprint.add_url_rule(
+    '/api/events/<int:event_id>',
+    view_func=EVENT_MANUPILATION_VIEW,
+    methods=['DELETE'])
