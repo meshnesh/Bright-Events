@@ -1,4 +1,5 @@
-# app/__init__.py
+"""import depancies and methods."""
+
 import json
 from flask_api import FlaskAPI, status
 from flask_sqlalchemy import SQLAlchemy
@@ -14,8 +15,6 @@ db = SQLAlchemy()
 def create_app(config_name):
     """Creates a new Flask object and returns when it's configured
     and connected with the db."""
-
-    from app.models import Events, User
 
     app = FlaskAPI(__name__, instance_relative_config=True)
 
