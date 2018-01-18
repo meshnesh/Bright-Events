@@ -1,4 +1,5 @@
-# test_event.py
+"""import depancies and methods."""
+
 import unittest
 import json
 from app import create_app, db
