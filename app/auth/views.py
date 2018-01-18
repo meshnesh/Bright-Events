@@ -9,7 +9,7 @@ from . import auth_blueprint
 
 
 class RegistrationView(MethodView):
-    """This class registers a new user."""
+    """This class registers a new user. Url ---> /api/auth/register"""
 
     @staticmethod
     def post():
@@ -50,7 +50,8 @@ class RegistrationView(MethodView):
 
 
 class LoginView(MethodView):
-    """This class-based view handles user login and access token generation."""
+    """This class handles user login and
+    access token generation. Url ---> /api/auth/login"""
 
     @staticmethod
     def post():
@@ -84,8 +85,10 @@ class LoginView(MethodView):
             # Return a server error using the HTTP Error Code 500 (Internal Server Error)
             return make_response(jsonify(response)), 500
 
+
 class RestEmailView(MethodView):
-    """This class validates a user email then generates a token to reset a users password."""
+    """This class validates a user email then
+    generates a token to reset a users password. Url ---> /api/auth/reset"""
 
     @staticmethod
     def post():
@@ -109,7 +112,7 @@ class RestEmailView(MethodView):
 
 
 class RestPasswordView(MethodView):
-    """This class resets a users password."""
+    """This class resets a users password. Url ---> /api/auth/reset-password"""
 
     @staticmethod
     def put():
@@ -154,9 +157,13 @@ class RestPasswordView(MethodView):
 
 class UserAPI(MethodView):
     """
-    User Resource
+    Class handles getting User Resource of a valid user token. Url ---> /api/auth/status
     """
-    def get(self):
+
+    @staticmethod
+    def get():
+        """Get the email and id of a user"""
+
         # get the auth token
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
@@ -165,32 +172,36 @@ class UserAPI(MethodView):
             resp = User.decode_token(access_token)
             if not isinstance(resp, str):
                 user = User.query.filter_by(id=resp).first()
-                responseObject = {
+                response_object = {
                     'status': 'success',
                     'data': {
                         'user_id': user.id,
                         'email': user.email
                     }
                 }
-                return make_response(jsonify(responseObject)), 200
-            responseObject = {
+                return make_response(jsonify(response_object)), 200
+            response_object = {
                 'status': 'fail',
                 'message': resp
             }
-            return make_response(jsonify(responseObject)), 401
+            return make_response(jsonify(response_object)), 401
 
-        responseObject = {
+        response_object = {
             'status': 'fail',
             'message': 'Provide a valid auth token.'
         }
-        return make_response(jsonify(responseObject)), 401
+        return make_response(jsonify(response_object)), 401
 
 
 class LogoutAPI(MethodView):
     """
-    Logout Resource
+    Handles logging out of a user from the application. Url ---> /api/auth/logout
     """
-    def post(self):
+
+    @staticmethod
+    def post():
+        """Makes a post request of the user valid token and black lists it if still valid"""
+
         # get auth token
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
@@ -202,52 +213,52 @@ class LogoutAPI(MethodView):
                 blacklist_token = BlacklistToken(token=access_token)
                 try:
                     blacklist_token.save()
-                    responseObject = jsonify({
+                    response_object = jsonify({
                         'status': 'success',
                         'message': 'Successfully logged out.'
                     })
-                    return make_response(responseObject), 200
+                    return make_response(response_object), 200
                 except Exception as error:
-                    responseObject = jsonify({
+                    response_object = jsonify({
                         'status': 'fail',
                         'message': error
                     })
-                    return make_response(responseObject), 200
+                    return make_response(response_object), 200
 
-            responseObject = {
+            response_object = {
                 'status': 'fail',
                 'message': resp
             }
-            return make_response(jsonify(responseObject)), 401
+            return make_response(jsonify(response_object)), 401
 
-        responseObject = {
+        response_object = {
             'status': 'fail',
             'message': 'Provide a valid auth token.'
         }
-        return make_response(jsonify(responseObject)), 403
+        return make_response(jsonify(response_object)), 403
 
 
 # Define the API resource
-registration_view = RegistrationView.as_view('registration_view')
-login_view = LoginView.as_view('login_view')
-reset_view = RestEmailView.as_view('rest_view')
-reset_password_view = RestPasswordView.as_view('rest_password_view')
-user_view = UserAPI.as_view('user_api')
-logout_view = LogoutAPI.as_view('logout_api')
+REGISTRATION_VIEW = RegistrationView.as_view('REGISTRATION_VIEW')
+LOGIN_VIEW = LoginView.as_view('LOGIN_VIEW')
+RESET_VIEW = RestEmailView.as_view('RESET_VIEW')
+RESET_PASSWORD_VIEW = RestPasswordView.as_view('RESET_PASSWORD_VIEW')
+USER_VIEW = UserAPI.as_view('USER_VIEW')
+LOGOUT_VIEW = LogoutAPI.as_view('LOGOUT_VIEW')
 
 
 # Define the rule for the registration url --->  /api/auth/register
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
     '/api/auth/register',
-    view_func=registration_view,
+    view_func=REGISTRATION_VIEW,
     methods=['POST'])
 
 # Define the rule for the registration url --->  /api/auth/login
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
     '/api/auth/login',
-    view_func=login_view,
+    view_func=LOGIN_VIEW,
     methods=['POST']
 )
 
@@ -255,7 +266,7 @@ auth_blueprint.add_url_rule(
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
     '/api/auth/reset',
-    view_func=reset_view,
+    view_func=RESET_VIEW,
     methods=['POST']
 )
 
@@ -263,18 +274,22 @@ auth_blueprint.add_url_rule(
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
     '/api/auth/reset-password',
-    view_func=reset_password_view,
+    view_func=RESET_PASSWORD_VIEW,
     methods=['PUT']
 )
 
+# Define the rule for the rest_password url --->  /api/auth/status
+# Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
-    '/auth/status',
-    view_func=user_view,
+    '/api/auth/status',
+    view_func=USER_VIEW,
     methods=['GET']
 )
 
+# Define the rule for the rest_password url --->  /api/auth/logout
+# Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
-    '/auth/logout',
-    view_func=logout_view,
+    '/api/auth/logout',
+    view_func=LOGOUT_VIEW,
     methods=['POST']
 )
