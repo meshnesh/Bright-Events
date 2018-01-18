@@ -113,18 +113,18 @@ class Events(db.Model):
     time = db.Column(db.String(255), nullable=False)
     date = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
-    cartegory = db.Column(db.String(255), nullable=False)
+    category = db.Column(db.String(255), nullable=False)
     imageUrl = db.Column(db.String(255))
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
 
-    def __init__(self, title, location, time, date, description, cartegory, imageUrl, created_by):
+    def __init__(self, title, location, time, date, description, category, imageUrl, created_by):
         """initialize an event with its creator."""
         self.title = title
         self.location = location
         self.time = time
         self.date = date
         self.description = description
-        self.cartegory = cartegory
+        self.category = category
         self.imageUrl = imageUrl
         self.created_by = created_by
 
