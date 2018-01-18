@@ -182,9 +182,7 @@ class AuthTestCase(unittest.TestCase):
         access_token = json.loads(login_res.data.decode())['access_token']
 
         blacklist_token = BlacklistToken(access_token)
-        # blacklist_token.save()
-        db.session.add(blacklist_token)
-        db.session.commit()
+        blacklist_token.save()
 
        # blacklisted valid token logout
         response = self.client().post(
