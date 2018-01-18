@@ -58,8 +58,10 @@ class AllEventsView(MethodView):
 
 class SingleEventView(MethodView):
     """This class handles getting single event
-    with out token validation. Url ---> /api/events/<int:event_id>"""
-    def get(self, event_id):
+    with out token validation. Url ---> /api/events/all/<int:event_id>"""
+
+    @staticmethod
+    def get(event_id):
         """Handle getting a single event by id"""
         event = Events.query.filter_by(id=event_id).first_or_404()
         response = jsonify({
@@ -168,10 +170,11 @@ class UserEventsView(MethodView):
 
 
 class EventsManupilationView(MethodView):
-    """This class handles all methods that involve single event 
+    """This class handles all methods that involve single event
     get, update and delete. Url --->/api/events/<int:event_id>"""
 
-    def get(self, event_id):
+    @staticmethod
+    def get(event_id):
         """Handles single event data with GET by event id."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
@@ -201,7 +204,8 @@ class EventsManupilationView(MethodView):
             }
             return make_response(jsonify(response)), 401
 
-    def put(self, event_id):
+    @staticmethod
+    def put(event_id):
         """This function handles editing of single events by their id"""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
@@ -250,7 +254,8 @@ class EventsManupilationView(MethodView):
             }
             return make_response(jsonify(response)), 401
 
-    def delete(self, event_id):
+    @staticmethod
+    def delete(event_id):
         """This Handles deleting of an event with it's id"""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
@@ -279,7 +284,8 @@ class EventRsvpView(MethodView):
     """This class handles POST method for user
     RSVP to and event in url, ----> /api/events/<int:event_id>/rsvp/"""
 
-    def post(self, event_id):
+    @staticmethod
+    def post(event_id):
         """Adds a user to rsvp to a specific event."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
