@@ -69,37 +69,74 @@ class UserEventsView(MethodView):
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
                 # Go ahead and handle the request, the user is authed
-                if request.method == "POST":
-                    title = str(request.data.get('title', ''))
-                    location = str(request.data.get('location', ''))
-                    time = str(request.data.get('time', ''))
-                    date = str(request.data.get('date', ''))
-                    description = str(request.data.get('description', ''))
-                    cartegory = str(request.data.get('cartegory', ''))
-                    imageUrl = str(request.data.get('imageUrl', ''))
-                    if title:
-                        event = Events(
-                            title=title,
-                            location=location,
-                            time=time, date=date,
-                            description=description,
-                            cartegory=cartegory,
-                            imageUrl=imageUrl,
-                            created_by=user_id)
-                        event.save()
-                        response = jsonify({
-                            'id': event.id,
-                            'title': event.title,
-                            'location': event.location,
-                            'time': event.time,
-                            'date': event.date,
-                            'description': event.description,
-                            'cartegory':event.cartegory,
-                            'imageUrl':event.imageUrl,
-                            'created_by': user_id
-                        })
 
-                        return make_response(response), 201
+                title = str(request.data.get('title', ''))
+                location = str(request.data.get('location', ''))
+                time = str(request.data.get('time', ''))
+                date = str(request.data.get('date', ''))
+                description = str(request.data.get('description', ''))
+                cartegory = str(request.data.get('cartegory', ''))
+                imageUrl = str(request.data.get('imageUrl', ''))
+                if title:
+                    event = Events(
+                        title=title,
+                        location=location,
+                        time=time, date=date,
+                        description=description,
+                        cartegory=cartegory,
+                        imageUrl=imageUrl,
+                        created_by=user_id)
+                    event.save()
+                    response = jsonify({
+                        'id': event.id,
+                        'title': event.title,
+                        'location': event.location,
+                        'time': event.time,
+                        'date': event.date,
+                        'description': event.description,
+                        'cartegory':event.cartegory,
+                        'imageUrl':event.imageUrl,
+                        'created_by': user_id
+                    })
+
+                    return make_response(response), 201
+        else:
+            # user is not legit, so the payload is an error message
+            message = user_id
+            response = {
+                'message': message
+            }
+            return make_response(jsonify(response)), 401
+
+    @staticmethod
+    def get():
+        """Handle GET request for this view. Url ---> /api/events"""
+
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # get all the events for this user
+                events = Events.get_all_user(user_id)
+                results = []
+
+                for event in events:
+                    obj = {
+                        'id': event.id,
+                        'title': event.title,
+                        'location': event.location,
+                        'time': event.time,
+                        'date': event.date,
+                        'description': event.description,
+                        'cartegory':event.cartegory,
+                        'imageUrl':event.imageUrl
+                    }
+                    results.append(obj)
+
+                return make_response(jsonify(results)), 200
+
         else:
             # user is not legit, so the payload is an error message
             message = user_id
@@ -126,3 +163,8 @@ events_blueprint.add_url_rule(
     '/api/events',
     view_func=USER_EVENTS,
     methods=['POST'])
+
+events_blueprint.add_url_rule(
+    '/api/events',
+    view_func=USER_EVENTS,
+    methods=['GET'])
