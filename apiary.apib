@@ -31,7 +31,7 @@ Create a new user account by registering
 
     + Headers
 
-            Location: /api/events/
+            Location: /api/events
 
     + Body
 
@@ -57,7 +57,7 @@ Create a new user account by registering
 
     + Headers
 
-            Location: /api/events/
+            Location: /api/events
 
     + Body
 
@@ -70,7 +70,7 @@ Create a new user account by registering
 
     + Headers
 
-            Location: /api/events/
+            Location: /api/events
 
     + Body
 
@@ -87,7 +87,7 @@ Create a new user account by registering
 
     + Headers
 
-            Location: /api/events/
+            Location: /api/events
 
     + Body
 
@@ -95,12 +95,11 @@ Create a new user account by registering
                 "message": "You logged out successfully."
             }
 
-            
-## Events [/events/]
+## All Events [/events/all]
 
-Create and Fetch all created events
+Fetch all created events.
 
-### Get events [GET]
+### Get all events [GET]
 
 Fetch all created events in the application
 
@@ -108,7 +107,75 @@ Fetch all created events in the application
     
     + Headers
 
-            Location: /api/events/
+            Location: /api/events/all
+
+    + Body
+
+            [
+                {
+                    "cartegory": "Family",
+                    "date": "26th OCT 2017",
+                    "description": "Celebrate all fathers in the world with this fathers day",
+                    "id": 1,
+                    "imageUrl": "https://www.google.com",
+                    "location": "Kasarani",
+                    "time": "10:00AM",
+                    "title": "Fathers Day"
+                },
+                {
+                    "cartegory": "event category",
+                    "date": "26th Jan 2018",
+                    "description": "evnet description, explaining the event in details",
+                    "id": 2,
+                    "imageUrl": "https://cloud.netlifyusercontent.com/assets/1",
+                    "location": "Kasarani Stadium",
+                    "time": "09:00 AM",
+                    "title": "Koroga Festival"
+                }
+            ]
+
+## Single Event [/events/all/1]
+
+Fetch single events by passing the event id
+
+### Get single events [GET]
+
+Fetch created events in the application by passing the id
+
++ Response 200 (application/json)
+    
+    + Headers
+
+            Location: /api/events/all/1
+
+    + Body
+
+            {
+                "cartegory": "Family",
+                "date": "26th OCT 2017",
+                "description": "Celebrate all fathers in the world with this fathers day",
+                "id": 1,
+                "imageUrl": "https://www.google.com",
+                "location": "Kasarani",
+                "time": "10:00AM",
+                "title": "Fathers Day"
+            }
+
+
+
+## Events [/events]
+
+Create and Fetch all created events by logged in user
+
+### Get events [GET]
+
+Fetch all created events in the application for a user with a valid token
+
++ Response 200 (application/json)
+    
+    + Headers
+
+            Location: /api/events
 
     + Body
 
@@ -156,7 +223,7 @@ Create a new event, must be logged in to do so.
 
     + Headers
 
-            Location: /api/events/
+            Location: /api/events
 
     + Body
 
@@ -323,4 +390,24 @@ Send a request with the new password
 
         {
             "message": "Password rest successfully. Please log in."
+        }
+
+## User Logout [/auth/logout]
+
+User can logout of the application if they have a valid token
+
+### logout [POST]
+
+Send a POST request with the token in the header
+
++ Request (application/json)
+
+        {
+        }
+
++ Response 200 (application/json)
+
+        {
+            "status": "success",
+            "message": "Successfully logged out."
         }
