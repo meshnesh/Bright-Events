@@ -146,11 +146,46 @@ class UserEventsView(MethodView):
             return make_response(jsonify(response)), 401
 
 
+class EventsManupilationView(MethodView):
+    """This class handles all methods that involve single event get, update and delete"""
+
+    def get(self, event_id):
+        """Handles single event data with GET by event id."""
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # retrieve an event using it's ID
+                event = Events.query.filter_by(id=event_id).first_or_404()
+                response = jsonify({
+                    'id': event.id,
+                    'title': event.title,
+                    'location': event.location,
+                    'time': event.time,
+                    'date': event.date,
+                    'description': event.description,
+                    'cartegory':event.cartegory,
+                    'imageUrl':event.imageUrl,
+                    'created_by': event.created_by
+                })
+                return make_response(response), 200
+        else:
+            # user is not legit, so the payload is an error message
+            message = user_id
+            response = {
+                'message': message
+            }
+            return make_response(jsonify(response)), 401
+
+
 
 
 # Define the API resource
 ALL_EVENTS_VIEW = AllEventsView.as_view('ALL_EVENTS_VIEW')
-USER_EVENTS = UserEventsView.as_view('USER_EVENTS')
+USER_EVENTS_VIEW = UserEventsView.as_view('USER_EVENTS_VIEW')
+EVENT_MANUPILATION_VIEW = EventsManupilationView.as_view('EVENT_MANUPILATION_VIEW')
 
 # Define the rule for view all events url --->  /api/events/all
 # Then add the rule to the blueprint
@@ -159,12 +194,22 @@ events_blueprint.add_url_rule(
     view_func=ALL_EVENTS_VIEW,
     methods=['GET'])
 
+# Define the rule for view all events url --->  /api/events
+# Then add the rule to the blueprint
 events_blueprint.add_url_rule(
     '/api/events',
-    view_func=USER_EVENTS,
+    view_func=USER_EVENTS_VIEW,
     methods=['POST'])
 
 events_blueprint.add_url_rule(
     '/api/events',
-    view_func=USER_EVENTS,
+    view_func=USER_EVENTS_VIEW,
+    methods=['GET'])
+
+
+# Define the rule for view all events url --->  /api/events/<int:event_id>
+# Then add the rule to the blueprint
+events_blueprint.add_url_rule(
+    '/api/events/<int:event_id>',
+    view_func=EVENT_MANUPILATION_VIEW,
     methods=['GET'])
