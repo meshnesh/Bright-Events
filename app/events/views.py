@@ -179,6 +179,55 @@ class EventsManupilationView(MethodView):
             }
             return make_response(jsonify(response)), 401
 
+    def put(self, event_id):
+        """This function handles editing of single events by their id"""
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # retrieve an event using it's ID
+                event = Events.query.filter_by(id=event_id).first_or_404()
+
+                title = str(request.data.get('title', ''))
+                location = str(request.data.get('location', ''))
+                time = str(request.data.get('time', ''))
+                date = str(request.data.get('date', ''))
+                description = str(request.data.get('description', ''))
+                cartegory = str(request.data.get('cartegory', ''))
+                imageUrl = str(request.data.get('imageUrl', ''))
+
+                event.title = title
+                event.location = location
+                event.time = time
+                event.date = date
+                event.description = description
+                event.cartegory = cartegory
+                event.imageUrl = imageUrl
+
+                event.save()
+                response = {
+                    'id': event.id,
+                    'title': event.title,
+                    'location': event.location,
+                    'time': event.time,
+                    'date': event.date,
+                    'description': event.description,
+                    'cartegory':event.cartegory,
+                    'imageUrl':event.imageUrl,
+                    'created_by': event.created_by
+                }
+                return make_response(jsonify(response)), 200
+
+        else:
+            # user is not legit, so the payload is an error message
+            message = user_id
+            response = {
+                'message': message
+            }
+            return make_response(jsonify(response)), 401
+
 
 
 
@@ -213,3 +262,8 @@ events_blueprint.add_url_rule(
     '/api/events/<int:event_id>',
     view_func=EVENT_MANUPILATION_VIEW,
     methods=['GET'])
+
+events_blueprint.add_url_rule(
+    '/api/events/<int:event_id>',
+    view_func=EVENT_MANUPILATION_VIEW,
+    methods=['PUT'])
