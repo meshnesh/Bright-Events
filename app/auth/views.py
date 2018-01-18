@@ -1,11 +1,14 @@
 """import depancies and methods."""
 
+import re
 from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 
 from . import auth_blueprint
+
+EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
 
 
 class RegistrationView(MethodView):
@@ -26,6 +29,14 @@ class RegistrationView(MethodView):
                 email = post_data['email']
                 password = post_data['password']
                 user = User(name=name, email=email, password=password)
+                email_match = re.match(EMAIL_VALIDATOR, user.email)
+
+                if not email_match:
+                    response = {
+                        'message': 'Wrong email format. Check your Email.'
+                    }
+                    return make_response(jsonify(response)), 403
+
                 user.save()
 
                 response = {
