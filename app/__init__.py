@@ -249,4 +249,7 @@ def create_app(config_name):
     from .auth import auth_blueprint
     app.register_blueprint(auth_blueprint)
 
+    from .events import events_blueprint
+    app.register_blueprint(events_blueprint)
+
     return app
