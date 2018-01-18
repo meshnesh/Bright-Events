@@ -45,6 +45,39 @@ class EventTestCase(unittest.TestCase):
         }
         return self.client().post('/api/auth/login', data=user_data)
 
+    def test_api_get_all_events(self):
+        """Test API can get all events without token passed (GET request)."""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Swimming In Lake Turkana', str(res.data))
+
+    def test_api_get_single_event(self):
+        """Test API can get a single event by using it's id. with out valid token"""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        rv = self.client().post(
+            '/api/events',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(rv.status_code, 201)
+        results = json.loads(rv.data.decode())
+        result = self.client().get(
+            '/api/events/all/{}'.format(results['id']))
+        self.assertEqual(result.status_code, 200)
+        self.assertIn('Swimming In Lake Turkana', str(result.data))
+
     def test_event_creation(self):
         """Test API can create an event (POST request)"""
         # register a test user, then log them in
