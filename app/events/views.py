@@ -253,11 +253,49 @@ class EventsManupilationView(MethodView):
             return make_response(jsonify(response)), 401
 
 
+class EventRsvpView(MethodView):
+    """This class handles POST method for user
+    RSVP to and event in url, ----> /api/events/<int:event_id>/rsvp/"""
+
+    def post(self, event_id):
+        """Adds a user to rsvp to a specific event."""
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                event = Events.query.filter_by(id=event_id).first_or_404()
+
+                # POST User to the RSVP
+                user = User.query.filter_by(id=user_id).first_or_404()
+                has_prev_rsvpd = event.add_rsvp(user)
+                if has_prev_rsvpd:
+                    response = {
+                        'message': 'You have already reserved a seat'
+                    }
+                    return make_response(jsonify(response)), 202
+
+                response = {
+                    'message': 'You have Reserved a seat'
+                }
+                return make_response(jsonify(response)), 200
+
+        else:
+            # user is not legit, so the payload is an error message
+            message = user_id
+            response = {
+                'message': message
+            }
+            return make_response(jsonify(response)), 401
+
+
 
 # Define the API resource
 ALL_EVENTS_VIEW = AllEventsView.as_view('ALL_EVENTS_VIEW')
 USER_EVENTS_VIEW = UserEventsView.as_view('USER_EVENTS_VIEW')
 EVENT_MANUPILATION_VIEW = EventsManupilationView.as_view('EVENT_MANUPILATION_VIEW')
+EVENT_RSVP_VIEW = EventRsvpView.as_view('EVENT_RSVP_VIEW')
 
 # Define the rule for view all events url --->  /api/events/all
 # Then add the rule to the blueprint
@@ -295,3 +333,10 @@ events_blueprint.add_url_rule(
     '/api/events/<int:event_id>',
     view_func=EVENT_MANUPILATION_VIEW,
     methods=['DELETE'])
+
+# Define the rule for view all events url --->  /api/events/<int:event_id>/rsvp
+# Then add the rule to the blueprint
+events_blueprint.add_url_rule(
+    '/api/events/<int:event_id>/rsvp',
+    view_func=EVENT_RSVP_VIEW,
+    methods=['POST'])
