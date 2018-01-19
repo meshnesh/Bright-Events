@@ -20,7 +20,7 @@ class AllEventsView(MethodView):
         limit = request.args.get('limit', default=10, type=int)
 
         args = {}
-        potential_search = ['title', 'location', 'cartegory']
+        potential_search = ['title', 'location', 'category']
 
         for search_res in potential_search:
             var = request.args.get(search_res)
@@ -42,8 +42,8 @@ class AllEventsView(MethodView):
                 'time': event.time,
                 'date': event.date,
                 'description': event.description,
-                'cartegory':event.cartegory,
-                'imageUrl':event.imageUrl
+                'category':event.category,
+                'image_url':event.image_url
             }
             results.append(obj)
 
@@ -71,8 +71,8 @@ class SingleEventView(MethodView):
             'time': event.time,
             'date': event.date,
             'description': event.description,
-            'cartegory':event.cartegory,
-            'imageUrl':event.imageUrl,
+            'category':event.category,
+            'image_url':event.image_url,
             'created_by': event.created_by
         })
         return make_response(response), 200
@@ -98,16 +98,16 @@ class UserEventsView(MethodView):
                 time = str(request.data.get('time', ''))
                 date = str(request.data.get('date', ''))
                 description = str(request.data.get('description', ''))
-                cartegory = str(request.data.get('cartegory', ''))
-                imageUrl = str(request.data.get('imageUrl', ''))
+                category = str(request.data.get('category', ''))
+                image_url = str(request.data.get('image_url', ''))
                 if title:
                     event = Events(
                         title=title,
                         location=location,
                         time=time, date=date,
                         description=description,
-                        cartegory=cartegory,
-                        imageUrl=imageUrl,
+                        category=category,
+                        image_url=image_url,
                         created_by=user_id)
                     event.save()
                     response = jsonify({
@@ -117,8 +117,8 @@ class UserEventsView(MethodView):
                         'time': event.time,
                         'date': event.date,
                         'description': event.description,
-                        'cartegory':event.cartegory,
-                        'imageUrl':event.imageUrl,
+                        'category':event.category,
+                        'image_url':event.image_url,
                         'created_by': user_id
                     })
 
@@ -153,8 +153,8 @@ class UserEventsView(MethodView):
                         'time': event.time,
                         'date': event.date,
                         'description': event.description,
-                        'cartegory':event.cartegory,
-                        'imageUrl':event.imageUrl
+                        'category':event.category,
+                        'image_url':event.image_url
                     }
                     results.append(obj)
 
@@ -191,8 +191,8 @@ class EventsManupilationView(MethodView):
                     'time': event.time,
                     'date': event.date,
                     'description': event.description,
-                    'cartegory':event.cartegory,
-                    'imageUrl':event.imageUrl,
+                    'category':event.category,
+                    'image_url':event.image_url,
                     'created_by': event.created_by
                 })
                 return make_response(response), 200
@@ -221,16 +221,16 @@ class EventsManupilationView(MethodView):
                 time = str(request.data.get('time', ''))
                 date = str(request.data.get('date', ''))
                 description = str(request.data.get('description', ''))
-                cartegory = str(request.data.get('cartegory', ''))
-                imageUrl = str(request.data.get('imageUrl', ''))
+                category = str(request.data.get('category', ''))
+                image_url = str(request.data.get('image_url', ''))
 
                 event.title = title
                 event.location = location
                 event.time = time
                 event.date = date
                 event.description = description
-                event.cartegory = cartegory
-                event.imageUrl = imageUrl
+                event.category = category
+                event.image_url = image_url
 
                 event.save()
                 response = {
@@ -240,8 +240,8 @@ class EventsManupilationView(MethodView):
                     'time': event.time,
                     'date': event.date,
                     'description': event.description,
-                    'cartegory':event.cartegory,
-                    'imageUrl':event.imageUrl,
+                    'category':event.category,
+                    'image_url':event.image_url,
                     'created_by': event.created_by
                 }
                 return make_response(jsonify(response)), 200

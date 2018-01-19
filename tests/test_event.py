@@ -12,11 +12,11 @@ class EventTestCase(unittest.TestCase):
         self.app = create_app(config_name="testing")
         self.client = self.app.test_client
         self.event = {
-            "cartegory": "Lifestyle",
+            "category": "Lifestyle",
             "date": "6th JAN 2017",
             "description": "Swim for the first time in a lake",
             "id": 7,
-            "imageUrl": "https://www.google.com",
+            "image_url": "https://www.google.com",
             "location": "Naivasha",
             "time": "10:00AM",
             "title": "Swimming In Lake Turkana"
@@ -152,7 +152,7 @@ class EventTestCase(unittest.TestCase):
                 "date": "6th JAN 2017",
                 "description": "Swim for the first time in a lake",
                 "id": 5,
-                "imageUrl": "https://www.google.com",
+                "image_url": "https://www.google.com",
                 "location": "Naivasha",
                 "time": "10:00AM",
                 "title": "Swimming In Lake Naivasha"
@@ -282,8 +282,8 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
-    def test_filter_event_cartegory(self):
-        """Test API can filter an event by cartegory (GET request)."""
+    def test_filter_event_category(self):
+        """Test API can filter an event by category (GET request)."""
         self.register_user()
         result = self.login_user()
         access_token = json.loads(result.data.decode())['access_token']
@@ -294,13 +294,13 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?cartegory=Lifestyle'
+            '/api/events/all?category=Lifestyle'
         )
         self.assertEqual(res.status_code, 200)
         self.assertIn('Lifestyle', str(res.data))
 
-    def test_filter_not_event_cartegory(self):
-        """Test API can filter an event by cartegory that does not exist (GET request)."""
+    def test_filter_not_event_category(self):
+        """Test API can filter an event by category that does not exist (GET request)."""
         self.register_user()
         result = self.login_user()
         access_token = json.loads(result.data.decode())['access_token']
@@ -311,13 +311,13 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?cartegory=Education'
+            '/api/events/all?category=Education'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
     def test_filter_event_all_search(self):
-        """Test API can filter an event by cartegory, location, title (GET request)."""
+        """Test API can filter an event by category, location, title (GET request)."""
         self.register_user()
         result = self.login_user()
         access_token = json.loads(result.data.decode())['access_token']
@@ -328,13 +328,13 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&cartegory=Lifestyle'
+            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&category=Lifestyle'
         )
         self.assertEqual(res.status_code, 200)
         self.assertIn('Lifestyle', str(res.data))
 
     def test_event_filter_no_title(self):
-        """Test API can filter an event by cartegory, location, title
+        """Test API can filter an event by category, location, title
         with wrong title (GET request).
         """
         self.register_user()
@@ -347,13 +347,13 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Hiking Mt Kenya&location=Naivasha&cartegory=Lifestyle'
+            '/api/events/all?title=Hiking Mt Kenya&location=Naivasha&category=Lifestyle'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
     def test_event_wrong_location(self):
-        """Test API can filter an event by cartegory, location, title
+        """Test API can filter an event by category, location, title
         with wrong location (GET request).
         """
         self.register_user()
@@ -366,13 +366,13 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming In Lake Turkana&location=Turkana&cartegory=Lifestyle'
+            '/api/events/all?title=Swimming In Lake Turkana&location=Turkana&category=Lifestyle'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
     def test_event_wrong_category(self):
-        """Test API can filter an event by cartegory, location, title
+        """Test API can filter an event by category, location, title
         with wrong category (GET request).
         """
         self.register_user()
@@ -385,7 +385,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&cartegory=Education'
+            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&category=Education'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
