@@ -171,6 +171,35 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['message'] == 'Successfully logged out.')
         self.assertEqual(response.status_code, 200)
 
+    def test_invalid_logout(self):
+        """ Test for logout after the token expires """
+        res = self.client().post('/api/auth/register', data=self.user_data)
+        self.assertEqual(res.status_code, 201)
+        login_res = self.client().post('/api/auth/login', data=self.user_data)
+
+        # get the token
+        access_token = json.loads(login_res.data.decode())['access_token']
+
+        # valid token logout
+        response = self.client().post(
+            '/api/auth/logout',
+            headers=dict(
+                Authorization='Bearer ' + access_token)
+        )
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['status'] == 'success')
+        self.assertTrue(data['message'] == 'Successfully logged out.')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client().post(
+            '/api/auth/logout',
+            headers=dict(
+                Authorization='Bearer ' + access_token)
+        )
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['status'] == 'fail')
+        self.assertEqual(response.status_code, 401)
+
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
