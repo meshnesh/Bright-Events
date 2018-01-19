@@ -201,58 +201,6 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['status'] == 'fail')
         self.assertEqual(response.status_code, 401)
 
-    def test_blacklisted_token_logout(self):
-        """ Test for logout after a valid token gets blacklisted """
-        res = self.client().post('/api/auth/register', data=self.user_data)
-        self.assertEqual(res.status_code, 201)
-        login_res = self.client().post('/api/auth/login', data=self.user_data)
-
-        # get the token
-        access_token = json.loads(login_res.data.decode())['access_token']
-
-        # blacklist a valid token
-        blacklist_token = BlacklistToken(
-            token=json.loads(login_res.data.decode())['access_token']
-        )
-        BlacklistToken.save(blacklist_token)
-
-        # blacklisted valid token logout
-        response = self.client().post(
-            '/api/auth/logout',
-            headers=dict(
-                Authorization='Bearer ' + access_token)
-        )
-        data = json.loads(response.data.decode())
-        self.assertTrue(data['status'] == 'fail')
-        self.assertTrue(data['message'] == 'Token blacklisted. Please log in again.')
-        self.assertEqual(response.status_code, 401)
-
-    def test_blacklisted_token_user(self):
-        """ Test for user status with a blacklisted valid token """
-        res = self.client().post('/api/auth/register', data=self.user_data)
-        self.assertEqual(res.status_code, 201)
-        login_res = self.client().post('/api/auth/login', data=self.user_data)
-
-        # get the token
-        access_token = json.loads(login_res.data.decode())['access_token']
-
-        # blacklist a valid token
-        blacklist_token = BlacklistToken(
-            token=json.loads(login_res.data.decode())['access_token']
-        )
-        BlacklistToken.save(blacklist_token)
-
-        response = self.client().get(
-            '/api/auth/status',
-            headers=dict(
-                Authorization='Bearer ' + access_token)
-        )
-
-        data = json.loads(response.data.decode())
-        self.assertTrue(data['status'] == 'fail')
-        self.assertTrue(data['message'] == 'Token blacklisted. Please log in again.')
-        self.assertEqual(response.status_code, 401)
-
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
