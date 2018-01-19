@@ -234,7 +234,7 @@ class LogoutAPI(MethodView):
                         'status': 'fail',
                         'message': error
                     })
-                    return make_response(response_object), 401
+                    return make_response(response_object), 200
 
             response_object = {
                 'status': 'fail',
