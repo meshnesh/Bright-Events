@@ -352,6 +352,44 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
 
+    def test_event_wrong_location(self):
+        """Test API can filter an event by category, location, title
+        with wrong location (GET request).
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Swimming In Lake Turkana&location=Turkana&category=Lifestyle'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
+    def test_event_wrong_category(self):
+        """Test API can filter an event by category, location, title
+        with wrong category (GET request).
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/events',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.event)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get(
+            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&category=Education'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
+
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
