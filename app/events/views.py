@@ -93,36 +93,52 @@ class UserEventsView(MethodView):
             if not isinstance(user_id, str):
                 # Go ahead and handle the request, the user is authed
 
-                title = str(request.data.get('title', ''))
-                location = str(request.data.get('location', ''))
-                time = str(request.data.get('time', ''))
-                date = str(request.data.get('date', ''))
-                description = str(request.data.get('description', ''))
-                category = str(request.data.get('category', ''))
-                image_url = str(request.data.get('image_url', ''))
-                if title:
-                    event = Events(
-                        title=title,
-                        location=location,
-                        time=time, date=date,
-                        description=description,
-                        category=category,
-                        image_url=image_url,
-                        created_by=user_id)
-                    event.save()
-                    response = jsonify({
-                        'id': event.id,
-                        'title': event.title,
-                        'location': event.location,
-                        'time': event.time,
-                        'date': event.date,
-                        'description': event.description,
-                        'category':event.category,
-                        'image_url':event.image_url,
-                        'created_by': user_id
-                    })
+                # title = str(request.data.get('title', ''))
+                # location = str(request.data.get('location', ''))
+                # time = str(request.data.get('time', ''))
+                # date = str(request.data.get('date', ''))
+                # description = str(request.data.get('description', ''))
+                # category = str(request.data.get('category', ''))
+                # image_url = str(request.data.get('image_url', ''))
 
-                    return make_response(response), 201
+                args = {}
+                event_models = [
+                    'title', 'location', 'category', 'time', 'date', 'description', 'image_url'
+                ]
+
+                for event_res in event_models:
+                    var = str(request.data.get(event_res, ''))
+                    if not var:
+                        response = {
+                            "message":'{} missing'.format(event_res)
+                        }
+                        return make_response(jsonify(response)), 401
+                    args.update({event_res:var})
+
+                if Events.query.filter_by(title=args['title']).first():
+                    response = {
+                        "message":'Event title exists. Choose another one'
+                    }
+                    return make_response(jsonify(response)), 401
+
+                event = Events(
+                    **args,
+                    created_by=user_id)
+
+                event.save()
+                response = jsonify({
+                    'id': event.id,
+                    'title': event.title,
+                    'location': event.location,
+                    'time': event.time,
+                    'date': event.date,
+                    'description': event.description,
+                    'category':event.category,
+                    'image_url':event.image_url,
+                    'created_by': user_id
+                })
+
+                return make_response(response), 201
         else:
             # user is not legit, so the payload is an error message
             message = user_id
