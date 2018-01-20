@@ -93,14 +93,6 @@ class UserEventsView(MethodView):
             if not isinstance(user_id, str):
                 # Go ahead and handle the request, the user is authed
 
-                # title = str(request.data.get('title', ''))
-                # location = str(request.data.get('location', ''))
-                # time = str(request.data.get('time', ''))
-                # date = str(request.data.get('date', ''))
-                # description = str(request.data.get('description', ''))
-                # category = str(request.data.get('category', ''))
-                # image_url = str(request.data.get('image_url', ''))
-
                 args = {}
                 event_models = [
                     'title', 'location', 'category', 'time', 'date', 'description', 'image_url'
