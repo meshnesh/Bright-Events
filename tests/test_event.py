@@ -174,7 +174,7 @@ class EventTestCase(unittest.TestCase):
         rv = self.client().post(
             '/api/events',
             headers=dict(Authorization="Bearer " + access_token),
-            data={'title': 'Swimming'})
+            data=self.event)
         self.assertEqual(rv.status_code, 201)
         # get the json with the event
         results = json.loads(rv.data.decode())
