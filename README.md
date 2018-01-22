@@ -20,7 +20,7 @@ The platform is being developed from this designs
 You can also view the [UI](https://meshnesh.github.io/designs/ui/) here.
 
 ### uml-class diagram ###
-![Alt Uml-diagram](https://github.com/meshnesh/Bright-Events/blob/develop/designs/uml_diagram/Bright%20Events.png)
+![Alt Uml-diagram](https://github.com/meshnesh/meshnesh.github.io/blob/master/designs/uml_diagram/Bright%20Events.png)
 
 ## To run the flask api  ##
 * clone the repo:
@@ -37,10 +37,20 @@ Create a virtual enviroment and install all the dependacy modules, in to your ma
 
     ``` virtualenv -p python3 myenv```
 
-* Activating the enviroment
+## Environment Variables
 
-    ``` source venv/bin/activate```
+Create a `.env` file and add the following:
 
+```
+source venv/bin/activate
+export SECRET="some-very-long-string-of-random-characters-CHANGE-TO-YOUR-LIKING"
+export APP_SETTINGS="development"
+export DATABASE_URL="postgresql://localhost/flask_api"
+```
+
+* Activate the enviroment
+
+    ``` source .env```
 
 Install all dependancies for the project by running:
 
@@ -49,6 +59,24 @@ Install all dependancies for the project by running:
 on your terminal run
 
 ``` pip install -r requirements.txt ```
+
+## Migrations
+
+On your psql console, create your database:
+
+`> CREATE DATABASE flask_api;`
+
+Then, make and apply your Migrations
+
+```
+(venv)$ python manage.py db init
+
+(venv)$ python manage.py db migrate
+```
+And finally, migrate your migrations to persist on the DB
+
+```(venv)$ python manage.py db upgrade```
+
 
 # run 
 To test our project on your terminal run 
@@ -63,4 +91,4 @@ Open: [http://127.0.0.1:5000/api/events](http://127.0.0.1:5000/api/events)
 
 # Heroku App
 View the application on heroku:
-Open: [Bright Events](https://bright-events.herokuapp.com/api/events)
+Open: [Bright Events](https://bright-events.herokuapp.com/api/events/all)
