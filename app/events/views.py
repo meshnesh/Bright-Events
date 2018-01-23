@@ -99,7 +99,7 @@ class UserEventsView(MethodView):
                 ]
 
                 for event_res in event_models:
-                    var = str(request.data.get(event_res, ''))
+                    var = str(request.data.get(event_res, '').capitalize())
                     if not var:
                         response = {
                             "message":'{} missing'.format(event_res)
