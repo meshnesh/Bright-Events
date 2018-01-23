@@ -192,6 +192,11 @@ class EventsManupilationView(MethodView):
             if not isinstance(user_id, str):
                 # retrieve an event using it's ID
                 event = Events.query.filter_by(id=event_id).first_or_404()
+                if user_id is not event.created_by:
+                    response = {
+                        'message': 'Your do not have authorization to access this event privately'
+                    }
+                    return make_response(jsonify(response)), 401
                 response = jsonify({
                     'id': event.id,
                     'title': event.title,
@@ -223,6 +228,11 @@ class EventsManupilationView(MethodView):
             if not isinstance(user_id, str):
                 # retrieve an event using it's ID
                 event = Events.query.filter_by(id=event_id).first_or_404()
+                if user_id is not event.created_by:
+                    response = {
+                        'message': 'Your do not have authorization to access this event privately'
+                    }
+                    return make_response(jsonify(response)), 401
 
                 title = str(request.data.get('title', ''))
                 location = str(request.data.get('location', ''))
@@ -273,6 +283,11 @@ class EventsManupilationView(MethodView):
             if not isinstance(user_id, str):
                 # retrieve an event using it's ID
                 event = Events.query.filter_by(id=event_id).first_or_404()
+                if user_id is not event.created_by:
+                    response = {
+                        'message': 'Your do not have authorization to access this event privately'
+                    }
+                    return make_response(jsonify(response)), 401
 
                 event.delete()
                 return {
