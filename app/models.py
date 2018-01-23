@@ -20,9 +20,9 @@ class User(db.Model):
 
     # Define the columns of the users table, starting with the primary key
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256), nullable=False)
-    email = db.Column(db.String(256), nullable=False, unique=True)
-    password = db.Column(db.String(256))
+    name = db.Column(db.String(15), nullable=False)
+    email = db.Column(db.String(25), nullable=False, unique=True)
+    password = db.Column(db.String(55))
     eventlists = db.relationship(
         'Events', order_by='Events.id', cascade="all, delete-orphan")
     myrsvps = db.relationship('Events', secondary=rsvps,
@@ -108,12 +108,12 @@ class Events(db.Model):
     __tablename__ = 'eventlists'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(50), nullable=False, unique=True)
-    location = db.Column(db.String(50), nullable=False)
-    time = db.Column(db.String(255), nullable=False)
-    date = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(25), nullable=False, unique=True)
+    location = db.Column(db.String(25), nullable=False)
+    time = db.Column(db.String(25), nullable=False)
+    date = db.Column(db.String(25), nullable=False)
     description = db.Column(db.String(255), nullable=False)
-    category = db.Column(db.String(255), nullable=False)
+    category = db.Column(db.String(25), nullable=False)
     image_url = db.Column(db.String(255))
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
 
