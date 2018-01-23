@@ -36,6 +36,13 @@ class RegistrationView(MethodView):
                         'message': 'Wrong email format. Check your Email.'
                     }
                     return make_response(jsonify(response)), 403
+                # print('your password is {}'.format(password))
+                for letter in password:
+                    if letter == ' ':
+                        response = {
+                            'message':'Password should not contain spaces'
+                        }
+                        return make_response(jsonify(response)), 403
 
                 user.save()
 
