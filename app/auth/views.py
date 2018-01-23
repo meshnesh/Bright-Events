@@ -37,12 +37,24 @@ class RegistrationView(MethodView):
                     }
                     return make_response(jsonify(response)), 403
                 # print('your password is {}'.format(password))
+                count = 1
+                prev = ''
                 for letter in password:
                     if letter == ' ':
                         response = {
                             'message':'Password should not contain spaces'
                         }
                         return make_response(jsonify(response)), 403
+                    elif prev == letter:
+                        count += 1
+                        if count == 2:
+                            response = {
+                                'message':'Too many repetitions of {}'.format(letter)
+                            }
+                            return make_response(jsonify(response)), 403
+                    else:
+                        prev = letter
+                        count = 0
 
                 user.save()
 
