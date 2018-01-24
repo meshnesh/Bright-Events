@@ -21,7 +21,7 @@ class AllEventsView(MethodView):
         q = request.args.get('q')
 
         args = {}
-        potential_search = ['title', 'location', 'category']
+        potential_search = ['location', 'category']
 
         for search_res in potential_search:
             var = request.args.get(search_res)
