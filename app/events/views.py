@@ -18,6 +18,7 @@ class AllEventsView(MethodView):
         events = Events.query
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
+        q = request.args.get('q')
 
         args = {}
         potential_search = ['title', 'location', 'category']
@@ -27,8 +28,36 @@ class AllEventsView(MethodView):
             if var:
                 args.update({search_res:var})
 
-        if args:
+        if q:
+            evnt = Events.query.filter(Events.title.ilike('%{}%'.format(q)))
+            event_page = evnt.paginate(page, limit, False).items
+
+            results = []
+
+            for event in event_page:
+                obj = {
+                    'id': event.id,
+                    'title': event.title,
+                    'location': event.location,
+                    'time': event.time,
+                    'date': event.date,
+                    'description': event.description,
+                    'category':event.category,
+                    'image_url':event.image_url
+                }
+                results.append(obj)
+
+            if not results:
+                response = {
+                    'message': "No events found"
+                }
+                return make_response(jsonify(response)), 404
+
+            return make_response(jsonify(results)), 200
+
+        else:
             events = Events.query.filter_by(**args)
+
 
         event_page = events.paginate(page, limit, False).items
 
