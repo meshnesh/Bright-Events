@@ -226,7 +226,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming in lake turkana'
+            '/api/events/all?q=Swimming in lake turkana'
         )
         self.assertEqual(res.status_code, 200)
         self.assertIn('Swimming in lake turkana', str(res.data))
@@ -243,7 +243,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=vacation'
+            '/api/events/all?q=vacation'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
@@ -328,7 +328,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming in lake turkana&location=Naivasha&category=Lifestyle'
+            '/api/events/all?q=Swimming in lake turkana&location=Naivasha&category=Lifestyle'
         )
         # self.assertEqual(res.status_code, 200)
         self.assertIn('Lifestyle', str(res.data))
@@ -347,7 +347,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Hiking Mt Kenya&location=Naivasha&category=Lifestyle'
+            '/api/events/all?q=Hiking Mt Kenya&location=Naivasha&category=Lifestyle'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
@@ -366,7 +366,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming In Lake Turkana&location=Turkana&category=Lifestyle'
+            '/api/events/all?location=Turkana&category=Lifestyle'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
@@ -385,7 +385,7 @@ class EventTestCase(unittest.TestCase):
             data=self.event)
         self.assertEqual(res.status_code, 201)
         res = self.client().get(
-            '/api/events/all?title=Swimming In Lake Turkana&location=Naivasha&category=Education'
+            '/api/events/all?location=Naivasha&category=Education'
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
