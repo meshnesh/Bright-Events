@@ -112,6 +112,7 @@ class Events(db.Model):
     location = db.Column(db.String(25), nullable=False)
     time = db.Column(db.String(25), nullable=False)
     date = db.Column(db.String(25), nullable=False)
+    category = db.Column(db.String(25), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255))
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
