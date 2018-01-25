@@ -180,10 +180,15 @@ class UserEventsView(MethodView):
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
                 # get all the events for this user
+                page = request.args.get('page', default=1, type=int)
+                limit = request.args.get('limit', default=10, type=int)
+
                 events = Events.get_all_user(user_id)
+
+                event_page = events.paginate(page, limit, False).items
                 results = []
 
-                for event in events:
+                for event in event_page:
                     obj = {
                         'id': event.id,
                         'title': event.title,
@@ -195,6 +200,12 @@ class UserEventsView(MethodView):
                         'image_url':event.image_url
                     }
                     results.append(obj)
+
+                if not results:
+                    response = {
+                        'message': "No events found"
+                    }
+                    return make_response(jsonify(response)), 404
 
                 return make_response(jsonify(results)), 200
 
