@@ -410,9 +410,9 @@ class EventCategories(MethodView):
                         return make_response(jsonify(response)), 401
                     args.update({event_res:var})
 
-                if EventCategories.query.filter_by(category_name=args['category_name']).first():
+                if EventCategory.check_category(category_name=args['category_name']):
                     response = {
-                        "message":'Event category name exists. Choose another one'
+                        "message":'Category name exists. Choose another one'
                     }
                     return make_response(jsonify(response)), 401
 
