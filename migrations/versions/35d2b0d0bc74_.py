@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1b96e9f041ad
+Revision ID: 35d2b0d0bc74
 Revises: 
-Create Date: 2018-01-19 11:34:51.646362
+Create Date: 2018-01-25 14:56:50.440740
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1b96e9f041ad'
+revision = '35d2b0d0bc74'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,22 +26,28 @@ def upgrade():
     sa.UniqueConstraint('id'),
     sa.UniqueConstraint('token')
     )
+    op.create_table('event_category',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('category_name', sa.String(length=50), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('category_name'),
+    sa.UniqueConstraint('id')
+    )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=256), nullable=False),
-    sa.Column('email', sa.String(length=256), nullable=False),
-    sa.Column('password', sa.String(length=256), nullable=True),
+    sa.Column('name', sa.String(length=15), nullable=False),
+    sa.Column('email', sa.String(length=25), nullable=False),
+    sa.Column('password', sa.String(length=100), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
     op.create_table('eventlists',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=50), nullable=False),
-    sa.Column('location', sa.String(length=50), nullable=False),
-    sa.Column('time', sa.String(length=255), nullable=False),
-    sa.Column('date', sa.String(length=255), nullable=False),
+    sa.Column('title', sa.String(length=25), nullable=False),
+    sa.Column('location', sa.String(length=25), nullable=False),
+    sa.Column('time', sa.String(length=25), nullable=False),
+    sa.Column('date', sa.String(length=25), nullable=False),
     sa.Column('description', sa.String(length=255), nullable=False),
-    sa.Column('category', sa.String(length=255), nullable=False),
     sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.Column('created_by', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
@@ -62,5 +68,6 @@ def downgrade():
     op.drop_table('rsvps')
     op.drop_table('eventlists')
     op.drop_table('users')
+    op.drop_table('event_category')
     op.drop_table('blacklist_tokens')
     # ### end Alembic commands ###
