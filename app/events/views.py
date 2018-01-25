@@ -537,6 +537,6 @@ events_blueprint.add_url_rule(
 # Define the rule for view all events url --->  /api/category
 # Then add the rule to the blueprint
 events_blueprint.add_url_rule(
-    ' /api/category',
-    view_func=EVENT_RSVP_VIEW,
+    '/api/category',
+    view_func=EVENT_CATEGORIES_VIEW,
     methods=['POST'])
