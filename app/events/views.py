@@ -42,7 +42,6 @@ class AllEventsView(MethodView):
                     'time': event.time,
                     'date': event.date,
                     'description': event.description,
-                    'category':event.category,
                     'image_url':event.image_url
                 }
                 results.append(obj)
@@ -71,7 +70,6 @@ class AllEventsView(MethodView):
                 'time': event.time,
                 'date': event.date,
                 'description': event.description,
-                'category':event.category,
                 'image_url':event.image_url
             }
             results.append(obj)
@@ -100,7 +98,6 @@ class SingleEventView(MethodView):
             'time': event.time,
             'date': event.date,
             'description': event.description,
-            'category':event.category,
             'image_url':event.image_url,
             'created_by': event.created_by
         })
@@ -125,7 +122,7 @@ class UserEventsView(MethodView):
 
                 args = {}
                 event_models = [
-                    'title', 'location', 'category', 'time', 'date', 'description', 'image_url'
+                    'title', 'location', 'time', 'date', 'description', 'image_url'
                 ]
 
                 for event_res in event_models:
@@ -143,6 +140,8 @@ class UserEventsView(MethodView):
                     }
                     return make_response(jsonify(response)), 401
 
+                
+
                 event = Events(
                     **args,
                     created_by=user_id)
@@ -155,9 +154,10 @@ class UserEventsView(MethodView):
                     'time': event.time,
                     'date': event.date,
                     'description': event.description,
-                    'category':event.category,
                     'image_url':event.image_url,
-                    'created_by': user_id
+                    'created_by': user_id,
+                    'event_category': event.event_category,
+
                 })
 
                 return make_response(response), 201
@@ -196,7 +196,6 @@ class UserEventsView(MethodView):
                         'time': event.time,
                         'date': event.date,
                         'description': event.description,
-                        'category':event.category,
                         'image_url':event.image_url
                     }
                     results.append(obj)
@@ -245,7 +244,6 @@ class EventsManupilationView(MethodView):
                     'time': event.time,
                     'date': event.date,
                     'description': event.description,
-                    'category':event.category,
                     'image_url':event.image_url,
                     'created_by': event.created_by
                 })
@@ -280,7 +278,6 @@ class EventsManupilationView(MethodView):
                 time = str(request.data.get('time', ''))
                 date = str(request.data.get('date', ''))
                 description = str(request.data.get('description', ''))
-                category = str(request.data.get('category', ''))
                 image_url = str(request.data.get('image_url', ''))
 
                 event.title = title
@@ -288,7 +285,6 @@ class EventsManupilationView(MethodView):
                 event.time = time
                 event.date = date
                 event.description = description
-                event.category = category
                 event.image_url = image_url
 
                 event.save()
@@ -299,7 +295,6 @@ class EventsManupilationView(MethodView):
                     'time': event.time,
                     'date': event.date,
                     'description': event.description,
-                    'category':event.category,
                     'image_url':event.image_url,
                     'created_by': event.created_by
                 }
@@ -443,7 +438,7 @@ class EventCategories(MethodView):
         for category in categories:
             obj = {
                 'id': category.id,
-                'title': category.category_name
+                'category_name': category.category_name
             }
             results.append(obj)
 
