@@ -185,6 +185,16 @@ class EventCategory(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @staticmethod
+    def get__all_categories():
+        """This method gets all the categories in the db"""
+        return EventCategory.query.all()
+
+    @staticmethod
+    def check_category(category_name):
+        """This method checks if a category already exists before adding another on."""
+        return EventCategory.query.filter_by(category_name=category_name).first()
+
     def __str__(self):
         return "<EventCategory: {}>".format(self.category_name)
 
