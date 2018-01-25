@@ -433,53 +433,27 @@ class EventCategories(MethodView):
             }
             return make_response(jsonify(response)), 401
 
-    # @staticmethod
-    # def get():
-    #     """Handle GET request for this view. Url ---> /api/events"""
+    @staticmethod
+    def get():
+        """Handle GET request for this view. Url ---> /api/category"""
+        categories = EventCategory.get__all_categories()
 
-    #     auth_header = request.headers.get('Authorization')
-    #     access_token = auth_header.split(" ")[1]
+        results = []
 
-    #     if access_token:
-    #         user_id = User.decode_token(access_token)
-    #         if not isinstance(user_id, str):
-    #             # get all the events for this user
-    #             page = request.args.get('page', default=1, type=int)
-    #             limit = request.args.get('limit', default=10, type=int)
+        for category in categories:
+            obj = {
+                'id': category.id,
+                'title': category.category_name
+            }
+            results.append(obj)
 
-    #             events = Events.get_all_user(user_id)
+        if not results:
+            response = {
+                'message': "Add a new category"
+            }
+            return make_response(jsonify(response)), 404
 
-    #             event_page = events.paginate(page, limit, False).items
-    #             results = []
-
-    #             for event in event_page:
-    #                 obj = {
-    #                     'id': event.id,
-    #                     'title': event.title,
-    #                     'location': event.location,
-    #                     'time': event.time,
-    #                     'date': event.date,
-    #                     'description': event.description,
-    #                     'category':event.category,
-    #                     'image_url':event.image_url
-    #                 }
-    #                 results.append(obj)
-
-    #             if not results:
-    #                 response = {
-    #                     'message': "No events found"
-    #                 }
-    #                 return make_response(jsonify(response)), 404
-
-    #             return make_response(jsonify(results)), 200
-
-    #     else:
-    #         # user is not legit, so the payload is an error message
-    #         message = user_id
-    #         response = {
-    #             'message': message
-    #         }
-    #         return make_response(jsonify(response)), 401
+        return make_response(jsonify(results)), 200
 
 # Define the API resource
 ALL_EVENTS_VIEW = AllEventsView.as_view('ALL_EVENTS_VIEW')
@@ -546,3 +520,8 @@ events_blueprint.add_url_rule(
     '/api/category',
     view_func=EVENT_CATEGORIES_VIEW,
     methods=['POST'])
+
+events_blueprint.add_url_rule(
+    '/api/category',
+    view_func=EVENT_CATEGORIES_VIEW,
+    methods=['GET'])
