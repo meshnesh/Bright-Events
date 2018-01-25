@@ -120,6 +120,7 @@ class UserEventsView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                # checks if the user_id has a valid token or contains the user id
                 # Go ahead and handle the request, the user is authed
 
                 args = {}
