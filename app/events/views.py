@@ -416,12 +416,12 @@ class EventCategories(MethodView):
                     }
                     return make_response(jsonify(response)), 401
 
-                event = EventCategory(**args)
+                category = EventCategory(**args)
 
-                event.save()
+                category.save()
                 response = jsonify({
-                    'id': event.id,
-                    'category_name': event.category_name
+                    'id': category.id,
+                    'category_name': category.category_name
                 })
 
                 return make_response(response), 201
