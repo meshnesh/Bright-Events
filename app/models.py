@@ -102,6 +102,43 @@ class User(db.Model):
     __repr__ = __str__
 
 
+class EventCategory(db.Model):
+    """
+    Category Model for storing Event Cartegories
+    """
+    __tablename__ = 'event_category'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
+    category_name = db.Column(db.String(50), unique=True, nullable=False)
+    eventlists = db.relationship(
+        'Events', order_by='Events.id')
+
+    def __init__(self, category_name):
+        self.category_name = category_name
+
+    def save(self):
+        """Save a category to the database.
+        This includes creating a new and editing one.
+        """
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get__all_categories():
+        """This method gets all the categories in the db"""
+        return EventCategory.query.all()
+
+    @staticmethod
+    def check_category(category_name):
+        """This method checks if a category already exists before adding another on."""
+        return EventCategory.query.filter_by(category_name=category_name).first()
+
+    def __str__(self):
+        return "<EventCategory: {}>".format(self.category_name)
+
+    __repr__ = __str__
+
+
 class Events(db.Model):
     """This class represents the eventlist table."""
 
@@ -112,21 +149,22 @@ class Events(db.Model):
     location = db.Column(db.String(25), nullable=False)
     time = db.Column(db.String(25), nullable=False)
     date = db.Column(db.String(25), nullable=False)
-    category = db.Column(db.String(25), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255))
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
+    event_category = db.Column(db.Integer, db.ForeignKey(EventCategory.id))
 
-    def __init__(self, title, location, time, date, description, category, image_url, created_by):
+    def __init__(self, title, location, time, date,
+                 description, image_url, created_by, event_category):
         """initialize an event with its creator."""
         self.title = title
         self.location = location
         self.time = time
         self.date = date
         self.description = description
-        self.category = category
         self.image_url = image_url
         self.created_by = created_by
+        self.event_category = event_category
 
     def save(self):
         """Save an event to the database.
@@ -163,41 +201,6 @@ class Events(db.Model):
 
     def __str__(self):
         return "<Events: {}>".format(self.title)
-
-    __repr__ = __str__
-
-
-class EventCategory(db.Model):
-    """
-    Category Model for storing Event Cartegories
-    """
-    __tablename__ = 'event_category'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
-    category_name = db.Column(db.String(50), unique=True, nullable=False)
-
-    def __init__(self, category_name):
-        self.category_name = category_name
-
-    def save(self):
-        """Save a category to the database.
-        This includes creating a new and editing one.
-        """
-        db.session.add(self)
-        db.session.commit()
-
-    @staticmethod
-    def get__all_categories():
-        """This method gets all the categories in the db"""
-        return EventCategory.query.all()
-
-    @staticmethod
-    def check_category(category_name):
-        """This method checks if a category already exists before adding another on."""
-        return EventCategory.query.filter_by(category_name=category_name).first()
-
-    def __str__(self):
-        return "<EventCategory: {}>".format(self.category_name)
 
     __repr__ = __str__
 
