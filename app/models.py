@@ -116,6 +116,8 @@ class Events(db.Model):
     category = db.Column(db.String(25), nullable=False)
     image_url = db.Column(db.String(255))
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
+    event_category = db.relationship(
+        'EventCategory', order_by='EventCategory.id', cascade="all, delete-orphan")
 
     def __init__(self, title, location, time, date, description, category, image_url, created_by):
         """initialize an event with its creator."""
@@ -163,6 +165,33 @@ class Events(db.Model):
 
     def __str__(self):
         return "<Events: {}>".format(self.title)
+
+    __repr__ = __str__
+
+
+class EventCategory(db.Model):
+    """
+    Category Model for storing Event Cartegories
+    """
+    __tablename__ = 'event_category'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
+    category_name = db.Column(db.String(50), unique=True, nullable=False)
+    event_cartegory = db.Column(db.Integer, db.ForeignKey(Events.id))
+
+    def __init__(self, category_name, event_cartegory):
+        self.category_name = category_name
+        self.event_cartegory = event_cartegory
+
+    def __str__(self):
+        return "<EventCategory: {}>".format(self.category_name)
+
+    def save(self):
+        """Save a category to the database.
+        This includes creating a new and editing one.
+        """
+        db.session.add(self)
+        db.session.commit()
 
     __repr__ = __str__
 
