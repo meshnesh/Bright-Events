@@ -16,6 +16,7 @@ class AllEventsView(MethodView):
 
         # GET all the events for this user
         events = Events.query
+        categories = EventCategory.get__all_categories()
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
 
@@ -31,16 +32,18 @@ class AllEventsView(MethodView):
         categ = request.args.get('category')
         if categ:
             events = events.filter_by(category=categ)
-        for el in arr:
-            val = request.args.get(el)
+        for element in arr:
+            val = request.args.get(element)
             if val:
-                events = events.filter(getattr(Events, el).ilike('%{}%'.format(val)))
+                events = events.filter(getattr(Events, element).ilike('%{}%'.format(val)))
 
         event_page = events.paginate(page, limit, False).items
 
         results = []
 
         for event in event_page:
+            for category in categories:
+                event.event_category = category.category_name
             obj = {
                 'id': event.id,
                 'title': event.title,
@@ -48,8 +51,10 @@ class AllEventsView(MethodView):
                 'time': event.time,
                 'date': event.date,
                 'description': event.description,
-                'image_url':event.image_url
+                'image_url':event.image_url,
+                'event_category':event.event_category
             }
+            print(event.event_category)
             results.append(obj)
 
         if not results:
