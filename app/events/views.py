@@ -74,6 +74,9 @@ class SingleEventView(MethodView):
     def get(event_id):
         """Handle getting a single event by id"""
         event = Events.query.filter_by(id=event_id).first_or_404()
+        categories = EventCategory.get__all_categories()
+        for category in categories:
+                event.event_category = category.category_name
         response = jsonify({
             'id': event.id,
             'title': event.title,
@@ -82,7 +85,8 @@ class SingleEventView(MethodView):
             'date': event.date,
             'description': event.description,
             'image_url':event.image_url,
-            'created_by': event.created_by
+            'created_by': event.created_by,
+            'event_category':event.event_category
         })
         return make_response(response), 200
 
@@ -163,6 +167,7 @@ class UserEventsView(MethodView):
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
                 # get all the events for this user
+                categories = EventCategory.get__all_categories()
                 page = request.args.get('page', default=1, type=int)
                 limit = request.args.get('limit', default=10, type=int)
 
@@ -172,6 +177,8 @@ class UserEventsView(MethodView):
                 results = []
 
                 for event in event_page:
+                    for category in categories:
+                        event.event_category = category.category_name
                     obj = {
                         'id': event.id,
                         'title': event.title,
@@ -179,7 +186,8 @@ class UserEventsView(MethodView):
                         'time': event.time,
                         'date': event.date,
                         'description': event.description,
-                        'image_url':event.image_url
+                        'image_url':event.image_url,
+                        'event_category':event.event_category
                     }
                     results.append(obj)
 
@@ -209,6 +217,7 @@ class EventsManupilationView(MethodView):
         """Handles single event data with GET by event id."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
+        categories = EventCategory.get__all_categories()
 
         if access_token:
             user_id = User.decode_token(access_token)
@@ -220,6 +229,8 @@ class EventsManupilationView(MethodView):
                         'message': 'Your do not have authorization to access this event privately'
                     }
                     return make_response(jsonify(response)), 401
+                for category in categories:
+                    event.event_category = category.category_name
                 response = jsonify({
                     'id': event.id,
                     'title': event.title,
@@ -228,7 +239,8 @@ class EventsManupilationView(MethodView):
                     'date': event.date,
                     'description': event.description,
                     'image_url':event.image_url,
-                    'created_by': event.created_by
+                    'created_by': event.created_by,
+                    'event_category':event.event_category
                 })
                 return make_response(response), 200
         else:
@@ -262,6 +274,7 @@ class EventsManupilationView(MethodView):
                 date = str(request.data.get('date', ''))
                 description = str(request.data.get('description', ''))
                 image_url = str(request.data.get('image_url', ''))
+                event_category = str(request.data.get('event_category', ''))
 
                 event.title = title
                 event.location = location
@@ -269,6 +282,7 @@ class EventsManupilationView(MethodView):
                 event.date = date
                 event.description = description
                 event.image_url = image_url
+                event.event_category = event_category
 
                 event.save()
                 response = {
@@ -279,7 +293,8 @@ class EventsManupilationView(MethodView):
                     'date': event.date,
                     'description': event.description,
                     'image_url':event.image_url,
-                    'created_by': event.created_by
+                    'created_by': event.created_by,
+                    'event_category': event.event_category
                 }
                 return make_response(jsonify(response)), 200
 
