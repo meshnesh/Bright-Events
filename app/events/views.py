@@ -18,7 +18,6 @@ class AllEventsView(MethodView):
         events = Events.query
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
-        q = request.args.get('q')
 
         args = {}
         potential_search = ['location', 'category']
@@ -28,35 +27,14 @@ class AllEventsView(MethodView):
             if var:
                 args.update({search_res:var})
 
-        if q:
-            evnt = Events.query.filter(Events.title.ilike('%{}%'.format(q)))
-            event_page = evnt.paginate(page, limit, False).items
-
-            results = []
-
-            for event in event_page:
-                obj = {
-                    'id': event.id,
-                    'title': event.title,
-                    'location': event.location,
-                    'time': event.time,
-                    'date': event.date,
-                    'description': event.description,
-                    'image_url':event.image_url
-                }
-                results.append(obj)
-
-            if not results:
-                response = {
-                    'message': "No events found"
-                }
-                return make_response(jsonify(response)), 404
-
-            return make_response(jsonify(results)), 200
-
-        else:
-            events = Events.query.filter_by(**args)
-
+        arr = ['title', 'location']
+        categ = request.args.get('category')
+        if categ:
+            events = events.filter_by(category=categ)
+        for el in arr:
+            val = request.args.get(el)
+            if val:
+                events = events.filter(getattr(Events, el).ilike('%{}%'.format(val)))
 
         event_page = events.paginate(page, limit, False).items
 
@@ -122,7 +100,7 @@ class UserEventsView(MethodView):
 
                 args = {}
                 event_models = [
-                    'title', 'location', 'time', 'date', 'description', 'image_url'
+                    'title', 'location', 'time', 'date', 'description', 'image_url', 'event_category'
                 ]
 
                 for event_res in event_models:
@@ -140,7 +118,7 @@ class UserEventsView(MethodView):
                     }
                     return make_response(jsonify(response)), 401
 
-                
+
 
                 event = Events(
                     **args,
