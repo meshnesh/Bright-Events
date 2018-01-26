@@ -134,7 +134,7 @@ class EventCategory(db.Model):
         return EventCategory.query.filter_by(category_name=category_name).first()
 
     def __str__(self):
-        return "<EventCategory: {}>".format(self.category_name)
+        return "<EventCategory: (id={}, category_name={})>".format(self.id, self.category_name)
 
     __repr__ = __str__
 
