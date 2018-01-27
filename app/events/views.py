@@ -122,6 +122,12 @@ class UserEventsView(MethodView):
                         return make_response(jsonify(response)), 401
                     args.update({event_res:var})
 
+                if args['title'][0] is  " ":
+                    response = {
+                        "message":'Event name cannot contain a space for the first letter'
+                    }
+                    return make_response(jsonify(response)), 401
+
                 if Events.query.filter_by(title=args['title']).first():
                     response = {
                         "message":'Event title exists. Choose another one'
