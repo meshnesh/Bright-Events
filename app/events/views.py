@@ -21,7 +21,7 @@ class AllEventsView(MethodView):
         limit = request.args.get('limit', default=10, type=int)
 
         args = {}
-        potential_search = ['location', 'category']
+        potential_search = ['event_category']
 
         for search_res in potential_search:
             var = request.args.get(search_res)
@@ -29,9 +29,9 @@ class AllEventsView(MethodView):
                 args.update({search_res:var})
 
         arr = ['title', 'location']
-        categ = request.args.get('category')
+        categ = request.args.get('event_category')
         if categ:
-            events = events.filter_by(category=categ)
+            events = events.filter_by(event_category=categ)
         for element in arr:
             val = request.args.get(element)
             if val:
