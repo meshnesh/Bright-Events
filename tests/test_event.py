@@ -234,7 +234,7 @@ class EventTestCase(unittest.TestCase):
         self.event_creation()
 
         res = self.client().get(
-            '/api/events/all?event_category=Sports'
+            '/api/events/all?event_category=1'
         )
         self.assertEqual(res.status_code, 200)
         self.assertIn('Sports', str(res.data))
