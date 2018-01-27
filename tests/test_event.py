@@ -57,7 +57,7 @@ class EventTestCase(unittest.TestCase):
         return res
 
     def event_creation(self):
-        """Test API can create an event (POST request)"""
+        """This helper creates an event(POST request)"""
         event = {
             "date": "6th JAN 2017",
             "description": "Swim for the first time in a lake",
@@ -70,7 +70,7 @@ class EventTestCase(unittest.TestCase):
         }
         # obtain the access token
         access_token = self.get_access_token()
-        category = self.create_event_cartegory()
+        self.create_event_cartegory()
         # ensure the request has an authorization header set with the access token in it
         res = self.client().post(
             '/api/events',
@@ -80,7 +80,7 @@ class EventTestCase(unittest.TestCase):
 
     def test_get_event_category(self):
         """Test API can get categories created (GET request)"""
-        created_category = self.create_event_cartegory()
+        self.create_event_cartegory()
         res = self.client().get(
             '/api/category')
         self.assertEqual(res.status_code, 200)
@@ -94,7 +94,7 @@ class EventTestCase(unittest.TestCase):
 
     def test_api_get_all_events(self):
         """Test API can get all events without token passed (GET request)."""
-        event_creation = self.event_creation()
+        self.event_creation()
         result = self.client().get(
             '/api/events/all')
         self.assertEqual(result.status_code, 200)
@@ -112,7 +112,7 @@ class EventTestCase(unittest.TestCase):
     def test_api_get_all_user_events(self):
         """Test API can get all events with token passed (GET request)."""
         access_token = self.get_access_token()
-        event_creation = self.event_creation()
+        self.event_creation()
 
         res = self.client().get(
             '/api/events',
@@ -136,12 +136,12 @@ class EventTestCase(unittest.TestCase):
     def test_events_can_be_edited(self):
         """Test API can edit an existing event. (PUT request)"""
         access_token = self.get_access_token()
-        created_category = self.create_event_cartegory()
+        self.create_event_cartegory()
         event_creation = self.event_creation()
 
 
         results = json.loads(event_creation.data.decode())
-        rv = self.client().put(
+        res = self.client().put(
             '/api/events/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data={
@@ -155,7 +155,7 @@ class EventTestCase(unittest.TestCase):
                 "title": "Swimming in lake naivasha"
             })
 
-        self.assertEqual(rv.status_code, 200)
+        self.assertEqual(res.status_code, 200)
         results = self.client().get(
             '/api/events/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token))
@@ -191,7 +191,7 @@ class EventTestCase(unittest.TestCase):
 
     def test_api_can_filter_event_title(self):
         """Test API can filter an event by title (GET request)."""
-        event_creation = self.event_creation()
+        self.event_creation()
 
         res = self.client().get(
             '/api/events/all?title=Swim'
