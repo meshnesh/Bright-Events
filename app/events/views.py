@@ -76,7 +76,7 @@ class SingleEventView(MethodView):
         event = Events.query.filter_by(id=event_id).first_or_404()
         categories = EventCategory.get__all_categories()
         for category in categories:
-                event.event_category = category.category_name
+            event.event_category = category.category_name
         response = jsonify({
             'id': event.id,
             'title': event.title,
@@ -109,7 +109,8 @@ class UserEventsView(MethodView):
 
                 args = {}
                 event_models = [
-                    'title', 'location', 'time', 'date', 'description', 'image_url', 'event_category'
+                    'title', 'location', 'time', 'date',
+                    'description', 'image_url', 'event_category'
                 ]
 
                 for event_res in event_models:
@@ -126,8 +127,6 @@ class UserEventsView(MethodView):
                         "message":'Event title exists. Choose another one'
                     }
                     return make_response(jsonify(response)), 401
-
-
 
                 event = Events(
                     **args,
