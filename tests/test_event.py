@@ -239,17 +239,15 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('Sports', str(res.data))
 
-# # NEEDS FIXING FROM THE VIEWS FILE
+    def test_filter_not_event_category(self):
+        """Test API cannot filter an event by category that does not exist (GET request)."""
+        self.event_creation()
 
-#     def test_filter_not_event_category(self):
-#         """Test API can filter an event by category that does not exist (GET request)."""
-#         self.event_creation()
-
-#         res = self.client().get(
-#             '/api/events/all?event_category=Education'
-#         )
-#         self.assertEqual(res.status_code, 404)
-#         self.assertIn('No events found', str(res.data))
+        res = self.client().get(
+            '/api/events/all?event_category=2'
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertIn('No events found', str(res.data))
 
     def test_filter_event_all_search(self):
         """Test API can filter an event by category, location, title (GET request)."""
@@ -284,20 +282,6 @@ class EventTestCase(unittest.TestCase):
         )
         self.assertEqual(res.status_code, 404)
         self.assertIn('No events found', str(res.data))
-
-# # WILL BE FIXED FROM THE VIEWS FILE
-
-#     def test_event_wrong_category(self):
-#         """Test API can filter an event by category, location, title
-#         with wrong category (GET request).
-#         """
-#         self.event_creation()
-
-#         res = self.client().get(
-#             '/api/events/all?location=Naivasha&category=Education'
-#         )
-#         self.assertEqual(res.status_code, 404)
-#         self.assertIn('No events found', str(res.data))
 
     def tearDown(self):
         """teardown all initialized variables."""
