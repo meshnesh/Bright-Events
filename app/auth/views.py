@@ -1,14 +1,20 @@
 """import depancies and methods."""
-
+import os
 import re
 from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
+from flask_mail import Mail, Message
+
+from app import create_app
 
 from . import auth_blueprint
 
 EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
+config_name = os.getenv('APP_SETTINGS') # config_name = "development"
+app = create_app(config_name)
+mail = Mail(app)
 
 
 class RegistrationView(MethodView):
@@ -129,9 +135,15 @@ class RestEmailView(MethodView):
         if user:
             access_token = user.generate_token(user.id)
             if access_token:
+                msg = Message(
+                    "Email confirmed you can reset your password",
+                    sender="tonny.nesh@gmail.com",
+                    recipients=["tonnie.nesh@gmail.com"]
+                )
+                mail.send(msg)
                 response = {
-                    'message': 'Email confirmed you can reset your password.',
-                    'access_token': access_token.decode()
+                    'message': 'Email confirmed you can reset your password.'
+                    # 'access_token': access_token.decode()
                 }
                 return make_response(jsonify(response)), 200
 
