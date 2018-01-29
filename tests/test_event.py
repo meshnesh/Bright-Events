@@ -257,7 +257,7 @@ class EventTestCase(unittest.TestCase):
             '/api/events/all?event_category=1'
         )
         self.assertEqual(res.status_code, 200)
-        self.assertIn('Sports', str(res.data))
+        self.assertIn('1', str(res.data))
 
     def test_filter_not_event_category(self):
         """Test API cannot filter an event by category that does not exist (GET request)."""
