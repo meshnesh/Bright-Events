@@ -91,6 +91,26 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(event_creation.status_code, 201)
         self.assertIn('Swimming in lake turkana', str(event_creation.data))
 
+    def test_already_existing_event(self):
+        """Test API create an event with an existing title (POST request)"""
+        event = {
+            "date": "6th JAN 2017",
+            "description": "Swim for the first time in a lake",
+            "id": 7,
+            "image_url": "https://www.google.com",
+            "location": "Naivasha",
+            "time": "10:00AM",
+            "title": "swimming in lake turkana",
+            "event_category": 1
+        }
+        self.event_creation()
+        access_token = self.get_access_token()
+        res = self.client().post(
+            '/api/events',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=event)
+        self.assertEqual(res.status_code, 401)
+
 
     def test_api_get_all_events(self):
         """Test API can get all events without token passed (GET request)."""
