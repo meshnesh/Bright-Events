@@ -115,18 +115,13 @@ class UserEventsView(MethodView):
 
                 for event_res in event_models:
                     var = str(request.data.get(event_res, '').capitalize())
+                    var = var.strip(' \t\n\r')
                     if not var:
                         response = {
                             "message":'{} missing'.format(event_res)
                         }
                         return make_response(jsonify(response)), 401
                     args.update({event_res:var})
-
-                if args['title'][0] is  " ":
-                    response = {
-                        "message":'Event name cannot contain a space for the first letter'
-                    }
-                    return make_response(jsonify(response)), 401
 
                 if Events.query.filter_by(title=args['title']).first():
                     response = {
