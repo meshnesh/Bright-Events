@@ -42,8 +42,6 @@ class AllEventsView(MethodView):
         results = []
 
         for event in event_page:
-            for category in categories:
-                event.event_category = category.category_name
             obj = {
                 'id': event.id,
                 'title': event.title,
@@ -54,7 +52,6 @@ class AllEventsView(MethodView):
                 'image_url':event.image_url,
                 'event_category':event.event_category
             }
-            print(event.event_category)
             results.append(obj)
 
         if not results:
