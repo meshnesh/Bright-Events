@@ -2,7 +2,7 @@
 
 from flask.views import MethodView
 from flask import make_response, request, jsonify
-from app.models import User, Events, EventCategory
+from app.models import User, Events, EventCategory, BlacklistToken
 
 from . import events_blueprint
 
@@ -104,6 +104,7 @@ class UserEventsView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                blacklist_token = BlacklistToken(token=access_token)
                 # checks if the user_id has a valid token or contains the user id
                 # Go ahead and handle the request, the user is authed
 
@@ -148,6 +149,13 @@ class UserEventsView(MethodView):
                 })
 
                 return make_response(response), 201
+
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
+
         else:
             # user is not legit, so the payload is an error message
             message = user_id
