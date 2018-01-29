@@ -142,8 +142,8 @@ class RestEmailView(MethodView):
                 )
                 mail.send(msg)
                 response = {
-                    'message': 'Email confirmed you can reset your password.'
-                    # 'access_token': access_token.decode()
+                    'message': 'Email confirmed you can reset your password.',
+                    'access_token': access_token.decode()
                 }
                 return make_response(jsonify(response)), 200
 
