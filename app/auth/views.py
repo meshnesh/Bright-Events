@@ -2,7 +2,7 @@
 import os
 import re
 from flask.views import MethodView
-from flask import make_response, request, jsonify, url_for
+from flask import make_response, request, jsonify
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
