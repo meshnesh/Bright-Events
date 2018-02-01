@@ -2,7 +2,7 @@
 import os
 import re
 from flask.views import MethodView
-from flask import make_response, request, jsonify
+from flask import make_response, request, jsonify, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
@@ -136,13 +136,17 @@ class RestEmailView(MethodView):
             access_token = user.generate_token(user.id)
             if access_token:
                 msg = Message(
-                    "Email confirmed you can reset your password",
+                    "Reset Password",
                     sender="tonny.nesh@gmail.com",
                     recipients=["tonnie.nesh@gmail.com"]
                 )
+
+                # link = url_for('static', token=access_token, _external=True)
+                msg.body = 'Your link is: http://127.0.0.1:5000/api/auth/reset-password/{}'.format(access_token)
+
                 mail.send(msg)
                 response = {
-                    'message': 'Email confirmed you can reset your password.',
+                    'message': 'Check your email to reset your password.',
                     'access_token': access_token.decode()
                 }
                 return make_response(jsonify(response)), 200
@@ -157,7 +161,7 @@ class RestPasswordView(MethodView):
     """This class resets a users password. Url ---> /api/auth/reset-password"""
 
     @staticmethod
-    def put():
+    def put(access_token):
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/reset-password
         """
@@ -168,33 +172,37 @@ class RestPasswordView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
-                try:
-                    reset_password = User.query.filter_by(id=user_id).first_or_404()
+                BlacklistToken(token=access_token)
+                # checks if the user_id has a valid token or contains the user id
+                # Go ahead and handle the request, the user is authed
 
-                    post_data = request.data
-                    name = reset_password.name
-                    email = reset_password.email
-                    reset_password.password = Bcrypt().generate_password_hash(
-                        post_data['password']).decode()
-                    user = User(name=name, email=email, password=reset_password.password)
-                    user.reset_password()
+                reset_password = User.query.filter_by(id=user_id).first_or_404()
 
-                    response = {
-                        'message': 'Password rest successfully. Please log in.'
-                    }
-                    # return a response notifying the user that password was reset successfully
-                    return make_response(jsonify(response)), 201
-                except Exception as error:
-                    # An error occured, therefore return a string message containing the error
-                    response = {
-                        'message': str(error)
-                    }
-                    return make_response(jsonify(response)), 401
-        message = user_id
-        response = {
-            'message': message
-        }
-        return make_response(jsonify(response)), 401
+                post_data = request.data
+                name = reset_password.name
+                email = reset_password.email
+                reset_password.password = Bcrypt().generate_password_hash(
+                    post_data['password']).decode()
+                user = User(name=name, email=email, password=reset_password.password)
+                user.reset_password()
+
+                response = {
+                    'message': 'Password rest successfully. Please log in.'
+                }
+                # return a response notifying the user that password was reset successfully
+                return make_response(jsonify(response)), 201
+
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
+        else:
+            message = user_id
+            response = {
+                'message': message
+            }
+            return make_response(jsonify(response)), 401
 
 
 class UserAPI(MethodView):
@@ -315,7 +323,7 @@ auth_blueprint.add_url_rule(
 # Define the rule for the rest_password url --->  /api/auth/rest-password
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
-    '/api/auth/reset-password',
+    '/api/auth/reset-password/<access_token>',
     view_func=RESET_PASSWORD_VIEW,
     methods=['PUT']
 )

@@ -101,7 +101,7 @@ class UserEventsView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
-                blacklist_token = BlacklistToken(token=access_token)
+                BlacklistToken(token=access_token)
                 # checks if the user_id has a valid token or contains the user id
                 # Go ahead and handle the request, the user is authed
 
@@ -171,6 +171,7 @@ class UserEventsView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                BlacklistToken(token=access_token)
                 # get all the events for this user
                 categories = EventCategory.get__all_categories()
                 page = request.args.get('page', default=1, type=int)
@@ -204,6 +205,12 @@ class UserEventsView(MethodView):
 
                 return make_response(jsonify(results)), 200
 
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
+
         else:
             # user is not legit, so the payload is an error message
             message = user_id
@@ -227,6 +234,7 @@ class EventsManupilationView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                BlacklistToken(token=access_token)
                 # retrieve an event using it's ID
                 event = Events.query.filter_by(id=event_id).first_or_404()
                 if user_id is not event.created_by:
@@ -248,6 +256,12 @@ class EventsManupilationView(MethodView):
                     'event_category':event.event_category
                 })
                 return make_response(response), 200
+
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
         else:
             # user is not legit, so the payload is an error message
             message = user_id
@@ -265,6 +279,7 @@ class EventsManupilationView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                BlacklistToken(token=access_token)
                 # retrieve an event using it's ID
                 event = Events.query.filter_by(id=event_id).first_or_404()
                 if user_id is not event.created_by:
@@ -303,6 +318,12 @@ class EventsManupilationView(MethodView):
                 }
                 return make_response(jsonify(response)), 200
 
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
+
         else:
             # user is not legit, so the payload is an error message
             message = user_id
@@ -320,6 +341,7 @@ class EventsManupilationView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                BlacklistToken(token=access_token)
                 # retrieve an event using it's ID
                 event = Events.query.filter_by(id=event_id).first_or_404()
                 if user_id is not event.created_by:
@@ -332,6 +354,12 @@ class EventsManupilationView(MethodView):
                 return {
                     "message": "event {} deleted successfully".format(event.id)
                 }, 200
+
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
 
         else:
             # user is not legit, so the payload is an error message
@@ -355,6 +383,7 @@ class EventRsvpView(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                BlacklistToken(token=access_token)
                 event = Events.query.filter_by(id=event_id).first_or_404()
 
                 # POST User to the RSVP
@@ -370,6 +399,12 @@ class EventRsvpView(MethodView):
                     'message': 'You have Reserved a seat'
                 }
                 return make_response(jsonify(response)), 200
+    
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
 
         else:
             # user is not legit, so the payload is an error message
@@ -393,6 +428,7 @@ class EventCategories(MethodView):
         if access_token:
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
+                BlacklistToken(token=access_token)
                 # checks if the user_id has a valid token or contains the user id
                 # Go ahead and handle the request, the user is authed
 
@@ -423,6 +459,12 @@ class EventCategories(MethodView):
                 })
 
                 return make_response(response), 201
+    
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
         else:
             # user is not legit, so the payload is an error message
             message = user_id
