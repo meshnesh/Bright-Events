@@ -84,7 +84,7 @@ class AuthTestCase(unittest.TestCase):
 
         reset_res = self.client().post('/api/auth/reset', data=self.user_data)
         result = json.loads(reset_res.data.decode())
-        self.assertEqual(result['message'], "Email confirmed you can reset your password.")
+        self.assertEqual(result['message'], "Check your email to reset your password.")
         self.assertEqual(reset_res.status_code, 200)
         self.assertTrue(result['access_token'])
 
@@ -119,7 +119,7 @@ class AuthTestCase(unittest.TestCase):
 
         reset_res = self.client().post('/api/auth/reset', data=self.user_data)
         result = json.loads(reset_res.data.decode())
-        self.assertEqual(result['message'], "Email confirmed you can reset your password.")
+        self.assertEqual(result['message'], "Check your email to reset your password.")
         self.assertEqual(reset_res.status_code, 200)
         self.assertTrue(result['access_token'])
 
