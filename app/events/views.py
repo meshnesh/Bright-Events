@@ -399,7 +399,7 @@ class EventRsvpView(MethodView):
                     'message': 'You have Reserved a seat'
                 }
                 return make_response(jsonify(response)), 200
-    
+
             response_object = {
                 'status': 'fail',
                 'message': user_id
@@ -459,7 +459,7 @@ class EventCategories(MethodView):
                 })
 
                 return make_response(response), 201
-    
+
             response_object = {
                 'status': 'fail',
                 'message': user_id
