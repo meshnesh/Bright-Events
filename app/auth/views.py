@@ -63,6 +63,15 @@ class RegistrationView(MethodView):
                         count = 0
 
                 user.save()
+                msg = Message(
+                    "welcome to Bright Events",
+                    sender="tonny.nesh@gmail.com",
+                    recipients=["tonnie.nesh@gmail.com"] #user.email
+                )
+
+                msg.body = 'Thank you for creating an account with. Please login to access the features of the application'
+
+                mail.send(msg)
 
                 response = {
                     'message': 'You registered successfully. Please log in.'
