@@ -161,7 +161,7 @@ class RestPasswordView(MethodView):
     """This class resets a users password. Url ---> /api/auth/reset-password"""
 
     @staticmethod
-    def put(access_token):
+    def put():
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/reset-password
         """
@@ -323,7 +323,7 @@ auth_blueprint.add_url_rule(
 # Define the rule for the rest_password url --->  /api/auth/rest-password
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
-    '/api/auth/reset-password/<access_token>',
+    '/api/auth/reset-password',
     view_func=RESET_PASSWORD_VIEW,
     methods=['PUT']
 )
