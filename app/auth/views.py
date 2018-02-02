@@ -34,7 +34,8 @@ class RegistrationView(MethodView):
                 name = post_data['name']
                 email = post_data['email']
                 password = post_data['password']
-                user = User(name=name, email=email, password=password)
+                email_confirmed = False
+                user = User(name=name, email=email, password=password, email_confirmed=email_confirmed)
                 email_match = re.match(EMAIL_VALIDATOR, user.email)
 
                 if not email_match:
