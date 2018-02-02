@@ -402,7 +402,7 @@ class EventRsvpView(MethodView):
                     }
                     return make_response(jsonify(response)), 202
                 msg = Message(
-                    "Reset Password",
+                    "RSVP to an Event",
                     sender="tonny.nesh@gmail.com",
                     recipients=["tonnie.nesh@gmail.com"]
                 )
