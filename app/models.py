@@ -103,7 +103,7 @@ class User(db.Model):
             return "Invalid token. Please register or login"
 
     def __str__(self):
-        return """User(id={}, name={}, email={}, events={}, email_confirmed{})""".format(
+        return """User(id={}, name={}, email={}, events={}, email_confirmed={})""".format(
             self.id, self.name, self.email, self.myrsvps.all(), self.email_confirmed)
 
     __repr__ = __str__
