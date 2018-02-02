@@ -387,13 +387,21 @@ class EventRsvpView(MethodView):
                 event = Events.query.filter_by(id=event_id).first_or_404()
 
                 # POST User to the RSVP
-                user = User.query.filter_by(id=user_id).first_or_404()
-                has_prev_rsvpd = event.add_rsvp(user)
-                if has_prev_rsvpd:
-                    response = {
-                        'message': 'You have already reserved a seat'
-                    }
-                    return make_response(jsonify(response)), 202
+                # user = User.query.filter_by(id=user_id).first_or_404()
+                # has_prev_rsvpd = event.add_rsvp(user)
+                # if has_prev_rsvpd:
+                #     response = {
+                #         'message': 'You have already reserved a seat'
+                #     }
+                #     return make_response(jsonify(response)), 202
+                # msg = Message(
+                #     "Reset Password",
+                #     sender="tonny.nesh@gmail.com",
+                #     recipients=["tonnie.nesh@gmail.com"]
+                # )
+
+                # msg.html = 'You have reserved a seat to attend {}'.format(event.name)
+                # MAIL.send(msg)
 
                 response = {
                     'message': 'You have Reserved a seat'
