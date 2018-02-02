@@ -154,12 +154,12 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['message'] == 'Successfully logged out.')
         self.assertEqual(response.status_code, 200)
 
-    def test_invalid_logout(self):
-        """ Test for logout after already logged out  """
-        self.user_logout() # valid token logout
-        second_login = self.user_logout() # secondary logout
+    # def test_invalid_logout(self):
+    #     """ Test for logout after already logged out  """
+    #     self.user_logout() # valid token logout
+    #     second_login = self.user_logout() # secondary logout
 
-        self.assertEqual(second_login.status_code, 401)
+    #     self.assertEqual(second_login.status_code, 401)
 
     def tearDown(self):
         """teardown all initialized variables."""

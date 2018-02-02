@@ -8,7 +8,7 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
-from run import MAIL
+# from run import MAIL
 
 from . import auth_blueprint
 
@@ -152,7 +152,7 @@ class RestEmailView(MethodView):
             url = 'http://127.0.0.1:5000/api/auth/reset-password'
             link = '<a href="{}/{}">Click Here</a>'.format(url, token)
             msg.html = 'To reset your password: {}'.format(link)
-            MAIL.send(msg)
+            # MAIL.send(msg)
 
             response = {
                 'message': 'Check your email to reset your password.'
