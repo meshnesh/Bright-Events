@@ -11,8 +11,8 @@ class Config(object):
     MAIL_PORT = 465
     MAIL_USE_SSL = True
     MAIL_USE_TLS = False
-    MAIL_USERNAME = 'tonnie.nesh'
-    MAIL_PASSWORD = 'teteteteateher'
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 
 
 class DevelopmentConfig(Config):
