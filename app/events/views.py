@@ -2,9 +2,16 @@
 
 from flask.views import MethodView
 from flask import make_response, request, jsonify
+from flask_mail import Mail, Message
 from app.models import User, Events, EventCategory, BlacklistToken
+from app import create_app
+
+from run import CONFIG_NAME
 
 from . import events_blueprint
+
+APP = create_app(CONFIG_NAME)
+MAIL = Mail(APP)
 
 
 class AllEventsView(MethodView):
@@ -372,7 +379,7 @@ class EventsManupilationView(MethodView):
 
 class EventRsvpView(MethodView):
     """This class handles POST method for user
-    RSVP to and event in url, ----> /api/events/<int:event_id>/rsvp/"""
+    RSVP to and event in url, ----> /api/events/<int:event_id>/rsvp"""
 
     @staticmethod
     def post(event_id):
@@ -385,23 +392,25 @@ class EventRsvpView(MethodView):
             if not isinstance(user_id, str):
                 BlacklistToken(token=access_token)
                 event = Events.query.filter_by(id=event_id).first_or_404()
-
+                print(event)
                 # POST User to the RSVP
-                # user = User.query.filter_by(id=user_id).first_or_404()
-                # has_prev_rsvpd = event.add_rsvp(user)
-                # if has_prev_rsvpd:
-                #     response = {
-                #         'message': 'You have already reserved a seat'
-                #     }
-                #     return make_response(jsonify(response)), 202
-                # msg = Message(
-                #     "Reset Password",
-                #     sender="tonny.nesh@gmail.com",
-                #     recipients=["tonnie.nesh@gmail.com"]
-                # )
+                user = User.query.filter_by(id=user_id).first_or_404()
+                has_prev_rsvpd = event.add_rsvp(user)
+                if has_prev_rsvpd:
+                    response = {
+                        'message': 'You have already reserved a seat'
+                    }
+                    return make_response(jsonify(response)), 202
+                msg = Message(
+                    "Reset Password",
+                    sender="tonny.nesh@gmail.com",
+                    recipients=["tonnie.nesh@gmail.com"]
+                )
 
-                # msg.html = 'You have reserved a seat to attend {}'.format(event.name)
-                # MAIL.send(msg)
+                msg.html = """
+                        You have reserved a seat to attend <h3>{}</h3> on {} {} at {}.
+                """.format(event.title, event.date, event.time, event.location)
+                MAIL.send(msg)
 
                 response = {
                     'message': 'You have Reserved a seat'
