@@ -5,15 +5,15 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
-from flask_mail import Message
+from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
-# from run import MAIL
+from run import APP
 
 from . import auth_blueprint
 
 EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
-
+MAIL = Mail(APP)
 SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 
@@ -140,7 +140,6 @@ class RestEmailView(MethodView):
         """Handle POST request for this view. Url ---> /api/auth/reset"""
         user = User.query.filter_by(email=request.data['email']).first()
         if user:
-            # print(user.email)
             token = SECRET.dumps(user.email, salt='email-confirm')
 
             msg = Message(
@@ -152,7 +151,7 @@ class RestEmailView(MethodView):
             url = 'http://127.0.0.1:5000/api/auth/reset-password'
             link = '<a href="{}/{}">Click Here</a>'.format(url, token)
             msg.html = 'To reset your password: {}'.format(link)
-            # MAIL.send(msg)
+            MAIL.send(msg)
 
             response = {
                 'message': 'Check your email to reset your password.'
