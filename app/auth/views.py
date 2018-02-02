@@ -5,15 +5,15 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
-from flask_mail import Message
+from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
-from run import MAIL
+from run import APP
 
 from . import auth_blueprint
 
 EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
-
+MAIL = Mail(APP)
 SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 
