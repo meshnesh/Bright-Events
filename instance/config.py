@@ -13,11 +13,13 @@ class Config(object):
     MAIL_USE_TLS = False
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_SUPPRESS_SEND = False # change to True when running poductionr
 
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
     DEBUG = True
+    # MAIL_SUPPRESS_SEND = False
 
 
 class TestingConfig(Config):
