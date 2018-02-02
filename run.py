@@ -1,3 +1,5 @@
+"""import depancies and methods."""
+
 import os
 
 from app import create_app
