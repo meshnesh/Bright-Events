@@ -5,19 +5,16 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
-from flask_mail import Mail, Message
+from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
-from app import create_app
+from run import mail
 
 from . import auth_blueprint
 
 EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
-config_name = os.getenv('APP_SETTINGS') # config_name = "development"
-app = create_app(config_name)
-mail = Mail(app)
 
-s = URLSafeTimedSerializer(os.getenv('SECRET'))
+SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 
 class RegistrationView(MethodView):
@@ -144,7 +141,7 @@ class RestEmailView(MethodView):
         user = User.query.filter_by(email=request.data['email']).first()
         if user:
             # print(user.email)
-            token = s.dumps(user.email, salt='email-confirm')
+            token = SECRET.dumps(user.email, salt='email-confirm')
 
             msg = Message(
                 "Reset Password",
@@ -178,7 +175,7 @@ class RestPasswordView(MethodView):
         """
 
         try:
-            email = s.loads(token, salt='email-confirm', max_age=3600) # token valid for 1 hour
+            email = SECRET.loads(token, salt='email-confirm', max_age=3600) # token valid for 1 hour
         except SignatureExpired:
             response = {
                 'message': 'The token is expired!, confirm your e-mail again'
