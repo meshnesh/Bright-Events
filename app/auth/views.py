@@ -144,7 +144,7 @@ class RestEmailView(MethodView):
 
             msg = Message(
                 "Reset Password",
-                sender="tonny.nesh@gmail.com",
+                sender="bryt.event@gmail.com",
                 recipients=["tonnie.nesh@gmail.com"]
             )
 
