@@ -115,7 +115,6 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(result['message'], "Check your email to reset your password.")
         self.assertEqual(res.status_code, 200)
 
-
     def test_email_non_exist_for_reset(self):
         """Test not registered Email fails when reseting there password"""
         self.user_registration() # register a user
@@ -131,30 +130,6 @@ class AuthTestCase(unittest.TestCase):
         result = json.loads(reset_res.data.decode())
         self.assertEqual(result['message'], "Wrong Email or user email does not exist.")
         self.assertEqual(reset_res.status_code, 401)
-
-# # FIXED WHEN EMAILING IS SETUP
-#     def test_user_reset_password(self):
-#         """Test Email exists so that they can reset there password"""
-#         new_password = {
-#             'password': 'nope'
-#         }
-
-#         self.user_registration()
-#         res = self.user_email_reset()
-
-#         # result = json.loads(res.data.decode())
-#         # self.assertEqual(result['message'], "Check your email to reset your password.")
-#         # self.assertEqual(res.status_code, 200)
-#         # self.assertTrue(result['access_token'])
-
-#         # obtain the access token
-#         access_token = json.loads(res.data.decode())['access_token']
-
-#         password_res = self.client().put(
-#             '/api/auth/reset-password',
-#             headers=dict(Authorization="Bearer " + access_token),
-#             data=new_password)
-#         self.assertEqual(password_res.status_code, 201)
 
     def test_user_status(self):
         """ Test for user status """
