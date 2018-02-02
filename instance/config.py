@@ -19,7 +19,6 @@ class Config(object):
 class DevelopmentConfig(Config):
     """Configurations for Development."""
     DEBUG = True
-    # MAIL_SUPPRESS_SEND = False
 
 
 class TestingConfig(Config):
