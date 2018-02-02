@@ -23,15 +23,17 @@ class User(db.Model):
     name = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(25), nullable=False, unique=True)
     password = db.Column(db.String(100))
+    email_confirmed = db.Column(db.Boolean(False), nullable=False)
     eventlists = db.relationship(
         'Events', order_by='Events.id', cascade="all, delete-orphan")
     myrsvps = db.relationship('Events', secondary=rsvps,
                               backref=db.backref('rsvpList', lazy='dynamic'), lazy='dynamic')
 
-    def __init__(self, name, email, password):
-        """Initialize the user with a name, an email and a password."""
+    def __init__(self, name, email, password, email_confirmed):
+        """Initialize the user with a name, an email, a password and email not confirmed."""
         self.name = name
         self.email = email
+        self.email_confirmed = email_confirmed
         self.password = Bcrypt().generate_password_hash(password).decode()
 
     def password_is_valid(self, password):
@@ -50,6 +52,11 @@ class User(db.Model):
 
     @staticmethod
     def reset_password():
+        """Save a new user user password to the database."""
+        db.session.commit()
+
+    @staticmethod
+    def email_confirmation():
         """Save a new user user password to the database."""
         db.session.commit()
 
@@ -96,8 +103,8 @@ class User(db.Model):
             return "Invalid token. Please register or login"
 
     def __str__(self):
-        return """User(id={}, name={}, email={}, events={})""".format(
-            self.id, self.name, self.email, self.myrsvps.all())
+        return """User(id={}, name={}, email={}, events={}, email_confirmed{})""".format(
+            self.id, self.name, self.email, self.myrsvps.all(), self.email_confirmed)
 
     __repr__ = __str__
 
