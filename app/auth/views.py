@@ -152,7 +152,7 @@ class RestEmailView(MethodView):
         """Handle POST request for this view. Url ---> /api/auth/reset"""
         user = User.query.filter_by(email=request.data['email']).first()
         if user:
-            token = SECRET.dumps(user.email, salt='email-confirm')
+            token = SECRET.dumps(user.email, salt='reset-password')
 
             msg = Message(
                 "Reset Password",
@@ -186,7 +186,11 @@ class RestPasswordView(MethodView):
         """
 
         try:
-            email = SECRET.loads(token, salt='email-confirm', max_age=3600) # token valid for 1 hour
+            email = SECRET.loads(
+                token, salt='reset-password',
+                max_age=3600 # token valid for 1 hour
+            )
+
         except SignatureExpired:
             response = {
                 'message': 'The token is expired!, confirm your e-mail again'
@@ -198,9 +202,15 @@ class RestPasswordView(MethodView):
         post_data = request.data
         name = reset_password.name
         email = reset_password.email
+        email_confirmed = reset_password.email_confirmed
         reset_password.password = Bcrypt().generate_password_hash(
             post_data['password']).decode()
-        user = User(name=name, email=email, password=reset_password.password)
+
+        user = User(
+            name=name, email=email, password=reset_password.password,
+            email_confirmed=email_confirmed
+        )
+
         user.reset_password()
 
         response = {
@@ -293,6 +303,39 @@ class LogoutAPI(MethodView):
         return make_response(jsonify(response_object)), 403
 
 
+class ConfirmEmailView(MethodView):
+    """This class validates a user email then
+    generates a token to reset a users password. Url ---> /api/auth/confirm"""
+
+    @staticmethod
+    def post():
+        """Handle POST request for this view. Url ---> /api/auth/confirm"""
+        user = User.query.filter_by(email=request.data['email']).first()
+        if user:
+            token = SECRET.dumps(user.email, salt='email-confirm')
+
+            msg = Message(
+                "Email Confirmation",
+                sender="bryt.event@gmail.com",
+                recipients=["tonnie.nesh@gmail.com"]
+            )
+
+            url = 'http://127.0.0.1:5000/api/auth/verify'
+            link = '<a href="{}/{}">Click Here</a>'.format(url, token)
+            msg.html = 'To Verify your Email Address : {}'.format(link)
+            MAIL.send(msg)
+
+            response = {
+                'message': 'Check your Email to Verify it.'
+            }
+            return make_response(jsonify(response)), 200
+
+        response = {
+            'message': 'Wrong Email or user email does not exist.'
+        }
+        return make_response(jsonify(response)), 401
+
+
 # Define the API resource
 REGISTRATION_VIEW = RegistrationView.as_view('REGISTRATION_VIEW')
 LOGIN_VIEW = LoginView.as_view('LOGIN_VIEW')
@@ -300,6 +343,7 @@ RESET_VIEW = RestEmailView.as_view('RESET_VIEW')
 RESET_PASSWORD_VIEW = RestPasswordView.as_view('RESET_PASSWORD_VIEW')
 USER_VIEW = UserAPI.as_view('USER_VIEW')
 LOGOUT_VIEW = LogoutAPI.as_view('LOGOUT_VIEW')
+CONFIRM_VIEW = ConfirmEmailView.as_view('CONFIRM_VIEW')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -346,5 +390,13 @@ auth_blueprint.add_url_rule(
 auth_blueprint.add_url_rule(
     '/api/auth/logout',
     view_func=LOGOUT_VIEW,
+    methods=['POST']
+)
+
+# Define the rule for the rest(to validate the email) url --->  /api/auth/confirm
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/api/auth/confirm',
+    view_func=CONFIRM_VIEW,
     methods=['POST']
 )
