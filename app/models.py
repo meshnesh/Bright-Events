@@ -51,13 +51,11 @@ class User(db.Model):
         db.session.commit()
 
     @staticmethod
-    def reset_password():
-        """Save a new user user password to the database."""
-        db.session.commit()
-
-    @staticmethod
-    def email_confirmation():
-        """Save a new user user password to the database."""
+    def update_user_data():
+        """
+        Save a new user password to the database.
+        Save new email confirmation
+        """
         db.session.commit()
 
     @staticmethod
