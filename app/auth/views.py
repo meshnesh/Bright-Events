@@ -2,10 +2,11 @@
 import os
 import re
 from flask.views import MethodView
-from flask import make_response, request, jsonify
+from flask import make_response, request, jsonify, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
 from app import create_app
 
@@ -15,6 +16,8 @@ EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
 config_name = os.getenv('APP_SETTINGS') # config_name = "development"
 app = create_app(config_name)
 mail = Mail(app)
+
+s = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 
 class RegistrationView(MethodView):
@@ -138,26 +141,26 @@ class RestEmailView(MethodView):
     @staticmethod
     def post():
         """Handle POST request for this view. Url ---> /api/auth/reset"""
-
-        # Query to see if the user email exists
         user = User.query.filter_by(email=request.data['email']).first()
         if user:
-            access_token = user.generate_token(user.id)
-            if access_token:
-                msg = Message(
-                    "Reset Password",
-                    sender="tonny.nesh@gmail.com",
-                    recipients=["tonnie.nesh@gmail.com"]
-                )
+            # print(user.email)
+            token = s.dumps(user.email, salt='email-confirm')
 
-                # link = url_for('static', token=access_token, _external=True)
-                msg.body = 'Your link is: <a href="http://127.0.0.1:5000/api/auth/reset-password/{}">Click Here</a>'.format(access_token)
+            msg = Message(
+                "Reset Password",
+                sender="tonny.nesh@gmail.com",
+                recipients=["tonnie.nesh@gmail.com"]
+            )
 
-                # mail.send(msg)
-                response = {
-                    'message': 'Check your email to reset your password.'
-                }
-                return make_response(jsonify(response)), 200
+            url = 'http://127.0.0.1:5000/api/auth/reset-password'
+            link = '<a href="{}/{}">Click Here</a>'.format(url, token)
+            msg.html = 'To reset your password: {}'.format(link)
+            mail.send(msg)
+
+            response = {
+                'message': 'Check your email to reset your password.'
+            }
+            return make_response(jsonify(response)), 200
 
         response = {
             'message': 'Wrong Email or user email does not exist.'
@@ -166,51 +169,37 @@ class RestEmailView(MethodView):
 
 
 class RestPasswordView(MethodView):
-    """This class resets a users password. Url ---> /api/auth/reset-password"""
+    """This class resets a users password. Url ---> /api/auth/reset-password/<token>"""
 
     @staticmethod
-    def put():
+    def put(token):
         """This Handles PUT request for handling the reset password for the user
-        ---> /api/auth/reset-password
+        ---> /api/auth/reset-password/<token>
         """
 
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # checks if the user_id has a valid token or contains the user id
-                # Go ahead and handle the request, the user is authed
-
-                reset_password = User.query.filter_by(id=user_id).first_or_404()
-
-                post_data = request.data
-                name = reset_password.name
-                email = reset_password.email
-                reset_password.password = Bcrypt().generate_password_hash(
-                    post_data['password']).decode()
-                user = User(name=name, email=email, password=reset_password.password)
-                user.reset_password()
-
-                response = {
-                    'message': 'Password rest successfully. Please log in.'
-                }
-                # return a response notifying the user that password was reset successfully
-                return make_response(jsonify(response)), 201
-
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-        else:
-            message = user_id
+        try:
+            email = s.loads(token, salt='email-confirm', max_age=3600) # token valid for 1 hour
+        except SignatureExpired:
             response = {
-                'message': message
+                'message': 'The token is expired!, confirm your e-mail again'
             }
             return make_response(jsonify(response)), 401
+
+        reset_password = User.query.filter_by(email=email).first()
+
+        post_data = request.data
+        name = reset_password.name
+        email = reset_password.email
+        reset_password.password = Bcrypt().generate_password_hash(
+            post_data['password']).decode()
+        user = User(name=name, email=email, password=reset_password.password)
+        user.reset_password()
+
+        response = {
+            'message': 'Password rest successfully. Please log in.'
+        }
+        # return a response notifying the user that password was reset successfully
+        return make_response(jsonify(response)), 201
 
 
 class UserAPI(MethodView):
@@ -328,10 +317,10 @@ auth_blueprint.add_url_rule(
     methods=['POST']
 )
 
-# Define the rule for the rest_password url --->  /api/auth/rest-password
+# Define the rule for the rest_password url --->  /api/auth/rest-password/<token>
 # Then add the rule to the blueprint
 auth_blueprint.add_url_rule(
-    '/api/auth/reset-password',
+    '/api/auth/reset-password/<token>',
     view_func=RESET_PASSWORD_VIEW,
     methods=['PUT']
 )
