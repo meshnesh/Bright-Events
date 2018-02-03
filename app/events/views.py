@@ -111,12 +111,13 @@ class UserEventsView(MethodView):
                 BlacklistToken(token=access_token)
                 # checks if the user_id has a valid token or contains the user id
                 # Go ahead and handle the request, the user is authed
-                user = User.query.filter_by(id=user_id).first_or_404()
-                if user.email_confirmed is not True:
-                    response = {
-                        "message":'Your Must Confirm your Email Address in-order to create an event'
-                    }
-                    return make_response(jsonify(response)), 401
+
+                # user = User.query.filter_by(id=user_id).first_or_404()
+                # if user.email_confirmed is not True:
+                #     response = {
+                #         "message":'Your Must Confirm your Email Address in-order to create an event'
+                #     }
+                #     return make_response(jsonify(response)), 401
 
                 args = {}
                 event_models = [
