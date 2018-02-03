@@ -211,7 +211,7 @@ class RestPasswordView(MethodView):
             email_confirmed=email_confirmed
         )
 
-        user.reset_password()
+        user.update_user_data()
 
         response = {
             'message': 'Password rest successfully. Please log in.'
@@ -336,6 +336,50 @@ class ConfirmEmailView(MethodView):
         return make_response(jsonify(response)), 401
 
 
+class VerifyEmailView(MethodView):
+    """This class resets a users password. Url ---> /api/auth/verify/<token>"""
+
+    @staticmethod
+    def put(token):
+        """This Handles PUT request for handling the reset password for the user
+        ---> /api/auth/verify/<token>
+        """
+
+        try:
+            email = SECRET.loads(
+                token, salt='email-confirm',
+                max_age=3600 # token valid for 1 hour
+            )
+
+        except SignatureExpired:
+            response = {
+                'message': 'The token is expired!, confirm your e-mail again'
+            }
+            return make_response(jsonify(response)), 401
+
+        reset_password = User.query.filter_by(email=email).first()
+
+        # post_data = request.data
+        name = reset_password.name
+        email = reset_password.email
+        reset_password.password = reset_password.password
+        email_confirmed = True
+
+        user = User(
+            name=name, email=email, password=reset_password.password,
+            email_confirmed=email_confirmed
+        )
+        print(user)
+
+        user.update_user_data()
+
+        response = {
+            'message': 'Email Confirmed successfully. You can enjoy the app features.'
+        }
+        # return a response notifying the user that password was reset successfully
+        return make_response(jsonify(response)), 201
+
+
 # Define the API resource
 REGISTRATION_VIEW = RegistrationView.as_view('REGISTRATION_VIEW')
 LOGIN_VIEW = LoginView.as_view('LOGIN_VIEW')
@@ -344,6 +388,7 @@ RESET_PASSWORD_VIEW = RestPasswordView.as_view('RESET_PASSWORD_VIEW')
 USER_VIEW = UserAPI.as_view('USER_VIEW')
 LOGOUT_VIEW = LogoutAPI.as_view('LOGOUT_VIEW')
 CONFIRM_VIEW = ConfirmEmailView.as_view('CONFIRM_VIEW')
+VERIFY_VIEW = VerifyEmailView.as_view('VERIFY_VIEW')
 
 
 # Define the rule for the registration url --->  /api/auth/register
@@ -399,4 +444,12 @@ auth_blueprint.add_url_rule(
     '/api/auth/confirm',
     view_func=CONFIRM_VIEW,
     methods=['POST']
+)
+
+# Define the rule for the rest_password url --->  /api/auth/verify/<token>
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/api/auth/verify/<token>',
+    view_func=VERIFY_VIEW,
+    methods=['PUT']
 )
