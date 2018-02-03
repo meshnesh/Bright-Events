@@ -23,7 +23,7 @@ class User(db.Model):
     name = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(25), nullable=False, unique=True)
     password = db.Column(db.String(100))
-    email_confirmed = db.Column(db.Boolean(False), nullable=False)
+    email_confirmed = db.Column(db.Boolean(False))
     eventlists = db.relationship(
         'Events', order_by='Events.id', cascade="all, delete-orphan")
     myrsvps = db.relationship('Events', secondary=rsvps,
