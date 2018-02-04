@@ -42,7 +42,7 @@ def token_required(function):
         except Exception:
             return jsonify(
                 {"error": "Token expired. Please log in again"}), 401
-        return function(user_id, *args, **kwargs)
+        return function(*args, **kwargs, user_id=user_id)
     return wrapper
 
 
@@ -135,12 +135,13 @@ class UserEventsView(MethodView):
     @token_required
     def post(self, user_id):
         """Handle POST request for this view. Url ---> /api/events"""
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token) # get the id from the token
 
         user = User.query.filter_by(id=user_id).first() # get user details
+        if user.email_confirmed is not True:
+            response = {
+                "message":'Your Must Confirm your Email Address in-order to create an event'
+            }
+            return make_response(jsonify(response)), 401
 
         args = {}
         event_models = [
@@ -189,10 +190,6 @@ class UserEventsView(MethodView):
     @token_required
     def get(self, user_id):
         """Handle GET request for this view. Url ---> /api/events"""
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token)
 
         user = User.query.filter_by(id=user_id).first() # get user details
 
@@ -238,11 +235,6 @@ class EventsManupilationView(MethodView):
     @token_required
     def get(self,user_id, event_id):
         """Handles single event data with GET by event id."""
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token)
-
         user = User.query.filter_by(id=user_id).first() # get user details
 
         event = Events.query.filter_by(id=event_id).first_or_404()
@@ -272,10 +264,6 @@ class EventsManupilationView(MethodView):
     @token_required
     def put(self, user_id, event_id):
         """This function handles editing of single events by their id"""
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token)
 
         event = Events.query.filter_by(id=event_id).first_or_404()
         category = EventCategory.query.filter_by(id=event.event_category).first()
@@ -320,10 +308,6 @@ class EventsManupilationView(MethodView):
     @token_required
     def delete(self, user_id, event_id):
         """This Handles deleting of an event with it's id"""
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token)
 
         event = Events.query.filter_by(id=event_id).first_or_404()
 
@@ -346,10 +330,6 @@ class EventRsvpView(MethodView):
     @token_required
     def post(self, user_id, event_id):
         """Adds a user to rsvp to a specific event."""
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token)
 
         event = Events.query.filter_by(id=event_id).first_or_404()
 
@@ -384,11 +364,6 @@ class EventCategories(MethodView):
     @token_required
     def post(self, user_id):
         """Handle POST request for this view. Url ---> /api/cartegory"""
-
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[1]
-
-        user_id = User.decode_token(access_token)
 
         args = {}
         event_models = ['category_name']
