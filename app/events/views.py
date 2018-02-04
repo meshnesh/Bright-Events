@@ -1,5 +1,6 @@
 """import depancies and methods."""
 
+from functools import wraps
 from flask.views import MethodView
 from flask import make_response, request, jsonify
 from flask_mail import Mail, Message
@@ -12,6 +13,37 @@ from . import events_blueprint
 
 APP = create_app(CONFIG_NAME)
 MAIL = Mail(APP)
+
+
+def token_required(function):
+    """Require token to access routes."""
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        """Require token to access routes."""
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        user_id = User.decode_token(access_token)
+
+        if not access_token:
+            return make_response(
+                jsonify({"error": "Token is missing. Provide a valid token"})
+            ), 401
+
+        if isinstance(user_id, str):
+            response_object = {
+                'status': 'fail',
+                'message': user_id
+            }
+            return make_response(jsonify(response_object)), 401
+        try:
+            user_id
+            # get logged in user object
+        except Exception:
+            return jsonify(
+                {"error": "Token expired. Please log in again"}), 401
+        return function(user_id, *args, **kwargs)
+    return wrapper
 
 
 class AllEventsView(MethodView):
@@ -97,405 +129,290 @@ class SingleEventView(MethodView):
 
 class UserEventsView(MethodView):
     """This class handles events creation and viewing of a single user"""
-
-    @staticmethod
-    def post():
+    @token_required
+    def post(self, user_id):
         """Handle POST request for this view. Url ---> /api/events"""
-
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # checks if the user_id has a valid token or contains the user id
-                # Go ahead and handle the request, the user is authed
+        user_id = User.decode_token(access_token) # get the id from the token
 
-                # user = User.query.filter_by(id=user_id).first_or_404()
-                # if user.email_confirmed is not True:
-                #     response = {
-                #         "message":'Your Must Confirm your Email Address in-order to create an event'
-                #     }
-                #     return make_response(jsonify(response)), 401
+        user = User.query.filter_by(id=user_id).first() # get user details
 
-                args = {}
-                event_models = [
-                    'title', 'location', 'time', 'date',
-                    'description', 'image_url', 'event_category'
-                ]
+        args = {}
+        event_models = [
+            'title', 'location', 'time', 'date',
+            'description', 'image_url', 'event_category'
+        ]
 
-                for event_res in event_models:
-                    var = str(request.data.get(event_res, '').capitalize())
-                    var = var.strip(' \t\n\r')
-                    if not var:
-                        response = {
-                            "message":'{} missing'.format(event_res)
-                        }
-                        return make_response(jsonify(response)), 401
-                    args.update({event_res:var})
+        for event_res in event_models:
+            var = str(request.data.get(event_res, '').capitalize())
+            var = var.strip(' \t\n\r')
+            if not var:
+                response = {
+                    "message":'{} missing'.format(event_res)
+                }
+                return make_response(jsonify(response)), 401
+            args.update({event_res:var})
 
-                if Events.query.filter_by(title=args['title']).first():
-                    response = {
-                        "message":'Event title exists. Choose another one'
-                    }
-                    return make_response(jsonify(response)), 401
-
-                event = Events(
-                    **args,
-                    created_by=user_id)
-
-                event.save()
-                response = jsonify({
-                    'id': event.id,
-                    'title': event.title,
-                    'location': event.location,
-                    'time': event.time,
-                    'date': event.date,
-                    'description': event.description,
-                    'image_url':event.image_url,
-                    'created_by': user_id,
-                    'event_category': event.event_category,
-
-                })
-
-                return make_response(response), 201
-
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        if Events.query.filter_by(title=args['title']).first():
             response = {
-                'message': message
+                "message":'Event title exists. Choose another one'
             }
             return make_response(jsonify(response)), 401
 
-    @staticmethod
-    def get():
+        event = Events(
+            **args,
+            created_by=user_id
+        )
+
+        event.save()
+        response = jsonify({
+            'id': event.id,
+            'title': event.title,
+            'location': event.location,
+            'time': event.time,
+            'date': event.date,
+            'description': event.description,
+            'image_url':event.image_url,
+            'created_by': user.name,
+            'event_category': event.event_category,
+
+        })
+
+        return make_response(response), 201
+
+
+    @token_required
+    def get(self, user_id):
         """Handle GET request for this view. Url ---> /api/events"""
-
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # get all the events for this user
-                categories = EventCategory.get__all_categories()
-                page = request.args.get('page', default=1, type=int)
-                limit = request.args.get('limit', default=10, type=int)
+        user_id = User.decode_token(access_token)
 
-                events = Events.get_all_user(user_id)
+        user = User.query.filter_by(id=user_id).first() # get user details
 
-                event_page = events.paginate(page, limit, False).items
-                results = []
+        categories = EventCategory.get__all_categories()
+        page = request.args.get('page', default=1, type=int)
+        limit = request.args.get('limit', default=10, type=int)
 
-                for event in event_page:
-                    for category in categories:
-                        event.event_category = category.category_name
-                    obj = {
-                        'id': event.id,
-                        'title': event.title,
-                        'location': event.location,
-                        'time': event.time,
-                        'date': event.date,
-                        'description': event.description,
-                        'image_url':event.image_url,
-                        'event_category':event.event_category
-                    }
-                    results.append(obj)
+        events = Events.get_all_user(user_id)
 
-                if not results:
-                    response = {
-                        'message': "No events found"
-                    }
-                    return make_response(jsonify(response)), 404
+        event_page = events.paginate(page, limit, False).items
+        results = []
 
-                return make_response(jsonify(results)), 200
-
-            response_object = {
-                'status': 'fail',
-                'message': user_id
+        for event in event_page:
+            for category in categories:
+                event.event_category = category.category_name
+            obj = {
+                'id': event.id,
+                'title': event.title,
+                'location': event.location,
+                'time': event.time,
+                'date': event.date,
+                'description': event.description,
+                'image_url':event.image_url,
+                'event_category':event.event_category,
+                'created_by': user.name,
             }
-            return make_response(jsonify(response_object)), 401
+            results.append(obj)
 
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        if not results:
             response = {
-                'message': message
+                'message': "No events found"
             }
-            return make_response(jsonify(response)), 401
+            return make_response(jsonify(response)), 404
+
+        return make_response(jsonify(results)), 200
 
 
 class EventsManupilationView(MethodView):
     """This class handles all methods that involve single event
     get, update and delete. Url --->/api/events/<int:event_id>"""
 
-    @staticmethod
-    def get(event_id):
+    @token_required
+    def get(self,user_id, event_id):
         """Handles single event data with GET by event id."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
-        categories = EventCategory.get__all_categories()
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # retrieve an event using it's ID
-                event = Events.query.filter_by(id=event_id).first_or_404()
-                if user_id is not event.created_by:
-                    response = {
-                        'message': 'Your do not have authorization to access this event privately'
-                    }
-                    return make_response(jsonify(response)), 401
-                for category in categories:
-                    event.event_category = category.category_name
-                response = jsonify({
-                    'id': event.id,
-                    'title': event.title,
-                    'location': event.location,
-                    'time': event.time,
-                    'date': event.date,
-                    'description': event.description,
-                    'image_url':event.image_url,
-                    'created_by': event.created_by,
-                    'event_category':event.event_category
-                })
-                return make_response(response), 200
+        user_id = User.decode_token(access_token)
 
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        user = User.query.filter_by(id=user_id).first() # get user details
+
+        event = Events.query.filter_by(id=event_id).first_or_404()
+        category = EventCategory.query.filter_by(id=event.event_category).first()
+        event_category = category.category_name
+
+        if user_id is not event.created_by:
             response = {
-                'message': message
+                'message': 'Your do not have authorization to access this event privately'
             }
             return make_response(jsonify(response)), 401
 
-    @staticmethod
-    def put(event_id):
+        response = jsonify({
+            'id': event.id,
+            'title': event.title,
+            'location': event.location,
+            'time': event.time,
+            'date': event.date,
+            'description': event.description,
+            'image_url':event.image_url,
+            'created_by': user.name,
+            'event_category':event_category
+        })
+        return make_response(response), 200
+
+
+    @token_required
+    def put(self, user_id, event_id):
         """This function handles editing of single events by their id"""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # retrieve an event using it's ID
-                event = Events.query.filter_by(id=event_id).first_or_404()
-                if user_id is not event.created_by:
-                    response = {
-                        'message': 'Your do not have authorization to access this event privately'
-                    }
-                    return make_response(jsonify(response)), 401
+        user_id = User.decode_token(access_token)
 
-                title = str(request.data.get('title', ''))
-                location = str(request.data.get('location', ''))
-                time = str(request.data.get('time', ''))
-                date = str(request.data.get('date', ''))
-                description = str(request.data.get('description', ''))
-                image_url = str(request.data.get('image_url', ''))
-                event_category = str(request.data.get('event_category', ''))
+        event = Events.query.filter_by(id=event_id).first_or_404()
+        category = EventCategory.query.filter_by(id=event.event_category).first()
+        event_category = category.category_name
 
-                event.title = title
-                event.location = location
-                event.time = time
-                event.date = date
-                event.description = description
-                event.image_url = image_url
-                event.event_category = event_category
-
-                event.save()
-                response = {
-                    'id': event.id,
-                    'title': event.title,
-                    'location': event.location,
-                    'time': event.time,
-                    'date': event.date,
-                    'description': event.description,
-                    'image_url':event.image_url,
-                    'created_by': event.created_by,
-                    'event_category': event.event_category
-                }
-                return make_response(jsonify(response)), 200
-
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        if user_id is not event.created_by:
             response = {
-                'message': message
+                'message': 'Your do not have authorization to access this event privately'
             }
             return make_response(jsonify(response)), 401
 
-    @staticmethod
-    def delete(event_id):
+        title = str(request.data.get('title', ''))
+        location = str(request.data.get('location', ''))
+        time = str(request.data.get('time', ''))
+        date = str(request.data.get('date', ''))
+        description = str(request.data.get('description', ''))
+        image_url = str(request.data.get('image_url', ''))
+        event_category = str(request.data.get('event_category', ''))
+
+        event.title = title
+        event.location = location
+        event.time = time
+        event.date = date
+        event.description = description
+        event.image_url = image_url
+        event.event_category = event_category
+
+        event.save()
+        response = {
+            'id': event.id,
+            'title': event.title,
+            'location': event.location,
+            'time': event.time,
+            'date': event.date,
+            'description': event.description,
+            'image_url':event.image_url,
+            'created_by': event.created_by,
+            'event_category': event_category
+        }
+        return make_response(jsonify(response)), 200
+
+    @token_required
+    def delete(self, user_id, event_id):
         """This Handles deleting of an event with it's id"""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # retrieve an event using it's ID
-                event = Events.query.filter_by(id=event_id).first_or_404()
-                if user_id is not event.created_by:
-                    response = {
-                        'message': 'Your do not have authorization to access this event privately'
-                    }
-                    return make_response(jsonify(response)), 401
+        user_id = User.decode_token(access_token)
 
-                event.delete()
-                return {
-                    "message": "event {} deleted successfully".format(event.id)
-                }, 200
+        event = Events.query.filter_by(id=event_id).first_or_404()
 
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        if user_id is not event.created_by:
             response = {
-                'message': message
+                'message': 'Your do not have authorization to access this event privately'
             }
             return make_response(jsonify(response)), 401
+
+        event.delete()
+        return {
+            "message": "event {} deleted successfully".format(event.id)
+        }, 200
 
 
 class EventRsvpView(MethodView):
     """This class handles POST method for user
     RSVP to and event in url, ----> /api/events/<int:event_id>/rsvp"""
 
-    @staticmethod
-    def post(event_id):
+    @token_required
+    def post(self, user_id, event_id):
         """Adds a user to rsvp to a specific event."""
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                event = Events.query.filter_by(id=event_id).first_or_404()
-                print(event)
-                # POST User to the RSVP
-                user = User.query.filter_by(id=user_id).first_or_404()
-                has_prev_rsvpd = event.add_rsvp(user)
-                if has_prev_rsvpd:
-                    response = {
-                        'message': 'You have already reserved a seat'
-                    }
-                    return make_response(jsonify(response)), 202
-                msg = Message(
-                    "RSVP to an Event",
-                    sender="tonny.nesh@gmail.com",
-                    recipients=["tonnie.nesh@gmail.com"]
-                )
+        user_id = User.decode_token(access_token)
 
-                msg.html = """
-                        You have reserved a seat to attend <h3>{}</h3> on {} {} at {}.
-                """.format(event.title, event.date, event.time, event.location)
-                MAIL.send(msg)
+        event = Events.query.filter_by(id=event_id).first_or_404()
 
-                response = {
-                    'message': 'You have Reserved a seat'
-                }
-                return make_response(jsonify(response)), 200
-
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        # POST User to the RSVP
+        user = User.query.filter_by(id=user_id).first_or_404()
+        has_prev_rsvpd = event.add_rsvp(user)
+        if has_prev_rsvpd:
             response = {
-                'message': message
+                'message': 'You have already reserved a seat'
             }
-            return make_response(jsonify(response)), 401
+            return make_response(jsonify(response)), 202
+        msg = Message(
+            "RSVP to an Event",
+            sender="tonny.nesh@gmail.com",
+            recipients=["tonnie.nesh@gmail.com"]
+        )
+
+        msg.html = """
+                You have reserved a seat to attend <h3>{}</h3> on {} {} at {}.
+        """.format(event.title, event.date, event.time, event.location)
+        MAIL.send(msg)
+
+        response = {
+            'message': 'You have Reserved a seat'
+        }
+        return make_response(jsonify(response)), 200
 
 
 class EventCategories(MethodView):
     """This class handles category creation and viewing"""
 
-    @staticmethod
-    def post():
+    @token_required
+    def post(self, user_id):
         """Handle POST request for this view. Url ---> /api/cartegory"""
 
         auth_header = request.headers.get('Authorization')
         access_token = auth_header.split(" ")[1]
 
-        if access_token:
-            user_id = User.decode_token(access_token)
-            if not isinstance(user_id, str):
-                BlacklistToken(token=access_token)
-                # checks if the user_id has a valid token or contains the user id
-                # Go ahead and handle the request, the user is authed
+        user_id = User.decode_token(access_token)
 
-                args = {}
-                event_models = ['category_name']
+        args = {}
+        event_models = ['category_name']
 
-                for event_res in event_models:
-                    var = str(request.data.get(event_res, '').capitalize())
-                    if not var:
-                        response = {
-                            "message":'{} missing'.format(event_res)
-                        }
-                        return make_response(jsonify(response)), 401
-                    args.update({event_res:var})
+        for event_res in event_models:
+            var = str(request.data.get(event_res, '').capitalize())
+            if not var:
+                response = {
+                    "message":'{} missing'.format(event_res)
+                }
+                return make_response(jsonify(response)), 401
+            args.update({event_res:var})
 
-                if EventCategory.check_category(category_name=args['category_name']):
-                    response = {
-                        "message":'Category name exists. Choose another one'
-                    }
-                    return make_response(jsonify(response)), 401
-
-                category = EventCategory(**args)
-
-                category.save()
-                response = jsonify({
-                    'id': category.id,
-                    'category_name': category.category_name
-                })
-
-                return make_response(response), 201
-
-            response_object = {
-                'status': 'fail',
-                'message': user_id
-            }
-            return make_response(jsonify(response_object)), 401
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        if EventCategory.check_category(category_name=args['category_name']):
             response = {
-                'message': message
+                "message":'Category name exists. Choose another one'
             }
             return make_response(jsonify(response)), 401
+
+        category = EventCategory(**args)
+
+        category.save()
+        response = jsonify({
+            'id': category.id,
+            'category_name': category.category_name
+        })
+
+        return make_response(response), 201
 
     @staticmethod
     def get():
