@@ -2,7 +2,7 @@
 import os
 import re
 from flask.views import MethodView
-from flask import make_response, request, jsonify
+from flask import make_response, request, jsonify, render_template, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from flask_mail import Message
@@ -74,12 +74,9 @@ class RegistrationView(MethodView):
                     recipients=["tonnie.nesh@gmail.com"] #user.email
                 )
 
-                msg.html = """
-                Hey {},
-                <br/>
-                Thank you for creating an account in Bright Events. 
-                Please login to access the features of the application
-                """.format(user.name)
+                
+                html = render_template("inline_welcome.html", name=name)
+                msg.html = html
 
                 MAIL.send(msg)
 
@@ -95,6 +92,7 @@ class RegistrationView(MethodView):
                 response = {
                     'message': str(error)
                 }
+                print(error)
                 return make_response(jsonify(response)), 401
         else:
             # There is an existing user. We don't want to register users twice
@@ -160,9 +158,11 @@ class RestEmailView(MethodView):
                 recipients=["tonnie.nesh@gmail.com"]
             )
 
-            url = 'http://127.0.0.1:5000/api/auth/reset-password'
-            link = '<a href="{}/{}">Click Here</a>'.format(url, token)
-            msg.html = 'To reset your password: {}'.format(link)
+            link = url_for("auth.RESET_PASSWORD_VIEW", token=token, _external=True)
+
+            html = render_template("inline_reset.html", link=link)
+
+            msg.html = html
             MAIL.send(msg)
 
             response = {
@@ -200,18 +200,10 @@ class RestPasswordView(MethodView):
         reset_password = User.query.filter_by(email=email).first()
 
         post_data = request.data
-        name = reset_password.name
-        email = reset_password.email
-        email_confirmed = reset_password.email_confirmed
         reset_password.password = Bcrypt().generate_password_hash(
             post_data['password']).decode()
+        reset_password.update_user_data()
 
-        user = User(
-            name=name, email=email, password=reset_password.password,
-            email_confirmed=email_confirmed
-        )
-
-        user.update_user_data()
 
         response = {
             'message': 'Password rest successfully. Please log in.'
@@ -273,7 +265,7 @@ class LogoutAPI(MethodView):
 
         if access_token:
             resp = User.decode_token(access_token)
-            if not isinstance(resp, str):
+            if isinstance(resp, int):
                 # mark the token as blacklisted
                 blacklist_token = BlacklistToken(token=access_token)
                 try:
@@ -311,6 +303,7 @@ class ConfirmEmailView(MethodView):
     def post():
         """Handle POST request for this view. Url ---> /api/auth/confirm"""
         user = User.query.filter_by(email=request.data['email']).first()
+        name = user.name
         if user:
             token = SECRET.dumps(user.email, salt='email-confirm')
 
@@ -320,9 +313,11 @@ class ConfirmEmailView(MethodView):
                 recipients=["tonnie.nesh@gmail.com"]
             )
 
-            url = 'http://127.0.0.1:5000/api/auth/verify'
-            link = '<a href="{}/{}">Click Here</a>'.format(url, token)
-            msg.html = 'To Verify your Email Address : {}'.format(link)
+            link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
+            html = render_template("inline_confirm.html", name=name, link=link)
+
+            msg.html = html
+
             MAIL.send(msg)
 
             response = {
@@ -359,19 +354,8 @@ class VerifyEmailView(MethodView):
 
         reset_password = User.query.filter_by(email=email).first()
 
-        # post_data = request.data
-        name = reset_password.name
-        email = reset_password.email
-        reset_password.password = reset_password.password
-        email_confirmed = True
-
-        user = User(
-            name=name, email=email, password=reset_password.password,
-            email_confirmed=email_confirmed
-        )
-        print(user)
-
-        user.update_user_data()
+        reset_password.email_confirmed = True
+        reset_password.update_user_data()
 
         response = {
             'message': 'Email Confirmed successfully. You can enjoy the app features.'
