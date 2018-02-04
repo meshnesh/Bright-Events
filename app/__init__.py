@@ -13,7 +13,7 @@ def create_app(config_name):
     """Creates a new Flask object and returns when it's configured
     and connected with the db."""
 
-    app = FlaskAPI(__name__, instance_relative_config=True)
+    app = FlaskAPI(__name__, instance_relative_config=True, template_folder="templates")
 
     app.config.from_object(app_config[config_name])
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
