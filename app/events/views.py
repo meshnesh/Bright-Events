@@ -193,7 +193,6 @@ class UserEventsView(MethodView):
 
         user = User.query.filter_by(id=user_id).first() # get user details
 
-        categories = EventCategory.get__all_categories()
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
 
@@ -203,8 +202,10 @@ class UserEventsView(MethodView):
         results = []
 
         for event in event_page:
-            for category in categories:
-                event.event_category = category.category_name
+            event = Events.query.filter_by(id=event.id).first_or_404()
+            category = EventCategory.query.filter_by(id=event.event_category).first()
+            event_category = category.category_name
+
             obj = {
                 'id': event.id,
                 'title': event.title,
@@ -213,7 +214,7 @@ class UserEventsView(MethodView):
                 'date': event.date,
                 'description': event.description,
                 'image_url':event.image_url,
-                'event_category':event.event_category,
+                'event_category':event_category,
                 'created_by': user.name,
             }
             results.append(obj)
