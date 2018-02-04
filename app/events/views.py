@@ -55,7 +55,6 @@ class AllEventsView(MethodView):
 
         # GET all the events for this user
         events = Events.query
-        categories = EventCategory.get__all_categories()
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
 
@@ -81,6 +80,10 @@ class AllEventsView(MethodView):
         results = []
 
         for event in event_page:
+            event = Events.query.filter_by(id=event.id).first_or_404()
+            category = EventCategory.query.filter_by(id=event.event_category).first()
+            event_category = category.category_name
+
             obj = {
                 'id': event.id,
                 'title': event.title,
@@ -89,7 +92,7 @@ class AllEventsView(MethodView):
                 'date': event.date,
                 'description': event.description,
                 'image_url':event.image_url,
-                'event_category':event.event_category
+                'event_category':event_category
             }
             results.append(obj)
 
@@ -110,9 +113,9 @@ class SingleEventView(MethodView):
     def get(event_id):
         """Handle getting a single event by id"""
         event = Events.query.filter_by(id=event_id).first_or_404()
-        categories = EventCategory.get__all_categories()
-        for category in categories:
-            event.event_category = category.category_name
+        category = EventCategory.query.filter_by(id=event.event_category).first()
+        event_category = category.category_name
+
         response = jsonify({
             'id': event.id,
             'title': event.title,
@@ -122,7 +125,7 @@ class SingleEventView(MethodView):
             'description': event.description,
             'image_url':event.image_url,
             'created_by': event.created_by,
-            'event_category':event.event_category
+            'event_category':event_category
         })
         return make_response(response), 200
 
