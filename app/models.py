@@ -205,8 +205,8 @@ class Events(db.Model):
         db.session.commit()
 
     def __str__(self):
-        return "<Events(title={}, location={}, date={}, time={})>".format(
-            self.title, self.location, self.date, self.time)
+        return "<Events(title={}, location={}, date={}, time={}, event_category={})>".format(
+            self.title, self.location, self.date, self.time, self.event_category)
 
     __repr__ = __str__
 
