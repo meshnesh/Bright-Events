@@ -2,7 +2,7 @@
 
 from functools import wraps
 from flask.views import MethodView
-from flask import make_response, request, jsonify
+from flask import make_response, request, jsonify, render_template
 from flask_mail import Mail, Message
 from app.models import User, Events, EventCategory, BlacklistToken
 from app import create_app
@@ -347,9 +347,12 @@ class EventRsvpView(MethodView):
             recipients=["tonnie.nesh@gmail.com"]
         )
 
-        msg.html = """
-                You have reserved a seat to attend <h3>{}</h3> on {} {} at {}.
-        """.format(event.title, event.date, event.time, event.location)
+        html = render_template(
+            "inline_rsvp.html", title=event.title, date=event.date,
+            time=event.time, location=event.location, description=event.description
+        )
+        msg.html = html
+
         MAIL.send(msg)
 
         response = {
