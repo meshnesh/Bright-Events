@@ -3,7 +3,6 @@
 import unittest
 import os
 import json
-# from app.models import User
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from app import create_app, db
 
