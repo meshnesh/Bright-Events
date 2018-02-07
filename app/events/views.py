@@ -133,11 +133,11 @@ class UserEventsView(MethodView):
         """Handle POST request for this view. Url ---> /api/events"""
 
         user = User.query.filter_by(id=user_id).first() # get user details
-        if user.email_confirmed is not True:
-            response = {
-                "message":'Your Must Confirm your Email Address in-order to create an event'
-            }
-            return make_response(jsonify(response)), 401
+        # if user.email_confirmed is not True:
+        #     response = {
+        #         "message":'Your Must Confirm your Email Address in-order to create an event'
+        #     }
+        #     return make_response(jsonify(response)), 401
 
         args = {}
         event_models = [
