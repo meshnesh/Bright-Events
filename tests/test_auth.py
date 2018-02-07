@@ -193,7 +193,6 @@ class AuthTestCase(unittest.TestCase):
         res = self.user_email_confirm()
 
         result = json.loads(res.data.decode())
-        print(result)
         self.assertEqual(result['message'], "Check your Email to Verify it.")
         self.assertEqual(res.status_code, 200)
 
