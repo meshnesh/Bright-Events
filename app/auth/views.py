@@ -7,13 +7,12 @@ from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from app import mail
 
-from run import MAIL
 
 from . import auth_blueprint
 
 EMAIL_VALIDATOR = re.compile(r'.+?@.+?\..+')
-# MAIL = Mail(APP)
 SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 
@@ -78,7 +77,7 @@ class RegistrationView(MethodView):
                 html = render_template("inline_welcome.html", name=name)
                 msg.html = html
 
-                MAIL.send(msg)
+                mail.send(msg)
 
                 user.save()
 
@@ -163,7 +162,7 @@ class RestEmailView(MethodView):
             html = render_template("inline_reset.html", link=link)
 
             msg.html = html
-            MAIL.send(msg)
+            mail.send(msg)
 
             response = {
                 'message': 'Check your email to reset your password.'
@@ -318,7 +317,7 @@ class ConfirmEmailView(MethodView):
 
             msg.html = html
 
-            MAIL.send(msg)
+            mail.send(msg)
 
             response = {
                 'message': 'Check your Email to Verify it.'
