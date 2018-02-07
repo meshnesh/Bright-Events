@@ -1,8 +1,13 @@
 """import depancies."""
 
 import unittest
+import os
 import json
+# from app.models import User
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from app import create_app, db
+
+SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 class AuthTestCase(unittest.TestCase):
     """Test case for the authentication blueprint."""
@@ -50,6 +55,27 @@ class AuthTestCase(unittest.TestCase):
             'password': 'test_password'
         }
         return self.client().post('/api/auth/reset', data=user_data)
+
+    def user_email_confirm(self):
+        """This helper method helps check user email to confirm it."""
+        user_data = {
+            'email': 'test@example.com',
+            'password': 'test_password'
+        }
+        return self.client().post('/api/auth/confirm', data=user_data)
+
+    def email_verification(self):
+        """This helper send an Email checking if valid and verify it through token"""
+        new_data={
+            "email_confirmed" : True
+        }
+
+        self.user_registration()
+        self.user_email_confirm()
+
+        token1 = SECRET.dumps('test@example.com', salt='email-confirm')
+
+        return self.client().put('/api/auth/verify/'+token1, data=new_data)
 
     def user_logout(self):
         """This helper method helps log out a test user."""
@@ -154,12 +180,30 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['message'] == 'Successfully logged out.')
         self.assertEqual(response.status_code, 200)
 
-    # def test_invalid_logout(self):
-    #     """ Test for logout after already logged out  """
-    #     self.user_logout() # valid token logout
-    #     second_login = self.user_logout() # secondary logout
+    def test_invalid_logout(self):
+        """ Test for logout after already logged out  """
+        self.user_logout() # valid token logout
+        second_login = self.user_logout() # secondary logout
 
-    #     self.assertEqual(second_login.status_code, 401)
+        self.assertEqual(second_login.status_code, 401)
+
+    def test_email_exist_for_confirmation(self):
+        """Test Email is valid by sending an email and  being confirmed """
+        self.user_registration()
+        res = self.user_email_confirm()
+
+        result = json.loads(res.data.decode())
+        print(result)
+        self.assertEqual(result['message'], "Check your Email to Verify it.")
+        self.assertEqual(res.status_code, 200)
+
+    def test_email_verification(self):
+        """Test Email is valid by sending url token and verify it """
+        response = self.email_verification()
+
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['message'] == 'Email Confirmed successfully. You can enjoy the app features.')
+        self.assertEqual(response.status_code, 201)
 
     def tearDown(self):
         """teardown all initialized variables."""
