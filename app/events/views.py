@@ -5,14 +5,10 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template
 from flask_mail import Mail, Message
 from app.models import User, Events, EventCategory, BlacklistToken
-from app import create_app
-
-from run import CONFIG_NAME
+from app import mail
 
 from . import events_blueprint
 
-APP = create_app(CONFIG_NAME)
-MAIL = Mail(APP)
 
 
 def token_required(function):
@@ -353,7 +349,7 @@ class EventRsvpView(MethodView):
         )
         msg.html = html
 
-        MAIL.send(msg)
+        mail.send(msg)
 
         response = {
             'message': 'You have Reserved a seat'
