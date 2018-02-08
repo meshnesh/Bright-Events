@@ -1,8 +1,13 @@
 """import depancies and methods."""
 
 import unittest
+import os
 import json
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from app import create_app, db
+
+SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
+
 
 class EventTestCase(unittest.TestCase):
     """This class represents the bucketlist test case"""
@@ -60,6 +65,26 @@ class EventTestCase(unittest.TestCase):
         access_token = json.loads(result.data.decode())['access_token']
         return access_token
 
+    def user_email_confirm(self):
+        """This helper method helps check user email to confirm it."""
+        user_data = {
+            'email': 'user@test.com',
+            'password': 'test1234'
+        }
+        return self.client().post('/api/auth/confirm', data=user_data)
+
+    def email_verification(self):
+        """This helper send an Email checking if valid and verify it through token"""
+        new_data={
+            "email_confirmed" : True
+        }
+
+        self.register_user()
+        self.user_email_confirm()
+
+        token1 = SECRET.dumps('user@test.com', salt='email-confirm')
+
+        return self.client().put('/api/auth/verify/'+token1, data=new_data)
 
     def get_fake_access_token(self):
         """register and login a user to get an access token"""
@@ -93,15 +118,20 @@ class EventTestCase(unittest.TestCase):
             "title": "swimming in lake turkana",
             "event_category": 1
         }
+
         # obtain the access token
         access_token = self.get_access_token()
         self.create_event_cartegory()
+
+        self.email_verification()
+
         # ensure the request has an authorization header set with the access token in it
         res = self.client().post(
             '/api/events',
             headers=dict(Authorization="Bearer " + access_token),
             data=event)
         return res
+
 
     def test_get_event_category(self):
         """Test API can get categories created (GET request)"""
@@ -135,7 +165,6 @@ class EventTestCase(unittest.TestCase):
             headers=dict(Authorization="Bearer " + access_token),
             data=event)
         self.assertEqual(res.status_code, 401)
-
 
     def test_api_get_all_events(self):
         """Test API can get all events without token passed (GET request)."""
