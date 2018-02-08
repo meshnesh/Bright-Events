@@ -73,7 +73,6 @@ class RegistrationView(MethodView):
                     recipients=["tonnie.nesh@gmail.com"] #user.email
                 )
 
-                
                 html = render_template("inline_welcome.html", name=name)
                 msg.html = html
 
