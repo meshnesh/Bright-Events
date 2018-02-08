@@ -47,7 +47,6 @@ class RegistrationView(MethodView):
                         'message': 'Wrong email format. Check your Email.'
                     }
                     return make_response(jsonify(response)), 403
-                # print('your password is {}'.format(password))
                 count = 1
                 prev = ''
                 for letter in password:
@@ -90,7 +89,6 @@ class RegistrationView(MethodView):
                 response = {
                     'message': str(error)
                 }
-                print(error)
                 return make_response(jsonify(response)), 401
         else:
             # There is an existing user. We don't want to register users twice
