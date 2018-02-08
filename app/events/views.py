@@ -3,7 +3,6 @@
 from functools import wraps
 from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template
-from flask_mail import Mail, Message
 from app.models import User, Events, EventCategory, BlacklistToken
 from app import mail
 
