@@ -3,7 +3,7 @@
 import unittest
 import os
 import json
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from itsdangerous import URLSafeTimedSerializer
 from app import create_app, db
 
 SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
