@@ -3,7 +3,7 @@
 from functools import wraps
 from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template
-from app.models import User, Events, EventCategory, BlacklistToken
+from app.models import User, Events, EventCategory
 from app import mail
 
 from . import events_blueprint
