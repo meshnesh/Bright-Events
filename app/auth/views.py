@@ -71,7 +71,7 @@ class RegistrationView(MethodView):
                 msg = Message(
                     "welcome to Bright Events",
                     sender="bryt.event@gmail.com",
-                    recipients=["tonnie.nesh@gmail.com"] #user.email
+                    recipients=[user.email]
                 )
 
                 link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
@@ -154,7 +154,7 @@ class RestEmailView(MethodView):
             msg = Message(
                 "Reset Password",
                 sender="bryt.event@gmail.com",
-                recipients=["tonnie.nesh@gmail.com"]
+                recipients=[user.email]
             )
 
             link = url_for("auth.RESET_PASSWORD_VIEW", token=token, _external=True)
@@ -309,7 +309,7 @@ class ConfirmEmailView(MethodView):
             msg = Message(
                 "Email Confirmation",
                 sender="bryt.event@gmail.com",
-                recipients=["tonnie.nesh@gmail.com"]
+                recipients=[user.email]
             )
 
             link = url_for("auth.VERIFY_VIEW", token=token, _external=True)

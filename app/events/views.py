@@ -340,7 +340,7 @@ class EventRsvpView(MethodView):
         msg = Message(
             "RSVP to an Event",
             sender="tonny.nesh@gmail.com",
-            recipients=["tonnie.nesh@gmail.com"]
+            recipients=[user.email]
         )
 
         html = render_template(
