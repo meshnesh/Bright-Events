@@ -5,9 +5,8 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
-from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from app import mail
+from app.emails import send_mail
 
 
 from . import auth_blueprint
@@ -67,18 +66,12 @@ class RegistrationView(MethodView):
                         count = 0
 
                 token = SECRET.dumps(user.email, salt='email-confirm')
-
-                msg = Message(
-                    "welcome to Bright Events",
-                    sender="bryt.event@gmail.com",
-                    recipients=[user.email]
-                )
+                subject = "welcome to Bright Events"
 
                 link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
                 html = render_template("inline_welcome.html", name=name, link=link)
-                msg.html = html
 
-                mail.send(msg)
+                send_mail(to=user.email, subject=subject, html=html)
 
                 user.save()
 
@@ -150,19 +143,12 @@ class RestEmailView(MethodView):
         user = User.query.filter_by(email=request.data['email']).first()
         if user:
             token = SECRET.dumps(user.email, salt='reset-password')
-
-            msg = Message(
-                "Reset Password",
-                sender="bryt.event@gmail.com",
-                recipients=[user.email]
-            )
+            subject = "Reset Password"
 
             link = url_for("auth.RESET_PASSWORD_VIEW", token=token, _external=True)
-
             html = render_template("inline_reset.html", link=link)
 
-            msg.html = html
-            mail.send(msg)
+            send_mail(to=user.email, subject=subject, html=html)
 
             response = {
                 'message': 'Check your email to reset your password.'
@@ -305,19 +291,12 @@ class ConfirmEmailView(MethodView):
         name = user.name
         if user:
             token = SECRET.dumps(user.email, salt='email-confirm')
-
-            msg = Message(
-                "Email Confirmation",
-                sender="bryt.event@gmail.com",
-                recipients=[user.email]
-            )
+            subject = "Email Confirmation"
 
             link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
             html = render_template("inline_confirm.html", name=name, link=link)
 
-            msg.html = html
-
-            mail.send(msg)
+            send_mail(to=user.email, subject=subject, html=html)
 
             response = {
                 'message': 'Check your Email to Verify it.'
