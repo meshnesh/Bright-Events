@@ -13,7 +13,7 @@ class Config(object):
     MAIL_USE_TLS = False
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_SUPPRESS_SEND = True # change to True when running production
+    MAIL_SUPPRESS_SEND = False
 
 
 class DevelopmentConfig(Config):
@@ -27,6 +27,7 @@ class TestingConfig(Config):
     SECRET = os.getenv('SECRET')
     SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DB_URL')
     DEBUG = True
+    MAIL_SUPPRESS_SEND = True
 
 
 class StagingConfig(Config):
