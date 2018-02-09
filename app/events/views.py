@@ -3,9 +3,8 @@
 from functools import wraps
 from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template
-from flask_mail import Message
 from app.models import User, Events, EventCategory
-from app import mail
+from app.emails import send_mail
 
 from . import events_blueprint
 
@@ -337,19 +336,14 @@ class EventRsvpView(MethodView):
                 'message': 'You have already reserved a seat'
             }
             return make_response(jsonify(response)), 202
-        msg = Message(
-            "RSVP to an Event",
-            sender="tonny.nesh@gmail.com",
-            recipients=[user.email]
-        )
+        subject = "RSVP to an Event"
 
         html = render_template(
             "inline_rsvp.html", title=event.title, date=event.date,
             time=event.time, location=event.location, description=event.description
         )
-        msg.html = html
 
-        mail.send(msg)
+        send_mail(to=user.email, subject=subject, html=html)
 
         response = {
             'message': 'You have Reserved a seat'
