@@ -106,7 +106,6 @@ class LoginView(MethodView):
         try:
             # Get the user object using their email (unique to every user)
             user = User.query.filter_by(email=request.data['email']).first()
-
             # Authenticate the found user using their password
             if user and user.password_is_valid(request.data['password']):
                 # Generate the access token. This will be used as the authorization header
@@ -117,12 +116,11 @@ class LoginView(MethodView):
                         'access_token': access_token.decode()
                     }
                     return make_response(jsonify(response)), 200
-            else:
-                # User does not exist. Therefore, we return an error message
-                response = {
-                    'message': 'Invalid email or password, Please try again'
-                }
-                return make_response(jsonify(response)), 401
+            # User does not exist. Therefore, we return an error message
+            response = {
+                'message': 'Invalid email or password, Please try again'
+            }
+            return make_response(jsonify(response)), 401
 
         except Exception as error:
             # Create a response containing an string error message
