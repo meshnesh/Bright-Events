@@ -66,13 +66,16 @@ class RegistrationView(MethodView):
                         prev = letter
                         count = 0
 
+                token = SECRET.dumps(user.email, salt='email-confirm')
+
                 msg = Message(
                     "welcome to Bright Events",
                     sender="bryt.event@gmail.com",
                     recipients=["tonnie.nesh@gmail.com"] #user.email
                 )
 
-                html = render_template("inline_welcome.html", name=name)
+                link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
+                html = render_template("inline_welcome.html", name=name, link=link)
                 msg.html = html
 
                 mail.send(msg)
