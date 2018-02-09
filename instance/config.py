@@ -7,6 +7,13 @@ class Config(object):
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
+    MAIL_USE_TLS = False
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_SUPPRESS_SEND = False
 
 
 class DevelopmentConfig(Config):
@@ -20,6 +27,7 @@ class TestingConfig(Config):
     SECRET = os.getenv('SECRET')
     SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DB_URL')
     DEBUG = True
+    MAIL_SUPPRESS_SEND = True
 
 
 class StagingConfig(Config):

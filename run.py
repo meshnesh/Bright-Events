@@ -1,8 +1,10 @@
-import os
+"""import depancies and methods."""
 
+import os
 from app import create_app
-config_name = os.getenv('APP_SETTINGS') # config_name = "development"
-app = create_app(config_name)
+
+CONFIG_NAME = os.getenv('APP_SETTINGS')
+APP = create_app(CONFIG_NAME)
 
 if __name__ == '__main__':
-    app.run()
+    APP.run()

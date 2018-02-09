@@ -1,8 +1,12 @@
 """import depancies."""
 
 import unittest
+import os
 import json
+from itsdangerous import URLSafeTimedSerializer
 from app import create_app, db
+
+SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
 class AuthTestCase(unittest.TestCase):
     """Test case for the authentication blueprint."""
@@ -50,6 +54,27 @@ class AuthTestCase(unittest.TestCase):
             'password': 'test_password'
         }
         return self.client().post('/api/auth/reset', data=user_data)
+
+    def user_email_confirm(self):
+        """This helper method helps check user email to confirm it."""
+        user_data = {
+            'email': 'test@example.com',
+            'password': 'test_password'
+        }
+        return self.client().post('/api/auth/confirm', data=user_data)
+
+    def email_verification(self):
+        """This helper send an Email checking if valid and verify it through token"""
+        new_data={
+            "email_confirmed" : True
+        }
+
+        self.user_registration()
+        self.user_email_confirm()
+
+        token1 = SECRET.dumps('test@example.com', salt='email-confirm')
+
+        return self.client().put('/api/auth/verify/'+token1, data=new_data)
 
     def user_logout(self):
         """This helper method helps log out a test user."""
@@ -115,7 +140,6 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(result['message'], "Check your email to reset your password.")
         self.assertEqual(res.status_code, 200)
 
-
     def test_email_non_exist_for_reset(self):
         """Test not registered Email fails when reseting there password"""
         self.user_registration() # register a user
@@ -131,30 +155,6 @@ class AuthTestCase(unittest.TestCase):
         result = json.loads(reset_res.data.decode())
         self.assertEqual(result['message'], "Wrong Email or user email does not exist.")
         self.assertEqual(reset_res.status_code, 401)
-
-# # FIXED WHEN EMAILING IS SETUP
-#     def test_user_reset_password(self):
-#         """Test Email exists so that they can reset there password"""
-#         new_password = {
-#             'password': 'nope'
-#         }
-
-#         self.user_registration()
-#         res = self.user_email_reset()
-
-#         # result = json.loads(res.data.decode())
-#         # self.assertEqual(result['message'], "Check your email to reset your password.")
-#         # self.assertEqual(res.status_code, 200)
-#         # self.assertTrue(result['access_token'])
-
-#         # obtain the access token
-#         access_token = json.loads(res.data.decode())['access_token']
-
-#         password_res = self.client().put(
-#             '/api/auth/reset-password',
-#             headers=dict(Authorization="Bearer " + access_token),
-#             data=new_password)
-#         self.assertEqual(password_res.status_code, 201)
 
     def test_user_status(self):
         """ Test for user status """
@@ -179,12 +179,22 @@ class AuthTestCase(unittest.TestCase):
         self.assertTrue(data['message'] == 'Successfully logged out.')
         self.assertEqual(response.status_code, 200)
 
-    def test_invalid_logout(self):
-        """ Test for logout after the token expires """
-        self.user_logout() # valid token logout
-        response = self.user_logout() # secondary logout
+    def test_email_exist_for_confirmation(self):
+        """Test Email is valid by sending an email and  being confirmed """
+        self.user_registration()
+        res = self.user_email_confirm()
 
-        self.assertEqual(response.status_code, 401)
+        result = json.loads(res.data.decode())
+        self.assertEqual(result['message'], "Check your Email to Verify it.")
+        self.assertEqual(res.status_code, 200)
+
+    def test_email_verification(self):
+        """Test Email is valid by sending url token and verify it """
+        response = self.email_verification()
+
+        data = json.loads(response.data.decode())
+        self.assertTrue(data['message'] == 'Email Confirmed successfully. You can enjoy the app features.')
+        self.assertEqual(response.status_code, 201)
 
     def tearDown(self):
         """teardown all initialized variables."""

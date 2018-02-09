@@ -22,7 +22,7 @@ Flask-API==1.0
 Flask-Bcrypt==0.7.1
 Flask-HTTPAuth==3.2.3
 Flask-JWT==0.3.2
-flask_mail==0.9.0
+Flask-Mail==0.9.0
 Flask-Migrate==2.1.1
 Flask-RESTful==0.3.6
 Flask-Script==2.0.6
