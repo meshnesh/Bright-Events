@@ -276,19 +276,19 @@ class ConfirmEmailView(MethodView):
         user = User.query.filter_by(email=request.data['email']).first()
         name = user.name
         if user:
-            if user.email_confirmed is True:
+            if user.email_confirmed is True: # checking if email mail already confirmed
                 response = {
                     'message': 'Email already Confirmed.'
                 }
                 return make_response(jsonify(response)), 401
 
-            token = SECRET.dumps(user.email, salt='email-confirm')
-            subject = "Email Confirmation"
+            token = SECRET.dumps(user.email, salt='email-confirm') # create a token with the user email 
+            subject = "Email Confirmation" # subject of the email
 
             link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
             html = render_template("inline_confirm.html", name=name, link=link)
 
-            send_mail(to=user.email, subject=subject, html=html)
+            send_mail(to=user.email, subject=subject, html=html) # send the email to the user
 
             response = {
                 'message': 'Check your Email to Verify it.'
