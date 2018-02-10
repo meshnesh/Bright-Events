@@ -163,19 +163,11 @@ class RestPasswordView(MethodView):
     """This class resets a users password. Url ---> /api/auth/reset-password/<token>"""
 
     @staticmethod
-    def put(token):
+    @confirm_token('reset-password')
+    def put(token, email):
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/reset-password/<token>
         """
-
-        try:
-            email = confirm_token(token, 'reset-password')
-
-        except SignatureExpired:
-            response = {
-                'message': 'The token is expired!, confirm your e-mail again'
-            }
-            return make_response(jsonify(response)), 401
 
         reset_password = User.query.filter_by(email=email).first()
 
@@ -308,19 +300,11 @@ class VerifyEmailView(MethodView):
     """This class resets a users password. Url ---> /api/auth/verify/<token>"""
 
     @staticmethod
-    def put(token):
+    @confirm_token('email-confirm')
+    def put(token, email):
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/verify/<token>
         """
-
-        try:
-            email = confirm_token(token, 'email-confirm')
-
-        except SignatureExpired:
-            response = {
-                'message': 'The token is expired!, confirm your e-mail again'
-            }
-            return make_response(jsonify(response)), 401
 
         reset_password = User.query.filter_by(email=email).first()
 
