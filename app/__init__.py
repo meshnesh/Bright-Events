@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import make_response, jsonify
 from flask_mail import Mail
 
+from functools import update_wrapper
 # local import
 from instance.config import app_config
 
@@ -26,34 +27,16 @@ def create_app(config_name):
     mail.init_app(app)
 
 
-    @app.errorhandler(404)
-    def not_found_error(error):
-        response_object = {
-            'message': 'Object not found'
-        }
-        print('manenos')
-        return make_response(jsonify(response_object)), 404
-
-    @app.errorhandler(405)
-    def method_error(error):
-        response_object = {
-            'message': 'Check the method'
-        }
-        return make_response(jsonify(response_object)), 405
-
-    @app.errorhandler(500)
-    def internal_error(error):
-        db.session.rollback()
-        response_object = {
-            'message': 'Oops error from our side, weare working to solve it'
-        }
-        return make_response(jsonify(response_object)), 500
-
     # import the authentication blueprint and register it on the app
     from .auth import auth_blueprint
     app.register_blueprint(auth_blueprint)
 
     from .events import events_blueprint
     app.register_blueprint(events_blueprint)
+
+    from app.errors import error
+    app.errorhandler(404)(error.not_found_error)
+    app.errorhandler(405)(error.method_error)
+    app.errorhandler(500)(error.internal_error)
 
     return app
