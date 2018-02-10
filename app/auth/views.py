@@ -7,7 +7,7 @@ from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from app.emails import send_mail
-
+from app.emails import confirm_token
 
 from . import auth_blueprint
 
@@ -169,10 +169,7 @@ class RestPasswordView(MethodView):
         """
 
         try:
-            email = SECRET.loads(
-                token, salt='reset-password',
-                max_age=3600 # token valid for 1 hour
-            )
+            email = confirm_token(token, 'reset-password')
 
         except SignatureExpired:
             response = {
@@ -317,10 +314,7 @@ class VerifyEmailView(MethodView):
         """
 
         try:
-            email = SECRET.loads(
-                token, salt='email-confirm',
-                max_age=3600 # token valid for 1 hour
-            )
+            email = confirm_token(token, 'email-confirm')
 
         except SignatureExpired:
             response = {
