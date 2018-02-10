@@ -282,7 +282,9 @@ class ConfirmEmailView(MethodView):
                 }
                 return make_response(jsonify(response)), 401
 
-            token = SECRET.dumps(user.email, salt='email-confirm') # create a token with the user email 
+            token = SECRET.dumps(
+                user.email, salt='email-confirm'
+            ) # create a token with the user email
             subject = "Email Confirmation" # subject of the email
 
             link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
