@@ -300,7 +300,7 @@ class VerifyEmailView(MethodView):
 
     @staticmethod
     @confirm_token('email-confirm')
-    def put(token, email):
+    def get(token, email):
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/verify/<token>
         """
@@ -388,5 +388,5 @@ auth_blueprint.add_url_rule(
 auth_blueprint.add_url_rule(
     '/api/auth/verify/<token>',
     view_func=VERIFY_VIEW,
-    methods=['PUT']
+    methods=['GET']
 )
