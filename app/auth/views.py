@@ -6,8 +6,7 @@ from flask import make_response, request, jsonify, render_template, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from app.emails import send_mail
-from app.emails import confirm_token
+from app.emails import send_mail, confirm_token
 
 from . import auth_blueprint
 
