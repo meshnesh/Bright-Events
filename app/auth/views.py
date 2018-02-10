@@ -276,6 +276,12 @@ class ConfirmEmailView(MethodView):
         user = User.query.filter_by(email=request.data['email']).first()
         name = user.name
         if user:
+            if user.email_confirmed is True:
+                response = {
+                    'message': 'Email already Confirmed.'
+                }
+                return make_response(jsonify(response)), 401
+
             token = SECRET.dumps(user.email, salt='email-confirm')
             subject = "Email Confirmation"
 
