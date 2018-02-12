@@ -5,7 +5,8 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from itsdangerous import URLSafeTimedSerializer
+
 from app.emails import send_mail, confirm_token
 
 from . import auth_blueprint
@@ -79,6 +80,7 @@ class RegistrationView(MethodView):
                 }
                 # return a response notifying the user that they registered successfully
                 return make_response(jsonify(response)), 201
+    
             except Exception as error:
                 # An error occured, therefore return a string message containing the error
                 response = {
@@ -121,10 +123,10 @@ class LoginView(MethodView):
             }
             return make_response(jsonify(response)), 401
 
-        except Exception as error:
+        except Exception as er:
             # Create a response containing an string error message
             response = {
-                'message': str(error)
+                'message': str(er)
             }
             # Return a server error using the HTTP Error Code 500 (Internal Server Error)
             return make_response(jsonify(response)), 500
