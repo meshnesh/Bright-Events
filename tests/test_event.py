@@ -84,7 +84,7 @@ class EventTestCase(unittest.TestCase):
 
         token1 = SECRET.dumps('user@test.com', salt='email-confirm')
 
-        return self.client().put('/api/auth/verify/'+token1, data=new_data)
+        return self.client().get('/api/auth/verify/'+token1, data=new_data)
 
     def get_fake_access_token(self):
         """register and login a user to get an access token"""

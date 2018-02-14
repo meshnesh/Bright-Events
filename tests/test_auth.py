@@ -74,7 +74,7 @@ class AuthTestCase(unittest.TestCase):
 
         token1 = SECRET.dumps('test@example.com', salt='email-confirm')
 
-        return self.client().put('/api/auth/verify/'+token1, data=new_data)
+        return self.client().get('/api/auth/verify/'+token1, data=new_data)
 
     def user_logout(self):
         """This helper method helps log out a test user."""

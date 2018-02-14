@@ -5,9 +5,9 @@ from flask.views import MethodView
 from flask import make_response, request, jsonify, render_template, url_for
 from app.models import User, BlacklistToken
 from flask_bcrypt import Bcrypt
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from app.emails import send_mail
+from itsdangerous import URLSafeTimedSerializer
 
+from app.emails import send_mail, confirm_token
 
 from . import auth_blueprint
 
@@ -80,6 +80,7 @@ class RegistrationView(MethodView):
                 }
                 # return a response notifying the user that they registered successfully
                 return make_response(jsonify(response)), 201
+    
             except Exception as error:
                 # An error occured, therefore return a string message containing the error
                 response = {
@@ -122,10 +123,10 @@ class LoginView(MethodView):
             }
             return make_response(jsonify(response)), 401
 
-        except Exception as error:
+        except Exception as er:
             # Create a response containing an string error message
             response = {
-                'message': str(error)
+                'message': str(er)
             }
             # Return a server error using the HTTP Error Code 500 (Internal Server Error)
             return make_response(jsonify(response)), 500
@@ -163,22 +164,11 @@ class RestPasswordView(MethodView):
     """This class resets a users password. Url ---> /api/auth/reset-password/<token>"""
 
     @staticmethod
-    def put(token):
+    @confirm_token('reset-password')
+    def put(token, email):
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/reset-password/<token>
         """
-
-        try:
-            email = SECRET.loads(
-                token, salt='reset-password',
-                max_age=3600 # token valid for 1 hour
-            )
-
-        except SignatureExpired:
-            response = {
-                'message': 'The token is expired!, confirm your e-mail again'
-            }
-            return make_response(jsonify(response)), 401
 
         reset_password = User.query.filter_by(email=email).first()
 
@@ -288,13 +278,21 @@ class ConfirmEmailView(MethodView):
         user = User.query.filter_by(email=request.data['email']).first()
         name = user.name
         if user:
-            token = SECRET.dumps(user.email, salt='email-confirm')
-            subject = "Email Confirmation"
+            if user.email_confirmed is True: # checking if email mail already confirmed
+                response = {
+                    'message': 'Email already Confirmed.'
+                }
+                return make_response(jsonify(response)), 401
+
+            token = SECRET.dumps(
+                user.email, salt='email-confirm'
+            ) # create a token with the user email
+            subject = "Email Confirmation" # subject of the email
 
             link = url_for("auth.VERIFY_VIEW", token=token, _external=True)
             html = render_template("inline_confirm.html", name=name, link=link)
 
-            send_mail(to=user.email, subject=subject, html=html)
+            send_mail(to=user.email, subject=subject, html=html) # send the email to the user
 
             response = {
                 'message': 'Check your Email to Verify it.'
@@ -311,22 +309,11 @@ class VerifyEmailView(MethodView):
     """This class resets a users password. Url ---> /api/auth/verify/<token>"""
 
     @staticmethod
-    def put(token):
+    @confirm_token('email-confirm')
+    def get(token, email):
         """This Handles PUT request for handling the reset password for the user
         ---> /api/auth/verify/<token>
         """
-
-        try:
-            email = SECRET.loads(
-                token, salt='email-confirm',
-                max_age=3600 # token valid for 1 hour
-            )
-
-        except SignatureExpired:
-            response = {
-                'message': 'The token is expired!, confirm your e-mail again'
-            }
-            return make_response(jsonify(response)), 401
 
         reset_password = User.query.filter_by(email=email).first()
 
@@ -411,5 +398,5 @@ auth_blueprint.add_url_rule(
 auth_blueprint.add_url_rule(
     '/api/auth/verify/<token>',
     view_func=VERIFY_VIEW,
-    methods=['PUT']
+    methods=['GET']
 )
