@@ -9,9 +9,9 @@ from app.emails import send_mail
 from . import events_blueprint
 
 
-
 def token_required(function):
     """Require token to access routes."""
+
     @wraps(function)
     def wrapper(*args, **kwargs):
         """Require token to access routes."""
@@ -38,6 +38,7 @@ def token_required(function):
             return jsonify(
                 {"error": "Token expired. Please log in again"}), 401
         return function(*args, **kwargs, user_id=user_id)
+
     return wrapper
 
 
@@ -59,7 +60,7 @@ class AllEventsView(MethodView):
         for search_res in potential_search:
             var = request.args.get(search_res)
             if var:
-                args.update({search_res:var})
+                args.update({search_res: var})
 
         arr = ['title', 'location']
         categ = request.args.get('event_category')
@@ -86,8 +87,8 @@ class AllEventsView(MethodView):
                 'time': event.time,
                 'date': event.date,
                 'description': event.description,
-                'image_url':event.image_url,
-                'event_category':event_category
+                'image_url': event.image_url,
+                'event_category': event_category
             }
             results.append(obj)
 
@@ -118,23 +119,24 @@ class SingleEventView(MethodView):
             'time': event.time,
             'date': event.date,
             'description': event.description,
-            'image_url':event.image_url,
+            'image_url': event.image_url,
             'created_by': event.created_by,
-            'event_category':event_category
+            'event_category': event_category
         })
         return make_response(response), 200
 
 
 class UserEventsView(MethodView):
     """This class handles events creation and viewing of a single user"""
+
     @token_required
     def post(self, user_id):
         """Handle POST request for this view. Url ---> /api/events"""
 
-        user = User.query.filter_by(id=user_id).first() # get user details
+        user = User.query.filter_by(id=user_id).first()  # get user details
         if user.email_confirmed is not True:
             response = {
-                "message":'Your Must Confirm your Email Address in-order to create an event'
+                "message": 'Your Must Confirm your Email Address in-order to create an event'
             }
             return make_response(jsonify(response)), 401
 
@@ -149,14 +151,14 @@ class UserEventsView(MethodView):
             var = var.strip(' \t\n\r')
             if not var:
                 response = {
-                    "message":'{} missing'.format(event_res)
+                    "message": '{} missing'.format(event_res)
                 }
                 return make_response(jsonify(response)), 401
-            args.update({event_res:var})
+            args.update({event_res: var})
 
         if Events.query.filter_by(title=args['title']).first():
             response = {
-                "message":'Event title exists. Choose another one'
+                "message": 'Event title exists. Choose another one'
             }
             return make_response(jsonify(response)), 401
 
@@ -173,7 +175,7 @@ class UserEventsView(MethodView):
             'time': event.time,
             'date': event.date,
             'description': event.description,
-            'image_url':event.image_url,
+            'image_url': event.image_url,
             'created_by': user.name,
             'event_category': event.event_category,
 
@@ -181,12 +183,11 @@ class UserEventsView(MethodView):
 
         return make_response(response), 201
 
-
     @token_required
     def get(self, user_id):
         """Handle GET request for this view. Url ---> /api/events"""
 
-        user = User.query.filter_by(id=user_id).first() # get user details
+        user = User.query.filter_by(id=user_id).first()  # get user details
 
         page = request.args.get('page', default=1, type=int)
         limit = request.args.get('limit', default=10, type=int)
@@ -208,8 +209,8 @@ class UserEventsView(MethodView):
                 'time': event.time,
                 'date': event.date,
                 'description': event.description,
-                'image_url':event.image_url,
-                'event_category':event_category,
+                'image_url': event.image_url,
+                'event_category': event_category,
                 'created_by': user.name,
             }
             results.append(obj)
@@ -228,9 +229,9 @@ class EventsManupilationView(MethodView):
     get, update and delete. Url --->/api/events/<int:event_id>"""
 
     @token_required
-    def get(self,user_id, event_id):
+    def get(self, user_id, event_id):
         """Handles single event data with GET by event id."""
-        user = User.query.filter_by(id=user_id).first() # get user details
+        user = User.query.filter_by(id=user_id).first()  # get user details
 
         event = Events.query.filter_by(id=event_id).first_or_404()
         category = EventCategory.query.filter_by(id=event.event_category).first()
@@ -249,12 +250,11 @@ class EventsManupilationView(MethodView):
             'time': event.time,
             'date': event.date,
             'description': event.description,
-            'image_url':event.image_url,
+            'image_url': event.image_url,
             'created_by': user.name,
-            'event_category':event_category
+            'event_category': event_category
         })
         return make_response(response), 200
-
 
     @token_required
     def put(self, user_id, event_id):
@@ -294,7 +294,7 @@ class EventsManupilationView(MethodView):
             'time': event.time,
             'date': event.date,
             'description': event.description,
-            'image_url':event.image_url,
+            'image_url': event.image_url,
             'created_by': event.created_by,
             'event_category': event_category
         }
@@ -314,8 +314,8 @@ class EventsManupilationView(MethodView):
 
         event.delete()
         return {
-            "message": "event {} deleted successfully".format(event.id)
-        }, 200
+                   "message": "event {} deleted successfully".format(event.id)
+               }, 200
 
 
 class EventRsvpView(MethodView):
@@ -365,14 +365,14 @@ class EventCategories(MethodView):
             var = str(request.data.get(event_res, '').capitalize())
             if not var:
                 response = {
-                    "message":'{} missing'.format(event_res)
+                    "message": '{} missing'.format(event_res)
                 }
                 return make_response(jsonify(response)), 401
-            args.update({event_res:var})
+            args.update({event_res: var})
 
         if EventCategory.check_category(category_name=args['category_name']):
             response = {
-                "message":'Category name exists. Choose another one'
+                "message": 'Category name exists. Choose another one'
             }
             return make_response(jsonify(response)), 401
 
@@ -408,6 +408,7 @@ class EventCategories(MethodView):
 
         return make_response(jsonify(results)), 200
 
+
 # Define the API resource
 ALL_EVENTS_VIEW = AllEventsView.as_view('ALL_EVENTS_VIEW')
 SINGLE_EVENT_VIEW = SingleEventView.as_view('SINGLE_EVENT_VIEW')
@@ -441,7 +442,6 @@ events_blueprint.add_url_rule(
     '/api/events',
     view_func=USER_EVENTS_VIEW,
     methods=['GET'])
-
 
 # Define the rule for view all events url --->  /api/events/<int:event_id>
 # Then add the rule to the blueprint

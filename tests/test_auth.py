@@ -8,6 +8,7 @@ from app import create_app, db
 
 SECRET = URLSafeTimedSerializer(os.getenv('SECRET'))
 
+
 class AuthTestCase(unittest.TestCase):
     """Test case for the authentication blueprint."""
 
@@ -26,7 +27,7 @@ class AuthTestCase(unittest.TestCase):
     def user_registration(self):
         """This helper method helps register a test user."""
         user_data = {
-            'name':'test user',
+            'name': 'test user',
             'email': 'test@example.com',
             'password': 'test_password'
         }
@@ -65,8 +66,8 @@ class AuthTestCase(unittest.TestCase):
 
     def email_verification(self):
         """This helper send an Email checking if valid and verify it through token"""
-        new_data={
-            "email_confirmed" : True
+        new_data = {
+            "email_confirmed": True
         }
 
         self.user_registration()
@@ -74,7 +75,7 @@ class AuthTestCase(unittest.TestCase):
 
         token1 = SECRET.dumps('test@example.com', salt='email-confirm')
 
-        return self.client().get('/api/auth/verify/'+token1, data=new_data)
+        return self.client().get('/api/auth/verify/' + token1, data=new_data)
 
     def user_logout(self):
         """This helper method helps log out a test user."""
@@ -99,8 +100,8 @@ class AuthTestCase(unittest.TestCase):
 
     def test_already_registered_user(self):
         """Test that a user cannot be registered twice."""
-        self.user_registration() # register a user
-        second_res = self.user_registration() # re-register the same user
+        self.user_registration()  # register a user
+        second_res = self.user_registration()  # re-register the same user
         self.assertEqual(second_res.status_code, 202)
         # get the results returned in json format
         result = json.loads(second_res.data.decode())
@@ -142,7 +143,7 @@ class AuthTestCase(unittest.TestCase):
 
     def test_email_non_exist_for_reset(self):
         """Test not registered Email fails when reseting there password"""
-        self.user_registration() # register a user
+        self.user_registration()  # register a user
 
         not_a_user = {
             'email': 'not_a_user@example.com'
@@ -150,7 +151,7 @@ class AuthTestCase(unittest.TestCase):
 
         reset_res = self.client().post(
             '/api/auth/reset', data=not_a_user
-        ) # make request with a none existence user
+        )  # make request with a none existence user
 
         result = json.loads(reset_res.data.decode())
         self.assertEqual(result['message'], "Wrong Email or user email does not exist.")
@@ -202,6 +203,7 @@ class AuthTestCase(unittest.TestCase):
             # drop all tables
             db.session.remove()
             db.drop_all()
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

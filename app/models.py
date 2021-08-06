@@ -6,11 +6,10 @@ from flask_bcrypt import Bcrypt
 import jwt
 from flask import current_app
 
-
 rsvps = db.Table('rsvps',
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('event_id', db.Integer, db.ForeignKey('eventlists.id'))
-)
+                 db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+                 db.Column('event_id', db.Integer, db.ForeignKey('eventlists.id'))
+                 )
 
 
 class User(db.Model):
@@ -41,7 +40,6 @@ class User(db.Model):
         Checks the password against it's hash to validates the user's password
         """
         return Bcrypt().check_password_hash(self.password, password)
-
 
     def save(self):
         """Save a user to the database.
@@ -180,7 +178,7 @@ class Events(db.Model):
 
     def add_rsvp(self, user):
         """ This method adds a user to the list of rsvps"""
-        #check if the user is already in the list
+        # check if the user is already in the list
         evt = user.myrsvps.filter_by(id=self.id).first()
         if evt:
             return True
